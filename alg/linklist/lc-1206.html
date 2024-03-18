@@ -1,0 +1,645 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>一步一步图解跳表 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.5.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.6.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.7.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../os/0-summary.html"><strong aria-hidden="true">2.</strong> 计算机网络</a></li><li class="chapter-item affix "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 传统 C++</a></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a></li><li class="chapter-item affix "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb LSM Tree</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🍭 精读</li><li class="spacer"></li><li class="chapter-item "><a href="../../ccgl/0-summary.html"><strong aria-hidden="true">7.</strong> 精读《C++ Core Guide Line》</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../ccgl/p1.html"><strong aria-hidden="true">7.1.</strong> 精读《C++ Core Guide Line》P.1 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../ccgl/p2.html"><strong aria-hidden="true">7.2.</strong> 精读《C++ Core Guide Line》P.2 使用 ISO 标准 C++</a></li><li class="chapter-item "><a href="../../ccgl/p3.html"><strong aria-hidden="true">7.3.</strong> 精读《C++ Core Guide Line》P.2 使用 ISO 标准 C++</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">8.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">8.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">8.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">8.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">8.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">8.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">8.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item expanded "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">9.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">9.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">9.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">9.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">9.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">9.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">9.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item expanded "><a href="../../alg/linklist/lc-1206.html" class="active"><strong aria-hidden="true">9.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">10.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">10.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">10.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">10.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">11.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">11.1.</strong> Trie 树</a></li></ol></li><li class="chapter-item "><li class="part-title">⚡️ 其他</li><li class="spacer"></li><li class="chapter-item "><a href="../../other/update.html"><strong aria-hidden="true">12.</strong> 🔥 更新日志</a></li><li class="chapter-item "><a href="../../other/contributing.html"><strong aria-hidden="true">13.</strong> 🍬 参与贡献</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/alg/linklist/lc-1206.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p><a href="https://leetcode.cn/problems/design-skiplist/description/">1206. 设计跳表</a></p>
+<p>跳表存在的场景还是蛮多了，例如 Redis 和 LevelDB 中都有跳表，面试的时候被问到的频率不低。看完下面的内容就能写这道题了：力扣 1206. 设计跳表 https://leetcode.cn/problems/design-skiplist/description/</p>
+<p>跳表是一种数据结构，可以被看作是对标准链表的一种改进，使得查找数据的速度变得更快。</p>
+<p>接下来会逐层展示跳表的遍历过程，并在每一层都画出相应的图。下面的例子跳表有 4 层，存储的整数值如下，目标值 <code>target = 50</code>。</p>
+<h3 id="初始跳表"><a class="header" href="#初始跳表">初始跳表</a></h3>
+<p>跳表在链表的基础上增加了多层额外的链表，每一层都跳过一些元素，从而加快搜索速度。</p>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 -------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 -------------------&gt; 55 -------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 -------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<ul>
+<li><strong>Level 0</strong> 是原始链表，包含所有元素。</li>
+<li><strong>Level 1</strong> 是第二层，它跳过了一些元素（例如，它可能只包含每两个元素中的一个）。</li>
+<li><strong>Level 3</strong> 是顶层，跳过更多的元素（例如，它可能只包含每四个元素中的一个）。</li>
+</ul>
+<p>当进行搜索时，你会从最顶层开始，这允许你跳过大部分元素。一旦你到达了需要下降到更低层继续搜索的点，就向下移动一层，再继续搜索。这个过程一直持续到找到目标元素或到达最底层链表。</p>
+<p>这种结构使得跳表在查找元素时比普通链表更加高效，因为它减少了需要遍历的节点数量。同时，跳表在插入和删除操作时也保持了较高的效率，因为只需更新相对较少的链接。</p>
+<h3 id="遍历-level-3"><a class="header" href="#遍历-level-3">遍历 Level 3</a></h3>
+<ul>
+<li><code>p</code> 从 <code>Head</code> 开始。</li>
+<li><code>p</code> 移动到 <code>11</code> -&gt; <code>33</code>。</li>
+<li><code>p</code> 到达 <code>55</code>，停止（因为 <code>55 &gt; 50</code>）。<code>pre[3] = 33</code>。</li>
+</ul>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 (pre[3]) ----------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 -------------------&gt; 55 -------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 -------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<h3 id="遍历-level-2"><a class="header" href="#遍历-level-2">遍历 Level 2</a></h3>
+<ul>
+<li><code>p</code> 继续从 <code>33</code> 开始。</li>
+<li><code>p</code> 移动到 <code>44</code>。</li>
+<li><code>p</code> 到达 <code>55</code>，停止（因为 <code>55 &gt; 50</code>）。<code>pre[2] = 44</code>。</li>
+</ul>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 -------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 (pre[2]) ----------&gt; 55 -------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 -------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<h3 id="遍历-level-1"><a class="header" href="#遍历-level-1">遍历 Level 1</a></h3>
+<ul>
+<li><code>p</code> 从 <code>44</code> 开始。</li>
+<li><code>p</code> 移动到 <code>48</code>。</li>
+<li><code>p</code> 到达 <code>55</code>，停止（因为 <code>55 &gt; 50</code>）。<code>pre[1] = 48</code>。</li>
+</ul>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 ----------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 ----------------------&gt; 55 ----------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 (pre[1]) -&gt; 55 ---&gt; 59 --------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<h3 id="遍历-level-0"><a class="header" href="#遍历-level-0">遍历 Level 0</a></h3>
+<ul>
+<li><code>p</code> 从 <code>48</code> 开始。</li>
+<li><code>p</code> 到达 <code>51</code>，停止（因为 <code>51 &gt; 50</code>）。<code>pre[0] = 48</code>。</li>
+</ul>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 ----------------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 ----------------------------&gt; 55 ----------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 ----------------&gt; 55 -------&gt; 59 ----&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 (pre[0]) -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<h3 id="结果"><a class="header" href="#结果">结果</a></h3>
+<p>最终 <code>pre</code> 数组中的节点如下，这些节点表示在每个层级中最后一个小于 <code>50</code> 的节点：</p>
+<ul>
+<li><code>pre[3]</code> = 节点 33</li>
+<li><code>pre[2]</code> = 节点 44</li>
+<li><code>pre[1]</code> = 节点 48</li>
+<li><code>pre[0]</code> = 节点 48</li>
+</ul>
+<p>在这个过程中，我们可以看到 <code>find</code> 函数是如何在每个层级中逐步靠近目标值的位置，从而高效地定位目标值可能存在的地方。</p>
+<h3 id="数据结构设计"><a class="header" href="#数据结构设计">数据结构设计</a></h3>
+<pre><code class="language-cpp">    // 跳表节点的结构定义
+    struct Node {
+        int val; // 节点存储的值
+        vector&lt;Node*&gt; next; // 存储到下一个节点的指针数组，next[i] 表示当前节点在第 i 层的下一个节点
+
+        Node(int _val) : val(_val) { // 构造函数，初始化节点值和 next 数组
+            next.resize(level, NULL); // 将 next 数组的大小初始化为 level，并全部指向 NULL
+        }
+    }*head; // 跳表的头节点，初始化时指向一个虚拟节点
+</code></pre>
+<h3 id="find"><a class="header" href="#find">find</a></h3>
+<p>结合一个具体的例子讲解 <code>find</code> 函数，我们假设目标值 (<code>target</code>) 是 36。我们的目标是找到跳表中每个层级上小于 36 的最大节点。以下是跳表的当前状态和 <code>find</code> 函数的执行步骤。</p>
+<p><strong>跳表当前状态:</strong></p>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 -------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 -------------------&gt; 55 -------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 -------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<p><strong>执行 <code>find(36, p)</code> 的步骤:</strong></p>
+<ol>
+<li>
+<p><strong>开始于 Level 3</strong>:</p>
+<ul>
+<li>从 Head 开始，寻找小于 36 的最大节点。</li>
+<li>移动到 33（因为 33 &lt; 36），然后移动到 55（因为 55 &gt; 36），停止。</li>
+<li>在 Level 3，小于 36 的最大节点是 33。</li>
+</ul>
+</li>
+<li>
+<p><strong>下降至 Level 2</strong>:</p>
+<ul>
+<li>从 Level 3 中找到的最后一个节点（33）开始。</li>
+<li>在 Level 2 中，33 已经是小于 36 的最大节点，因此无需移动。</li>
+<li>在 Level 2，小于 36 的最大节点仍然是 33。</li>
+</ul>
+</li>
+<li>
+<p><strong>下降至 Level 1</strong>:</p>
+<ul>
+<li>从 Level 2 中找到的节点（33）开始。</li>
+<li>33 后面是 37，但因为 37 &gt; 36，停止移动。</li>
+<li>在 Level 1，小于 36 的最大节点是 33。</li>
+</ul>
+</li>
+<li>
+<p><strong>下降至 Level 0</strong>:</p>
+<ul>
+<li>从 Level 1 中找到的节点（33）开始。</li>
+<li>33 后面是 35（35 &lt; 36），移动到 35。</li>
+<li>35 后面是 37，但因为 37 &gt; 36，停止移动。</li>
+<li>在 Level 0，小于 36 的最大节点是 35。</li>
+</ul>
+</li>
+</ol>
+<p><strong><code>find</code> 结果</strong>:</p>
+<ul>
+<li>Level 3 中小于 36 的最大节点是 33。</li>
+<li>Level 2 中小于 36 的最大节点是 33。</li>
+<li>Level 1 中小于 36 的最大节点是 33。</li>
+<li>Level 0 中小于 36 的最大节点是 35。</li>
+</ul>
+<p>通过这个过程，<code>find</code> 函数有效地确定了在每个层级中小于目标值 36 的最大节点。这个信息可以用于后续的插入、搜索或删除操作，因为它提供了每个层级中开始这些操作的正确节点。</p>
+<pre><code class="language-cpp">    // 辅助函数：找到小于目标值 target 的每一层的最大节点
+    void find(int target, vector&lt;Node*&gt;&amp; p) {
+        Node* node = head;
+        for (int i = level - 1; i &gt;= 0; i--) {
+            while (node-&gt;next[i] &amp;&amp; node-&gt;next[i]-&gt;val &lt; target) {
+                node = node-&gt;next[i]; // 在第 i 层向前移动，直到找到小于 target 的最大节点
+            }
+            p[i] = node; // 存储每一层找到的节点
+        }
+    }
+</code></pre>
+<h3 id="search"><a class="header" href="#search">search</a></h3>
+<p>为了说明如何在给定的跳表中查找值为 18 的节点。</p>
+<p><strong>初始跳表状态:</strong></p>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 -------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 -------------------&gt; 55 -------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 -------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<p><strong>执行 <code>search(18)</code> 的步骤:</strong></p>
+<ol>
+<li>
+<p><strong>开始于 Level 3</strong>:</p>
+<ul>
+<li>从 Head 开始，寻找小于 18 的最大节点。</li>
+<li>移动到 11（因为 11 &lt; 18），然后到 33（因为 33 &gt; 18），停止。</li>
+<li>在 Level 3，小于 18 的最大节点是 11。</li>
+</ul>
+</li>
+<li>
+<p><strong>下降至 Level 2</strong>:</p>
+<ul>
+<li>从 Level 3 中找到的最后一个节点（11）开始。</li>
+<li>在 Level 2 中，11 后面是 22，但因为 22 &gt; 18，停止。</li>
+<li>在 Level 2，小于 18 的最大节点是</li>
+</ul>
+</li>
+</ol>
+<p>11。</p>
+<ol start="3">
+<li>
+<p><strong>下降至 Level 1</strong>:</p>
+<ul>
+<li>从 Level 2 中找到的节点（11）开始。</li>
+<li>11 后面是 15（15 &lt; 18），移动到 15。</li>
+<li>15 后面是 22，但因为 22 &gt; 18，停止。</li>
+<li>在 Level 1，小于 18 的最大节点是 15。</li>
+</ul>
+</li>
+<li>
+<p><strong>下降至 Level 0</strong>:</p>
+<ul>
+<li>从 Level 1 中找到的节点（15）开始。</li>
+<li>15 后面是 18，我们找到了目标节点。</li>
+<li>在 Level 0，找到了值为 18 的节点。</li>
+</ul>
+</li>
+</ol>
+<p><strong><code>search</code> 结果</strong>:</p>
+<ul>
+<li>在 Level 0 中找到了值为 18 的节点，所以 <code>search(18)</code> 返回 <code>true</code>。</li>
+</ul>
+<p>通过这个过程，<code>search</code> 函数在跳表的不同层级中高效地定位了值为 18 的节点。它首先在高层级中快速移动，快速跳过那些不满足条件的节点，然后逐层下降，直到在最底层找到了目标节点。通过这种方式，跳表提供了比普通链表更快的搜索性能。</p>
+<pre><code class="language-cpp">    // 查找函数：判断跳表中是否存在值为 target 的节点
+    bool search(int target) {
+        vector&lt;Node*&gt; pre(level);
+        find(target, pre); // 找到每一层小于 target 的最大节点
+        auto p = pre[0]-&gt;next[0]; // 在最底层判断是否存在 target
+        return p &amp;&amp; p-&gt;val == target; // 如果存在且值相等，返回 true
+    }
+</code></pre>
+<h3 id="add"><a class="header" href="#add">add</a></h3>
+<p>接下来结合具体的例子讲解如何在跳表中插入值为 36 的节点，我们将遵循 <code>add</code> 方法的步骤，并展示每个步骤如何在跳表的各层中影响链接。下面是跳表的当前状态，以及插入值为 36 的节点后的状态。</p>
+<p><strong>当前跳表状态（插入值为 36 的节点前）:</strong></p>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 -------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 -------------------&gt; 55 -------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 -------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<p><strong>步骤 1: 查找前驱节点</strong></p>
+<ul>
+<li><code>find</code> 函数被调用以找到跳表中每个层级上小于 36 的最大节点。</li>
+<li>例如，在 Level 1 中，值为 33 的节点是 36 的前驱节点。</li>
+</ul>
+<p><strong>步骤 2: 插入新节点</strong></p>
+<ul>
+<li>创建一个新节点 <code>p</code>，值为 36。</li>
+<li>在每个层级中，将新节点插入到前驱节点之后。</li>
+<li>随机决定新节点出现在哪些层级中。假设随机选择它只出现在 Level 0 和 Level 1。</li>
+</ul>
+<p><strong>插入后的跳表状态:</strong></p>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 ---------------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 ---------------------------&gt; 44 -------------------&gt; 55 --------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; [36] -&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 --------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; [36] -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 --&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<p>在这个图形化的表示中：</p>
+<ul>
+<li><code>[36]</code> 表示新插入的节点，值为 36。</li>
+<li>在 Level 1 中，新节点 <code>[36]</code> 被插入在值为 33 的节点和值为 37 的节点之间。即，<code>33 -&gt; [36] -&gt; 37</code>。</li>
+<li>在 Level 0 中，同样的插入操作发生，将 <code>[36]</code> 插入在值为 35 和值为 37 的节点之间。</li>
+<li>在更高层级（Level 2 和 Level 3），由于 <code>[36]</code> 没有被包含（基于随机选择），这些层级的链接保持不变。</li>
+</ul>
+<p>通过这种方式，值为 36 的节点被有效地插入到跳表中，并且跳表的结构被适当地更新以保持其快速搜索的特性。</p>
+<pre><code class="language-cpp">    // 插入函数：向跳表中插入一个值为 num 的新节点
+    void add(int num) {
+        vector&lt;Node*&gt; pre(level);
+        find(num, pre); // 找到每一层小于 num 的最大节点
+
+        auto p = new Node(num); // 创建新节点
+        for (int i = 0; i &lt; level; i++ ) {
+            p-&gt;next[i] = pre[i]-&gt;next[i]; // 新节点的 next 指向前驱节点的 next
+            pre[i]-&gt;next[i] = p; // 前驱节点的 next 指向新节点
+            if (rand() % 2) break; // 有 50% 的概率停止向上层插入
+        }
+    }
+</code></pre>
+<h3 id="erase"><a class="header" href="#erase">erase</a></h3>
+<p>当我们以文本图形化的方式来讲解如何从跳表中删除一个值为 33 的节点时，我们会展示在各个层级中节点是如何被更新和移除的。以下是您提供的跳表示例，并标记了如何删除值为 33 的节点。</p>
+<p>假设的跳表结构（删除值为 33 的节点前）:</p>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------&gt; 33 ----------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------&gt; 33 -------------------&gt; 44 ----------------------&gt; 55 ----------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------&gt; 33 -------&gt; 37 -------&gt; 44 -------&gt; 48 (pre[1]) -&gt; 55 ---&gt; 59 --------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 33 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<p><strong>删除步骤:</strong></p>
+<ol>
+<li>
+<p><strong>查找前驱节点</strong>:</p>
+<ul>
+<li>使用 <code>find</code> 函数在每个层级找到值为 33 的节点的前驱节点。</li>
+<li>在 Level 1 中，前驱节点是值为 27 的节点。</li>
+<li>在 Level 2 中，前驱节点是值为 22 的节点。</li>
+<li>在 Level 3 中，前驱节点是值为 11 的节点。</li>
+</ul>
+</li>
+<li>
+<p><strong>更新指针绕过值为 33 的节点</strong>:</p>
+<ul>
+<li>在每个层级，将前驱节点的 <code>next</code> 指针指向值为 33 的节点的下一个节点。</li>
+<li>例如，在 Level 1，将值为 27 的节点的 <code>next</code> 指向值为 37 的节点。</li>
+</ul>
+</li>
+</ol>
+<p>跳表结构（删除值为 33 的节点后）:</p>
+<pre><code>Level 3:  Head -&gt; 11 -------------------------------------------------------------------------------------&gt; 55 -&gt; NULL
+Level 2:  Head -&gt; 11 -------------------&gt; 22 -------------------------------------&gt; 44 -------------------&gt; 55 -------------------&gt; 66 -&gt; NULL
+Level 1:  Head -&gt; 11 -------&gt; 15 -------&gt; 22 -------&gt; 27 -------------&gt; 37 -------&gt; 44 -------&gt; 48 -------&gt; 55 -------&gt; 59 -------&gt; 66 -------&gt; 72 -&gt; NULL
+Level 0:  Head -&gt; 11 -&gt; 13 -&gt; 15 -&gt; 18 -&gt; 22 -&gt; 24 -&gt; 27 -&gt; 30 -&gt; 35 -&gt; 37 -&gt; 40 -&gt; 44 -&gt; 46 -&gt; 48 -&gt; 51 -&gt; 55 -&gt; 57 -&gt; 59 -&gt; 61 -&gt; 66 -&gt; 69 -&gt; 72 -&gt; 75 -&gt; NULL
+</code></pre>
+<p>在上面的示例中，你可以看到：</p>
+<ul>
+<li>原本指向值为 33 的节点的指针现在直接指向了它在各个层级中的下一个节点。例如，原本在 Level 1 中，值为 27 的节点指向值为 33 的节点，现在直接指向值为 37 的节点。</li>
+<li>这种指针的更新在所有包含值为 33 的节点的层级中发生。因此，在 Level 0 中，值为 30 的节点的 <code>next</code> 现在指向值为 35 的节点，绕过了值为 33 的节点。</li>
+<li>通过这种方式，值为 33 的节点从跳表的所有层级中被移除，而不影响其他节点之间的链接关系。</li>
+</ul>
+<p>这就完成了删除操作。在物理层面上，值为 33 的节点将被释放，以回收内存空间。在逻辑层面上，该节点就像不存在一样，因为没有任何指针再指向它，它也不再指向其他节点。</p>
+<pre><code class="language-cpp">    // 删除函数：从跳表中删除值为 num 的节点
+    bool erase(int num) {
+        vector&lt;Node*&gt; pre(level);
+        find(num, pre); // 找到每一层小于 num 的最大节点
+
+        auto p = pre[0]-&gt;next[0]; // 检查最底层是否存在要删除的节点
+        if (!p || p-&gt;val != num) return false; // 如果不存在，返回 false
+
+        // 存在则从每一层中删除
+        for (int i = 0; i &lt; level &amp;&amp; pre[i]-&gt;next[i] == p; i++) {
+            pre[i]-&gt;next[i] = p-&gt;next[i]; // 将前驱节点的 next 指向要删除节点的下一个节点
+        }
+
+        delete p; // 释放被删除节点的内存
+        return true;
+    }
+</code></pre>
+<h3 id="code"><a class="header" href="#code">code</a></h3>
+<p>下面是完整代码：</p>
+<pre><code class="language-cpp">class Skiplist {
+public:
+    static const int level = 8; // 定义跳表的最大层数为 8，这是一个经验值，太大会造成空间浪费
+
+    // 跳表节点的结构定义
+    struct Node {
+        int val; // 节点存储的值
+        vector&lt;Node*&gt; next; // 存储到下一个节点的指针数组，next[i] 表示当前节点在第 i 层的下一个节点
+
+        Node(int _val) : val(_val) { // 构造函数，初始化节点值和 next 数组
+            next.resize(level, NULL); // 将 next 数组的大小初始化为 level，并全部指向 NULL
+        }
+    }*head; // 跳表的头节点，初始化时指向一个虚拟节点
+
+    // 构造函数
+    Skiplist() {
+        head = new Node(-1); // 初始化头节点，使用一个不存在的节点值（这里用 -1）
+    }
+
+    // 析构函数
+    ~Skiplist() {
+        Node *current = head;
+        while (current) {
+            Node *temp = current;
+            current = current-&gt;next[0]; // 遍历链表，释放每个节点的内存
+            delete temp;
+        }
+    }
+
+    // 辅助函数：找到小于目标值 target 的每一层的最大节点
+    void find(int target, vector&lt;Node*&gt;&amp; p) {
+        Node* node = head;
+        for (int i = level - 1; i &gt;= 0; i--) {
+            while (node-&gt;next[i] &amp;&amp; node-&gt;next[i]-&gt;val &lt; target) {
+                node = node-&gt;next[i]; // 在第 i 层向前移动，直到找到小于 target 的最大节点
+            }
+            p[i] = node; // 存储每一层找到的节点
+        }
+    }
+
+    // 查找函数：判断跳表中是否存在值为 target 的节点
+    bool search(int target) {
+        vector&lt;Node*&gt; pre(level);
+        find(target, pre); // 找到每一层小于 target 的最大节点
+        auto p = pre[0]-&gt;next[0]; // 在最底层判断是否存在 target
+        return p &amp;&amp; p-&gt;val == target; // 如果存在且值相等，返回 true
+    }
+
+    // 插入函数：向跳表中插入一个值为 num 的新节点
+    void add(int num) {
+        vector&lt;Node*&gt; pre(level);
+        find(num, pre); // 找到每一层小于 num 的最大节点
+
+        auto p = new Node(num); // 创建新节点
+        for (int i = 0; i &lt; level; i++ ) {
+            p-&gt;next[i] = pre[i]-&gt;next[i]; // 新节点的 next 指向前驱节点的 next
+            pre[i]-&gt;next[i] = p; // 前驱节点的 next 指向新节点
+            if (rand() % 2) break; // 有 50% 的概率停止向上层插入
+        }
+    }
+
+    // 删除函数：从跳表中删除值为 num 的节点
+    bool erase(int num) {
+        vector&lt;Node*&gt; pre(level);
+        find(num, pre); // 找到每一层小于 num 的最大节点
+
+        auto p = pre[0]-&gt;next[0]; // 检查最底层是否存在要删除的节点
+        if (!p || p-&gt;val != num) return false; // 如果不存在，返回 false
+
+        // 存在则从每一层中删除
+        for (int i = 0; i &lt; level &amp;&amp; pre[i]-&gt;next[i] == p; i++) {
+            pre[i]-&gt;next[i] = p-&gt;next[i]; // 将前驱节点的 next 指向要删除节点的下一个节点
+        }
+
+        delete p; // 释放被删除节点的内存
+        return true;
+    }
+};
+
+/**
+ * Skiplist 对象的实例化和使用：
+ * Skiplist* obj = new Skiplist();
+ * bool param_1 = obj-&gt;search(target);
+ * obj-&gt;add(num);
+ * bool param_3 = obj-&gt;erase(num);
+ */
+</code></pre>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../alg/linklist/lc-142.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../alg/hash/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../alg/linklist/lc-142.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../alg/hash/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "alg/linklist/lc-1206.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>
