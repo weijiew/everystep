@@ -1,0 +1,320 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Leveldb Memtable 迭代器 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item expanded "><a href="../lsm/memtable-iter.html" class="active"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/lsm/memtable-iter.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>MemTable 迭代器是用于遍历 MemTable 中的键值对的工具。在 LevelDB 中，MemTable 是内存中的键值对存储结构，使用跳表（SkipList）实现，提供了快速插入和查找键值对的功能。</p>
+<h3 id="memtableiterator"><a class="header" href="#memtableiterator">MemTableIterator</a></h3>
+<p>在 <code>MemTable::NewIterator()</code> 方法中，创建了一个新的 <code>MemTableIterator</code> 实例，并返回其指针。这个方法提供了一种方式来创建一个新的 MemTable 迭代器，用于遍历 MemTable 中的所有元素。</p>
+<h3 id="合并迭代器"><a class="header" href="#合并迭代器">合并迭代器</a></h3>
+<p><code>MergingIterator</code> 的主要作用是合并多个迭代器的结果，这在处理多个数据源时非常有用。例如，假设你有三个数组，每个数组都已经排序，你想要遍历这三个数组中的所有元素，同时保持元素的顺序。你可以为每个数组创建一个迭代器，然后使用 <code>MergingIterator</code> 来合并这些迭代器。</p>
+<p>以下是一个简化的示例：</p>
+<pre><code class="language-cpp">// 假设我们有三个已排序的数组
+std::vector&lt;int&gt; arr1 = {1, 3, 5, 7};
+std::vector&lt;int&gt; arr2 = {2, 4, 6, 8};
+std::vector&lt;int&gt; arr3 = {0, 9, 10, 11};
+
+// 为每个数组创建一个迭代器
+Iterator* it1 = new VectorIterator(arr1);
+Iterator* it2 = new VectorIterator(arr2);
+Iterator* it3 = new VectorIterator(arr3);
+
+// 创建一个迭代器数组
+Iterator* iterators[3] = {it1, it2, it3};
+
+// 创建一个 MergingIterator 来合并这些迭代器
+MergingIterator* merge_it = new MergingIterator(new IntComparator(), iterators, 3);
+
+// 使用 MergingIterator 遍历所有元素
+for (merge_it-&gt;SeekToFirst(); merge_it-&gt;Valid(); merge_it-&gt;Next()) {
+  std::cout &lt;&lt; merge_it-&gt;value() &lt;&lt; " ";
+}
+</code></pre>
+<p>在这个例子中，<code>MergingIterator</code> 会按照正确的顺序遍历所有数组的元素，就像遍历一个单一的、有序的数组一样。首先，它会找到所有迭代器中的最小元素（在这个例子中是 0），然后移动到下一个最小元素，依此类推，直到遍历完所有元素。</p>
+<p>上面这段代码的目的是将三个已排序的数组合并，并按照升序打印出所有的元素。<code>MergingIterator</code> 会按照正确的顺序遍历所有数组的元素，就像遍历一个单一的、有序的数组一样。</p>
+<p>在这个例子中，<code>MergingIterator</code> 会首先找到所有迭代器中的最小元素（在这个例子中是 0），然后移动到下一个最小元素，依此类推，直到遍历完所有元素。</p>
+<p>所以，这段代码的输出应该是：</p>
+<pre><code>0 1 2 3 4 5 6 7 8 9 10 11
+</code></pre>
+<p>这就是所有三个数组中的元素，按照升序排列。</p>
+<p>请注意，这个例子假设了 <code>VectorIterator</code> 和 <code>IntComparator</code> 类的存在，这两个类在实际的 LevelDB 中并不存在，这里只是为了说明 <code>MergingIterator</code> 的工作原理。在实际的 LevelDB 中，<code>MergingIterator</code> 用于合并多个 <code>MemTable</code> 的迭代器，以便可以按照正确的顺序遍历所有 <code>MemTable</code> 的内容。</p>
+<h3 id="实现细节"><a class="header" href="#实现细节">实现细节</a></h3>
+<p>LevelDB 的合并迭代器（<code>MergingIterator</code>）是通过维护一组子迭代器来实现的，这些子迭代器分别对应于需要合并的数据源。<code>MergingIterator</code> 的主要工作是在这些子迭代器之间进行协调，以确保以正确的顺序返回元素。</p>
+<p>在 <code>MergingIterator</code> 中，有两个主要的方法用于定位当前应该返回的元素：<code>FindSmallest</code> 和 <code>FindLargest</code>。这两个方法分别在向前和向后遍历时使用，它们会遍历所有的子迭代器，找到具有最小或最大键的迭代器，并将其设置为当前迭代器。</p>
+<p>当调用 <code>Next</code> 或 <code>Prev</code> 方法时，<code>MergingIterator</code> 会先移动当前迭代器，然后再调用 <code>FindSmallest</code> 或 <code>FindLargest</code> 来找出新的当前迭代器。这样，<code>MergingIterator</code> 就可以按照键的大小顺序遍历所有的元素。</p>
+<p>在 <code>Seek</code> 方法中，<code>MergingIterator</code> 会将所有的子迭代器定位到指定的键，然后再调用 <code>FindSmallest</code> 来找出新的当前迭代器。这样，<code>MergingIterator</code> 就可以从指定的键开始遍历元素。</p>
+<p>在 <code>MergingIterator</code> 的实现中，还有一些额外的逻辑用于处理迭代器的方向。如果迭代器的方向改变了（例如，先调用了 <code>Next</code>，然后调用了 <code>Prev</code>），<code>MergingIterator</code> 会确保所有的子迭代器都定位到正确的位置。</p>
+<p>关于时间和空间复杂度：</p>
+<ul>
+<li>
+<p>时间复杂度：<code>MergingIterator</code> 的操作（<code>Next</code>、<code>Prev</code>、<code>Seek</code> 等）的时间复杂度为 O(n)，其中 n 是子迭代器的数量。这是因为在每个操作中，<code>MergingIterator</code> 都需要遍历所有的子迭代器来找出当前应该返回的元素。</p>
+</li>
+<li>
+<p>空间复杂度：<code>MergingIterator</code> 的空间复杂度为 O(n)，其中 n 是子迭代器的数量。这是因为 <code>MergingIterator</code> 需要存储所有的子迭代器。</p>
+</li>
+</ul>
+<h3 id="如果一个键被移除需要将其返回给用户吗leveldb-在哪里处理了这个逻辑"><a class="header" href="#如果一个键被移除需要将其返回给用户吗leveldb-在哪里处理了这个逻辑">如果一个键被移除需要将其返回给用户吗？Leveldb 在哪里处理了这个逻辑？</a></h3>
+<p>在 LevelDB 中，当一个键被删除时，会在 MemTable 中添加一个删除标记（也称为墓碑）。这个删除标记是一个特殊的键值对，其类型为 <code>kTypeDeletion</code>，键为被删除的键，值通常为空。</p>
+<p>当用户尝试获取一个被删除的键时，LevelDB 会首先在 MemTable 中查找这个键。如果找到了对应的删除标记，LevelDB 会返回一个 <code>NotFound</code> 错误，表示这个键不存在。这个逻辑在 <code>MemTable::Get</code> 方法中实现：</p>
+<p>在这个方法中，LevelDB 首先在 MemTable 中查找指定的键。如果找到了对应的键值对，LevelDB 会检查其类型。如果类型为 <code>kTypeValue</code>，则返回对应的值；如果类型为 <code>kTypeDeletion</code>，则返回 <code>NotFound</code> 错误。</p>
+<h3 id="如果一个键有多个版本用户会看到所有的版本吗leveldb-在哪里处理了这个逻辑"><a class="header" href="#如果一个键有多个版本用户会看到所有的版本吗leveldb-在哪里处理了这个逻辑">如果一个键有多个版本，用户会看到所有的版本吗？Leveldb 在哪里处理了这个逻辑？</a></h3>
+<p>在 LevelDB 中，一个键可能有多个版本，每个版本都有一个与之关联的序列号。这些版本是按照序列号的降序排列的，也就是说，序列号最大的版本在最前面。</p>
+<p>当用户尝试获取一个键的值时，LevelDB 会返回序列号最大（也就是最新）的版本。这个逻辑在 <code>Version::Get</code> 方法中实现：</p>
+<p>在这个方法中，LevelDB 首先在 MemTable 和 SSTable 中查找指定的键。如果找到了对应的键值对，LevelDB 会检查其序列号。只有当序列号小于或等于读取操作的快照序列号时，LevelDB 才会返回对应的值。这样，用户就只能看到他们在执行读取操作时已经存在的版本，而不能看到后来添加的版本。</p>
+<p>如果一个键有多个版本，那么 <code>Version::Get</code> 方法只会返回序列号最大的版本。这是因为在查找键值对时，一旦找到了一个匹配的键值对，<code>Version::Get</code> 方法就会立即返回，而不会继续查找其他的版本。因此，用户通常只能看到一个键的最新版本。</p>
+<h3 id="迭代器会随着数据的更新而更新吗"><a class="header" href="#迭代器会随着数据的更新而更新吗">迭代器会随着数据的更新而更新吗？</a></h3>
+<p>如果在 skiplist memtable 上创建一个迭代器，随后向 memtable 插入新的键，那么迭代器会看到新的键吗？</p>
+<p>在 LevelDB 中，迭代器是基于创建它们的那一刻的状态进行操作的。也就是说，如果在创建迭代器之后有新的键插入到 MemTable，那么这个迭代器是不会看到这个新的键的。</p>
+<p>这是因为在创建迭代器时，LevelDB 会创建一个快照（Snapshot），并且这个快照会包含创建它的那一刻 MemTable 的所有数据。然后，迭代器在进行操作时，只会操作这个快照中的数据，而不会操作后来插入到 MemTable 的数据。</p>
+<p>这种设计可以确保迭代器的操作是一致的，也就是说，无论在迭代器操作期间 MemTable 如何变化，迭代器看到的数据都是一致的。这对于数据库的并发控制是非常重要的，因为它可以确保在读取数据时不会受到其他操作的影响。</p>
+<p>这个逻辑在 LevelDB 的 <code>DBImpl::Get</code> 方法中实现，该方法在创建迭代器之前会先创建一个快照。</p>
+<h3 id="为什么需要确保合并迭代器按照迭代器构造顺序返回数据"><a class="header" href="#为什么需要确保合并迭代器按照迭代器构造顺序返回数据">为什么需要确保合并迭代器按照迭代器构造顺序返回数据？</a></h3>
+<p>在 <code>MergingIterator</code> 中，我们并没有要求合并迭代器必须按照迭代器构造的顺序返回数据。实际上，<code>MergingIterator</code> 的设计目标是返回所有子迭代器中的最小（或最大）元素，而不是按照子迭代器的构造顺序返回元素。</p>
+<p>在 <code>MergingIterator</code> 的 <code>Next</code> 和 <code>Prev</code> 方法中，我们可以看到，它会在所有子迭代器中找到键最小（或最大）的那个，然后将其设置为当前迭代器。这样，当我们调用 <code>MergingIterator</code> 的 <code>key</code> 或 <code>value</code> 方法时，它会返回当前迭代器的键或值，也就是所有子迭代器中键最小（或最大）的那个。</p>
+<p>这种设计可以确保 <code>MergingIterator</code> 在遍历数据时，总是按照键的升序（或降序）顺序返回元素，而不是按照子迭代器的构造顺序返回元素。这对于数据库的查询操作是非常重要的，因为它可以确保查询结果的有序性，从而提高查询效率。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>这篇文章主要讲解了 LevelDB 中的迭代器设计，包括 <code>MemTableIterator</code> 和 <code>MergingIterator</code>。<code>MemTableIterator</code> 是用于遍历内存中键值对存储结构 <code>MemTable</code> 的工具。<code>MergingIterator</code> 则是用于合并多个迭代器的结果，以便可以按照正确的顺序遍历所有的元素。此外，文章还讨论了 LevelDB 中的一些实现细节，如键的多版本处理，迭代器的一致性，以及合并迭代器的工作原理等。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../lsm/memtable.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../lsm/block.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../lsm/memtable.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../lsm/block.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "lsm/memtable-iter.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/custom.js"></script>
+        <script src="../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

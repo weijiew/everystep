@@ -1,0 +1,349 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Leveldb Block 实现细节 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item expanded "><a href="../lsm/block.html" class="active"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/lsm/block.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>在 LevelDB 中，<code>Block</code> 是一个重要的数据结构，它用于存储一组键值对。<code>Block</code> 的设计目标是将一组键值对存储在一起，以便可以快速地将它们一起读取到内存中，从而提高查询效率。</p>
+<h3 id="block-概览"><a class="header" href="#block-概览">Block 概览</a></h3>
+<p>在 LevelDB 中，磁盘上的数据是以块（Block）为单位进行存储的。块通常为 4-KB 大小，这相当于操作系统中的页面大小和 SSD 上的页面大小。一个块存储有序的键值对，这些键值对是通过一种特殊的编码格式进行存储的，以便可以高效地进行查询和更新操作。</p>
+<p>一个 SST（Sorted String Table）文件由多个块组成，每个块都存储了一部分键值对。当内存中的 MemTable 的数量超过系统限制时，LevelDB 会将 MemTable 刷新为一个 SST 文件。这个过程称为 Compaction，它是 LevelDB 管理磁盘空间和提高查询效率的重要机制。</p>
+<p>块的编码和解码是 LevelDB 中的一个重要部分。在编码过程中，LevelDB 会将一组键值对按照一定的格式编码为一个字节流，然后将这个字节流写入到磁盘中。在解码过程中，LevelDB 会从磁盘中读取一个字节流，然后按照编码格式将这个字节流解码为一组键值对。</p>
+<p>在 <code>table/block.cc</code> 和 <code>table/block.h</code> 文件中，实现了 <code>Block</code> 类，这个类封装了块的编码和解码操作。在 <code>Block</code> 类中，定义了一些方法，如 <code>NewIterator</code>、<code>ReadBlock</code> 和 <code>ApproximateMemoryUsage</code> 等，这些方法用于创建迭代器、读取块的内容和估计块的内存使用量等。</p>
+<p>在 <code>table/format.h</code> 文件中，定义了 <code>BlockHandle</code> 类和 <code>Footer</code> 类，这两个类用于描述块在 SST 文件中的位置和元数据信息。</p>
+<p>在 <code>Block</code> 的编码格式中，包括了一系列的键值对和一个重启点数组。每个键值对包括一个共享键长度，一个非共享键长度，一个值长度，一个非共享键和一个值。重启点数组是一个固定大小的整数数组，用于帮助在 <code>Block</code> 中进行二分查找。</p>
+<p>在 <code>Block</code> 的解码过程中，LevelDB 会首先读取 <code>Block</code> 的元数据，包括 <code>Block</code> 的大小和校验和，然后根据这些元数据读取 <code>Block</code> 的内容。然后，LevelDB 会按照编码格式将这个字节流解码为一组键值对。</p>
+<p>总的来说，块的编码和解码是 LevelDB 管理磁盘空间和提高查询效率的重要部分。</p>
+<h3 id="block-的编码格式"><a class="header" href="#block-的编码格式">Block 的编码格式</a></h3>
+<p>键值对部分的编码格式如下：</p>
+<ol>
+<li>
+<p>共享键长度：这是一个变长整数，表示当前键与前一个键共享的前缀长度。对于块中的第一个键，这个值总是为 0，因为它没有前一个键可以共享前缀。</p>
+</li>
+<li>
+<p>非共享键长度：这也是一个变长整数，表示当前键与前一个键不共享的后缀长度。也就是说，这个值表示当前键的独有部分的长度。</p>
+</li>
+<li>
+<p>值长度：这同样是一个变长整数，表示当前键对应的值的长度。</p>
+</li>
+<li>
+<p>非共享键：这是一个字节序列，长度为非共享键长度。这个序列与前一个键的共享前缀连接在一起，就构成了当前键。</p>
+</li>
+<li>
+<p>值：这是一个字节序列，长度为值长度。这就是当前键对应的值。</p>
+</li>
+</ol>
+<p>重启点数组部分的编码格式如下：</p>
+<p>重启点数组是一个固定大小的整数数组，每个整数的大小为 4 字节。这个数组包含了一系列的重启点，每个重启点都是一个偏移量，指向 <code>Block</code> 中的一个键。这个数组用于帮助在 <code>Block</code> 中进行二分查找。</p>
+<p>这种编码格式的设计使得 <code>Block</code> 可以高效地进行二分查找。当我们需要查找一个键时，可以先在重启点数组中进行二分查找，找到最接近的重启点，然后从这个重启点开始，顺序查找到我们需要的键。这样，我们就可以在 <code>Block</code> 中快速地查找到任何一个键。</p>
+<h3 id="一个具体的例子"><a class="header" href="#一个具体的例子">一个具体的例子</a></h3>
+<p>在 LevelDB 中，键值对的编码过程主要在 <code>BlockBuilder::Add</code> 方法中完成。假设我们有一个键值对，键为 "key123"，值为 "value123"，我们将看到如何将其编码为块。</p>
+<p>首先，我们需要计算当前键与上一个键的共享前缀长度。假设上一个键是 "key122"，那么共享前缀长度就是 5，因为 "key122" 和 "key123" 的前 5 个字符是相同的。</p>
+<p>然后，我们需要计算当前键的非共享部分的长度，也就是当前键去掉共享前缀后的长度。在这个例子中，非共享部分是 "3"，所以非共享键长度就是 1。</p>
+<p>接下来，我们需要计算值的长度。在这个例子中，值是 "value123"，所以值长度就是 7。</p>
+<p>然后，我们将共享键长度、非共享键长度和值长度编码为变长整数，添加到缓冲区中。在这个例子中，共享键长度、非共享键长度和值长度分别为 5、1 和 7，编码后的结果分别为 05、01 和 07。</p>
+<p>接着，我们将非共享键和值添加到缓冲区中。在这个例子中，非共享键是 "3"，值是 "value123"。</p>
+<p>最后，我们更新上一个键和键值对数量。在这个例子中，上一个键变为 "key123"，键值对数量加 1。</p>
+<p>所以，"key123" 和 "value123" 编码为块的结果就是 "0501073value123"。</p>
+<p>这只是一个简化的例子，实际的编码过程可能会涉及到更复杂的情况，比如前缀压缩、重启点的添加等。</p>
+<h3 id="restarts-array"><a class="header" href="#restarts-array">restarts array</a></h3>
+<p>在 LevelDB 中，Block 的数据部分是由一系列的键值对组成，这些键值对是按照键的顺序存储的。为了提高查找效率，LevelDB 在每个 Block 的末尾添加了一个重启点数组（restarts array）。</p>
+<p>重启点数组是一个包含多个偏移量的数组，每个偏移量都指向 Block 中的一个键。这些键是特殊的，因为它们是完整的，没有进行前缀压缩。这些键被称为重启点（restart points），因为它们是新一轮前缀压缩的开始。</p>
+<p>当我们要在 Block 中查找一个键时，我们可以先在重启点数组中进行二分查找，找到最接近目标键的重启点，然后从这个重启点开始，顺序查找到目标键。这样，我们就可以避免扫描整个 Block，从而提高查找效率。</p>
+<p>重启点数组的编码格式如下：</p>
+<ul>
+<li>重启点数组是一个固定大小的整数数组，每个整数的大小为 4 字节。这个数组包含了一系列的重启点，每个重启点都是一个偏移量，指向 Block 中的一个键。</li>
+<li>重启点数组的末尾是一个 4 字节的整数，表示重启点的数量。</li>
+</ul>
+<p>这就是 Block 中的重启点数组的基本概念和作用。</p>
+<h3 id="在块中查找一个键的时间复杂度是多少"><a class="header" href="#在块中查找一个键的时间复杂度是多少">在块中查找一个键的时间复杂度是多少？</a></h3>
+<p>在 LevelDB 中，查找一个键的时间复杂度主要取决于两个部分：在重启点数组中进行二分查找的时间复杂度和从找到的重启点开始顺序查找到目标键的时间复杂度。</p>
+<ol>
+<li>
+<p>在重启点数组中进行二分查找的时间复杂度是 O(log n)，其中 n 是重启点的数量。因为二分查找是一种高效的查找算法，其时间复杂度是对数级别的。</p>
+</li>
+<li>
+<p>从找到的重启点开始顺序查找到目标键的时间复杂度是 O(m)，其中 m 是两个重启点之间的键的数量。因为这部分是顺序查找，所以时间复杂度是线性级别的。</p>
+</li>
+</ol>
+<p>因此，总的来说，查找一个键的时间复杂度是 O(log n + m)。在实际应用中，由于 LevelDB 的重启点间隔（block_restart_interval）通常设置得比较小（例如16），所以 m 的值通常不会很大，因此查找一个键的效率是相当高的。</p>
+<h3 id="当查找一个不存在的键时光标会停在哪里"><a class="header" href="#当查找一个不存在的键时光标会停在哪里">当查找一个不存在的键时，光标会停在哪里？</a></h3>
+<p>在 LevelDB 中，当查找一个不存在的键时，光标（Cursor）会停在大于或等于目标键的第一个键的位置。如果所有的键都小于目标键，那么光标会移动到数据的末尾，此时调用 <code>Valid()</code> 方法会返回 <code>false</code>，表示已经没有更多的数据。这是因为 LevelDB 的迭代器设计为半开区间，即 <code>[start, end)</code>，当目标键不存在时，迭代器会定位到大于或等于目标键的第一个位置。</p>
+<h3 id="写入块的数字的字节顺序是什么"><a class="header" href="#写入块的数字的字节顺序是什么">写入块的数字的字节顺序是什么？</a></h3>
+<p>在 LevelDB 中，写入块的数字使用的是小端字节序（Little-Endian）。这是由于 LevelDB 的设计者们选择了这种字节序，因为它在大多数现代处理器（包括 x86 和 ARM）上都能提供更好的性能。</p>
+<p>在源代码中，可以看到 <code>PutFixed32</code> 函数，它用于将 32 位整数写入到块中：</p>
+<pre><code class="language-cpp">void PutFixed32(std::string* dst, uint32_t value) {
+  char buf[sizeof(value)];
+  EncodeFixed32(buf, value);
+  dst-&gt;append(buf, sizeof(buf));
+}
+</code></pre>
+<p>在 <code>EncodeFixed32</code> 函数中，你可以看到它是如何将一个 32 位整数编码为小端字节序的：</p>
+<pre><code class="language-cpp">void EncodeFixed32(char* buf, uint32_t value) {
+  if (port::kLittleEndian) {
+    memcpy(buf, &amp;value, sizeof(value));
+  } else {
+    buf[0] = value &amp; 0xff;
+    buf[1] = (value &gt;&gt; 8) &amp; 0xff;
+    buf[2] = (value &gt;&gt; 16) &amp; 0xff;
+    buf[3] = (value &gt;&gt; 24) &amp; 0xff;
+  }
+}
+</code></pre>
+<p>这里，<code>port::kLittleEndian</code> 是一个编译时常量，它表示当前平台是否使用小端字节序。如果是，那么直接使用 <code>memcpy</code> 函数将整数的内存复制到缓冲区即可。否则，需要手动将每个字节编码为小端字节序。</p>
+<h3 id="leveldb-是否容易受到恶意构建的块的影响如果用户故意构造一个无效的块会有无效的内存访问或-ooms-吗"><a class="header" href="#leveldb-是否容易受到恶意构建的块的影响如果用户故意构造一个无效的块会有无效的内存访问或-ooms-吗">Leveldb 是否容易受到恶意构建的块的影响？如果用户故意构造一个无效的块，会有无效的内存访问或 OOMs 吗？</a></h3>
+<p>LevelDB 是设计得相当健壮的，它有很多检查和验证机制来确保数据的完整性。然而，如果一个恶意用户故意构造一个无效的块并尝试将其插入到数据库中，LevelDB 会在尝试读取或写入这个块时遇到问题。</p>
+<p>首先，LevelDB 在读取块时会进行一些基本的验证，例如检查块的大小是否合理，以及块的校验和是否正确。如果这些检查失败，LevelDB 将拒绝读取这个块，并返回一个错误。</p>
+<p>其次，LevelDB 在处理块中的键值对时也有一些保护措施。例如，它会检查每个键值对的长度是否合理，以及键是否按照正确的顺序排列。如果这些检查失败，LevelDB 将停止处理这个块，并返回一个错误。</p>
+<p>然而，尽管有这些保护措施，但是如果一个恶意用户故意构造一个非常大的块，并尝试将其插入到数据库中，那么这可能会导致 LevelDB 使用大量的内存，甚至可能导致内存耗尽（OOM）。因此，对于不受信任的输入，最好在将其插入到 LevelDB 之前进行一些额外的验证。</p>
+<p>总的来说，虽然 LevelDB 有一些内置的保护措施来防止无效的块，但是它并不能完全防止所有的恶意攻击。因此，如果你的应用需要处理不受信任的输入，那么你应该在将数据插入到 LevelDB 之前进行一些额外的验证。</p>
+<h3 id="一个块可以包含重复的键吗"><a class="header" href="#一个块可以包含重复的键吗">一个块可以包含重复的键吗？</a></h3>
+<p>在 LevelDB 中，一个块（Block）中的键是不允许重复的。这是因为 LevelDB 是一个键值存储系统，每个键在数据库中都应该是唯一的。在添加新的键值对时，如果键已经存在，那么新的值将会覆盖旧的值。</p>
+<h3 id="如果用户添加一个大于目标块大小的键会发生什么"><a class="header" href="#如果用户添加一个大于目标块大小的键会发生什么">如果用户添加一个大于目标块大小的键会发生什么？</a></h3>
+<p>如果用户尝试添加一个大于目标块大小的键，那么这将会导致问题。首先，如果键的大小超过了块的大小，那么这个键将无法被添加到块中。其次，由于 LevelDB 使用前缀压缩来存储键，如果一个键的大小超过了块的大小，那么前缀压缩将无法工作，这将会导致存储效率降低。</p>
+<p>在实际使用中，键的大小通常远小于块的大小，因此这种情况很少发生。如果你的应用需要处理大键，那么你可能需要调整 LevelDB 的配置，或者寻找其他更适合处理大键的数据库系统。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>LevelDB 是一个键值存储系统，其中数据以块（Block）的形式存储，每个块包含一组有序的键值对。块的设计使得可以快速地将一组键值对读取到内存中，提高查询效率。块的编码和解码是 LevelDB 管理磁盘空间和提高查询效率的重要部分。在编码过程中，LevelDB 会将一组键值对按照一定的格式编码为一个字节流，然后将这个字节流写入到磁盘中。在解码过程中，LevelDB 会从磁盘中读取一个字节流，然后按照编码格式将这个字节流解码为一组键值对。LevelDB 在读取块时会进行一些基本的验证，例如检查块的大小是否合理，以及块的校验和是否正确。如果这些检查失败，LevelDB 将拒绝读取这个块，并返回一个错误。在 LevelDB 中，一个块中的键是不允许重复的。如果用户尝试添加一个大于目标块大小的键，那么这将会导致问题。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../lsm/memtable-iter.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../lsm/sst.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../lsm/memtable-iter.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../lsm/sst.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "lsm/block.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/custom.js"></script>
+        <script src="../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>TCP 粘包、拆包问题 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item expanded "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item expanded "><a href="../../net/tcp/pack.html" class="active"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/net/tcp/pack.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <h1 id="tcp-粘包拆包问题"><a class="header" href="#tcp-粘包拆包问题">TCP 粘包拆包问题</a></h1>
+<p>面试的时候被问到了，TCP 粘包和拆包问题，之前的项目中也涉及了这部分内容，写篇文章系统的总结一下。</p>
+<h3 id="什么是-tcp-粘包"><a class="header" href="#什么是-tcp-粘包">什么是 TCP 粘包？</a></h3>
+<p>TCP粘包问题是由于TCP是一个面向字节流的协议，数据在传输过程中，可能会将多个数据包合并为一个数据包进行发送，这就是所谓的TCP粘包问题。这种情况通常发生在发送端的数据发送速度大于接收端的数据处理速度时。</p>
+<pre><code>发送端                      网络                     接收端
+  |                         |                         |
+  | -- 数据包A --&gt;           |                         |
+  | -- 数据包B --&gt;           |                         |
+  |                         | -- 数据包C (A + B) --&gt;   |
+  |                         |                         | -- 处理数据包C，分离出A和B
+  |                         |                         |
+</code></pre>
+<p>在这个示例中，发送端连续发送了两个数据包A和B。由于网络的原因，这两个数据包在到达接收端时被合并为一个数据包C。接收端在接收数据时，期望能够按照数据包的边界接收数据，即先接收数据包A，然后接收数据包B。但是由于TCP的粘包问题，接收端实际上接收到的是一个大的数据包C，这就需要接收端自己去处理如何从数据包C中分离出原来的数据包A和B。</p>
+<h3 id="tcp-粘包是怎么产生的"><a class="header" href="#tcp-粘包是怎么产生的">TCP 粘包是怎么产生的？</a></h3>
+<p>TCP粘包问题是由于TCP协议的特性导致的。TCP是一个面向字节流的协议，这意味着TCP并不关心数据的边界，它只负责将数据作为一个连续的字节流发送出去。因此，当发送端连续发送多个数据包时，这些数据包可能会被合并为一个大的数据包进行发送，这就是所谓的TCP粘包问题。</p>
+<p>相比之下，UDP是一个面向报文的协议，每个UDP数据包都是独立的，UDP保证了数据包的边界。在UDP中，数据包的边界是由UDP协议自身来保证的。每个UDP数据包都是独立的，包含了源端口号、目标端口号、长度和校验和等信息。当接收端接收到UDP数据包时，它可以通过这些信息来确定数据包的边界。因此，UDP不存在粘包问题。当接收端接收到UDP数据包时，它可以明确知道数据包的边界在哪里。</p>
+<p>具体来说，UDP数据包的长度字段表示了UDP头部和数据部分的总长度，接收端可以通过这个长度字段来确定数据包的边界。因此，UDP不存在像TCP那样的粘包问题。</p>
+<p>总的来说，TCP和UDP的主要区别在于TCP是面向连接的，提供可靠的数据传输服务，而UDP是无连接的，提供不可靠的数据传输服务。这也导致了TCP存在粘包问题，而UDP不存在粘包问题。</p>
+<h3 id="如何解决-tcp-粘包问题"><a class="header" href="#如何解决-tcp-粘包问题">如何解决 TCP 粘包问题？</a></h3>
+<p>解决TCP粘包问题的常见方法有：</p>
+<ol>
+<li>
+<p>在数据包之间添加特殊的分隔符，使得接收端可以通过这些分隔符来识别数据包的边界。</p>
+</li>
+<li>
+<p>在每个数据包的头部添加长度字段，表示数据包的长度，接收端通过读取长度字段，可以知道每个数据包的边界在哪里。</p>
+</li>
+<li>
+<p>使用固定长度的数据包，这样接收端可以直接通过数据包的长度来确定数据包的边界。</p>
+</li>
+</ol>
+<h3 id="如何在数据包之间添加特殊的分隔符"><a class="header" href="#如何在数据包之间添加特殊的分隔符">如何在数据包之间添加特殊的分隔符？</a></h3>
+<p>在这个示例中，发送端在每个数据包的末尾添加了一个特殊的分隔符'#'，接收端可以通过这个分隔符来识别数据包的边界。</p>
+<pre><code>发送端                      网络                     接收端
+  |                         |                         |
+  | -- 数据包A# --&gt;          |                         |
+  | -- 数据包B# --&gt;          |                         |
+  |                         | -- 数据包A#B# --&gt;        |
+  |                         |                         | -- 分离出数据包A和B
+  |                         |                         |
+</code></pre>
+<p>这种方法常见于文本协议，如HTTP和SMTP。在这些协议中，数据包之间通常使用特殊的字符（如换行符或空格）作为分隔符。例如，HTTP协议中的请求和响应头部就是通过换行符来分隔的。当接收端接收到数据时，它可以通过这些分隔符来识别数据包的边界。</p>
+<p>以下结合HTTP协议的报文结构来讲解这种方法：</p>
+<p>HTTP协议是一种文本协议，它的报文结构主要包括起始行、头部字段和消息体三部分。起始行和头部字段之间、头部字段和消息体之间、以及头部字段之间都是通过换行符来分隔的。</p>
+<p>例如，一个HTTP请求报文可能如下所示：</p>
+<pre><code>GET /index.html HTTP/1.1\r\n
+Host: www.example.com\r\n
+Connection: keep-alive\r\n
+\r\n
+</code></pre>
+<p>在这个例子中，<code>GET /index.html HTTP/1.1</code>是起始行，<code>Host: www.example.com</code>和<code>Connection: keep-alive</code>是头部字段，它们之间都是通过<code>\r\n</code>（换行符）来分隔的。头部字段和消息体之间的空行（即连续的两个换行符）表示头部字段的结束和消息体的开始。</p>
+<p>当接收端接收到这个HTTP请求报文时，它可以通过这些换行符来识别数据包的边界。例如，它可以先找到第一个换行符，然后读取起始行；然后再找到下一个换行符，读取第一个头部字段；以此类推，直到读取到连续的两个换行符，表示头部字段的结束和消息体的开始。</p>
+<h3 id="在头部设置长度"><a class="header" href="#在头部设置长度">在头部设置长度</a></h3>
+<p>在这个示例中，发送端在每个数据包的头部添加了一个长度字段，表示数据包的长度，接收端通过读取长度字段，可以知道每个数据包的边界在哪里。</p>
+<pre><code>发送端                      网络                     接收端
+  |                         |                         |
+  | -- 数据包(3,A) --&gt;       |                         |
+  | -- 数据包(3,B) --&gt;       |                         |
+  |                         | -- 数据包(3,A)(3,B) --&gt;  |
+  |                         |                         | -- 分离出数据包A和B
+  |                         |                         |
+</code></pre>
+<p>这种方法常见于二进制协议，如Protocol Buffers和Thrift。在这些协议中，每个数据包的头部通常会包含一个表示数据包长度的字段。当接收端接收到数据时，它可以通过读取这个长度字段来确定数据包的边界。例如，Protocol Buffers协议中的消息就是通过在消息头部添加一个表示消息长度的字段来解决粘包问题的。</p>
+<p>以下是一个具体的例子，结合Protocol Buffers协议的报文结构来讲解这种方法：</p>
+<p>Protocol Buffers（简称protobuf）是一种二进制协议，它的报文结构主要包括一个长度字段和一个数据字段。长度字段表示数据字段的长度。</p>
+<p>例如，一个protobuf报文可能如下所示：</p>
+<pre><code>+----------------+------------------+
+| 长度 (2 bytes)  | 数据 (n bytes)   |
++----------------+------------------+
+</code></pre>
+<p>在这个例子中，长度字段是2字节，表示数据字段的长度。数据字段是n字节，表示实际的数据。
+当接收端接收到这个protobuf报文时，它可以先读取长度字段，然后根据长度字段的值来读取数据字段。这样，接收端就可以通过长度字段来确定数据包的边界。</p>
+<p>这就是protobuf协议如何通过在每个数据包的头部添加长度字段来解决粘包问题的。</p>
+<h3 id="如何设置包长度固定"><a class="header" href="#如何设置包长度固定">如何设置包长度固定</a></h3>
+<p>在这个示例中，发送端使用固定长度的数据包，这样接收端可以直接通过数据包的长度来确定数据包的边界。</p>
+<pre><code>发送端                      网络                     接收端
+  |                         |                         |
+  | -- 数据包A(5) --&gt;        |                         |
+  | -- 数据包B(5) --&gt;        |                         |
+  |                         | -- 数据包A(5)B(5) --&gt;    |
+  |                         |                         | -- 分离出数据包A和B
+  |                         |                         |
+</code></pre>
+<p>这种方法在一些特定的场景中可能会被使用，例如在一些实时通信的协议中。在这些协议中，为了简化处理过程，所有的数据包都会被设计为固定长度。当接收端接收到数据时，它可以直接通过数据包的长度来确定数据包的边界。例如，一些音频流协议就可能会使用这种方法来解决粘包问题。</p>
+<p>以下是一个具体的例子，结合音频流协议（如RTP）的报文结构来讲解这种方法：</p>
+<p>实时传输协议（RTP）是一种面向数据包的协议，常用于音频和视频的实时传输。在RTP协议中，所有的数据包都被设计为固定长度，以简化处理过程。</p>
+<p>例如，一个RTP数据包的结构可能如下所示：</p>
+<pre><code>+----------------+------------------+------------------+
+| RTP头部 (12字节) | 有效载荷 (固定长度) | RTP尾部 (可选)   |
++----------------+------------------+------------------+
+</code></pre>
+<p>在这个例子中，RTP头部是12字节，有效载荷是固定长度，RTP尾部是可选的。当接收端接收到这个RTP数据包时，它可以直接通过数据包的长度来确定数据包的边界。</p>
+<p>这就是RTP协议如何通过使用固定长度的数据包来解决粘包问题的。</p>
+<h3 id="什么是-tcp-拆包"><a class="header" href="#什么是-tcp-拆包">什么是 TCP 拆包？</a></h3>
+<p>TCP 拆包是指 TCP 协议在传输数据时，将大的数据包拆分为多个小的数据包进行发送的过程。这是因为网络中的每个链路可能有不同的最大传输单元（MTU），超过 MTU 大小的数据包需要被拆分才能进行传输。</p>
+<p>例如，假设我们有一个大小为 3000 字节的数据包需要通过 TCP 发送，而网络的 MTU 为 1500 字节。在这种情况下，TCP 协议会将这个数据包拆分为两个大小分别为 1500 字节的数据包进行发送。</p>
+<pre><code>发送方
++---------------------+
+|     数据包 (3000字节) |
++---------------------+
+          |
+          | TCP 拆包
+          v
++-----------------+   +-----------------+
+| 数据包1 (1500字节)|  | 数据包2 (1500字节)|
++-----------------+   +-----------------+
+          |
+          | 发送
+          v
+接收方
++-----------------+   +-----------------+
+| 数据包1 (1500字节)|  | 数据包2 (1500字节) |
++-----------------+   +-----------------+
+          |
+          | TCP 粘包
+          v
++---------------------+
+|     数据包 (3000字节) |
++---------------------+
+</code></pre>
+<p>在接收端，TCP 协议会将接收到的所有数据包重新组装成原始的数据包。这个过程被称为 TCP 粘包。</p>
+<h3 id="什么原因导致了-tcp-拆包"><a class="header" href="#什么原因导致了-tcp-拆包">什么原因导致了 TCP 拆包？</a></h3>
+<p>TCP 拆包主要是由于网络中的每个链路可能有不同的最大传输单元（MTU）导致的。MTU 是指网络中一次能够传输的最大数据包大小。如果一个数据包的大小超过了 MTU，那么这个数据包就需要被拆分成多个小的数据包才能进行传输。</p>
+<p>例如，假设我们有一个大小为 3000 字节的数据包需要通过 TCP 发送，而网络的 MTU 为 1500 字节。在这种情况下，TCP 协议会将这个数据包拆分为两个大小分别为 1500 字节的数据包进行发送。</p>
+<p>这样做的原因是，如果一个数据包的大小超过了 MTU，那么这个数据包在传输过程中可能会被丢弃，导致数据无法成功传输。通过将大的数据包拆分为多个小的数据包，可以避免这种情况，确保数据能够成功传输。</p>
+<p>此外，TCP 拆包还可以提高网络的利用率。如果一个大的数据包在传输过程中出现了错误，那么整个数据包都需要被重新传输。而如果将大的数据包拆分为多个小的数据包，那么即使其中一个小的数据包出现了错误，也只需要重新传输这个小的数据包，而不需要重新传输整个大的数据包。这样可以减少不必要的重传，提高网络的利用率。</p>
+<h3 id="tcp-拆包是透明的吗"><a class="header" href="#tcp-拆包是透明的吗">TCP 拆包是透明的吗？</a></h3>
+<p>TCP 拆包是由 TCP 协议自身处理的。当 TCP 协议在发送数据时，如果数据包的大小超过了网络的最大传输单元（MTU），TCP 协议会自动将数据包拆分为多个小的数据包进行发送。这个过程是完全透明的，对于上层协议和应用程序来说，它们并不需要知道数据包是否被拆分，也不需要进行任何额外的处理。</p>
+<p>同样地，当 TCP 协议在接收数据时，如果接收到了多个被拆分的数据包，TCP 协议会自动将这些数据包重新组装成原始的数据包。这个过程也是完全透明的，对于上层协议和应用程序来说，它们只会看到完整的数据包，而不会看到被拆分的数据包。</p>
+<p>因此，TCP 拆包和粘包是由 TCP 协议自身处理的，不需要上层协议进行进一步的解决。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>TCP粘包是由于TCP协议的字节流特性，导致在数据传输过程中，多个数据包可能被合并为一个数据包发送。这通常发生在发送端的数据发送速度大于接收端的数据处理速度时。解决TCP粘包问题的常见方法有：添加特殊的分隔符，设置长度字段，或使用固定长度的数据包。</p>
+<p>TCP拆包则是由于网络中的每个链路可能有不同的最大传输单元（MTU），导致超过MTU大小的数据包需要被拆分为多个小的数据包进行传输。这个过程是由TCP协议自身处理的，对于上层协议和应用程序来说，是完全透明的。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../net/tcp/tcp-field.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../net/tcp/tcp-udp.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../net/tcp/tcp-field.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../net/tcp/tcp-udp.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "net/tcp/pack.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

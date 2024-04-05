@@ -1,0 +1,455 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>OS IPC 进程通信实现细节 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item expanded "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item expanded "><a href="../../os/mult/os-ipc.html" class="active"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/mult/os-ipc.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>这篇文章结合具体的代码讲解操作系统 IPC(Inter-Process Communication) 通信机制的实现细节。</p>
+<h3 id="什么是-ipc-"><a class="header" href="#什么是-ipc-">什么是 IPC ？</a></h3>
+<p>IPC，全称为进程间通信（Inter-Process Communication），是指在不同的进程之间传递和共享信息的机制。这种机制允许运行在同一操作系统上的不同进程之间进行数据交换。常见的 IPC 机制包括管道（Pipe）、消息队列（Message Queue）、信号量（Semaphore）、共享内存（Shared Memory）、套接字（Socket）等。这些机制都有各自的特点和适用场景，可以根据具体的需求进行选择。</p>
+<h3 id="为什么需要-ipc-什么是-ipc-"><a class="header" href="#为什么需要-ipc-什么是-ipc-">为什么需要 IPC ，什么是 IPC ？</a></h3>
+<p>操作系统需要进程间通信（IPC）的原因主要有以下几点：</p>
+<ol>
+<li>
+<p>数据共享：多个进程可能需要访问和操作同一份数据，通过 IPC，这些进程可以共享数据，而无需复制数据。</p>
+</li>
+<li>
+<p>速度：在某些情况下，使用 IPC 传递数据比其他方法（如通过文件系统）更快。</p>
+</li>
+<li>
+<p>模块化：通过 IPC，可以将一个大的任务分解为多个小的、独立的进程，每个进程负责一部分任务。这样可以提高代码的模块化程度，使得代码更易于理解和维护。</p>
+</li>
+<li>
+<p>并发：通过 IPC，多个进程可以并行执行，从而提高系统的性能。</p>
+</li>
+<li>
+<p>资源共享：多个进程可能需要使用同一资源（如打印机、文件等），通过 IPC，这些进程可以协调对资源的使用，避免资源冲突。</p>
+</li>
+<li>
+<p>同步和协调：多个进程在执行过程中可能需要相互协调和同步，通过 IPC，这些进程可以相互发送信号和消息，以达到同步和协调的目的。</p>
+</li>
+</ol>
+<h3 id="ipc-类型有哪些"><a class="header" href="#ipc-类型有哪些">IPC 类型有哪些</a></h3>
+<p>操作系统的进程间通信（IPC）主要有以下几种类型：</p>
+<ol>
+<li>
+<p>管道（Pipe）和命名管道（named pipe）：这是最早的 IPC 形式，主要用于有血缘关系的进程间的通信。</p>
+</li>
+<li>
+<p>消息队列（Message Queue）：消息队列是消息的链表，存放在内核中并由消息队列标识符标识。</p>
+</li>
+<li>
+<p>共享内存（Shared Memory）：多个进程共享一段能够同时读写的内存区域。</p>
+</li>
+<li>
+<p>信号量（Semaphore）：主要作为控制多个进程对共享资源的访问。</p>
+</li>
+<li>
+<p>套接字（Socket）：更为一般的进程间通信机制，可用于不同机器之间的进程间通信。</p>
+</li>
+<li>
+<p>信号（Signal）：一种比较复杂的通信方式，用于通知接收进程某个事件已经发生。</p>
+</li>
+</ol>
+<p>以上就是操作系统中常见的进程间通信方式。</p>
+<h3 id="jos-中的-ipc-通信方式"><a class="header" href="#jos-中的-ipc-通信方式">JOS 中的 IPC 通信方式</a></h3>
+<p>JOS 中的 IPC（Inter-Process Communication，进程间通信）属于消息传递类型。在 JOS 中，进程间通信主要通过<code>sys_ipc_try_send</code>和<code>sys_ipc_recv</code>两个系统调用来实现。<code>sys_ipc_try_send</code>用于发送消息，<code>sys_ipc_recv</code>用于接收消息。这种方式下，进程间的通信数据是通过内核进行中转的，发送进程将消息发送给内核，然后接收进程从内核中接收消息。</p>
+<p>用户进程可以使用 JOS 的 IPC 机制向彼此发送的"消息"包含两个组成部分：一个 32 位的值，以及可选的一个页面映射。允许进程在消息中传递页面映射提供了一种比单个 32 位整数能容纳的数据更多的有效传输方式，也使得进程能够轻松地设置共享内存安排。</p>
+<h3 id="如何接收消息"><a class="header" href="#如何接收消息">如何接收消息？</a></h3>
+<p>当一个进程想要接收消息时，它会调用<code>sys_ipc_recv</code>系统调用。这个调用会使当前进程进入等待状态，直到它接收到一个消息为止。在这个等待期间，该进程不会被调度运行。</p>
+<p>这里有一个重要的概念，那就是任何其他进程都可以向等待接收消息的进程发送消息。这并不限于特定的进程，也不限于与接收进程有父/子关系的进程。这意味着，IPC 的设计允许任何进程之间进行通信，而不仅仅是有特定关系的进程。</p>
+<h3 id="如何发送消息"><a class="header" href="#如何发送消息">如何发送消息？</a></h3>
+<p>当一个进程想要发送消息时，它会调用<code>sys_ipc_try_send</code>系统调用，并提供接收者的进程 id 和要发送的值。</p>
+<p>如果指定的接收进程正在等待接收消息（即它已经调用了<code>sys_ipc_recv</code>并且还没有接收到一个值），那么<code>sys_ipc_try_send</code>会成功地传递消息并返回 0，表示消息发送成功。</p>
+<p>如果指定的接收进程并没有在等待接收消息，那么<code>sys_ipc_try_send</code>会返回一个错误码<code>-E_IPC_NOT_RECV</code>，表示目标进程当前并不期望接收一个值。</p>
+<p>在用户空间，有一个库函数<code>ipc_recv</code>，它会调用<code>sys_ipc_recv</code>，然后在当前进程的<code>struct Env</code>中查找关于接收到的值的信息。这个函数的作用是帮助进程接收消息，并处理接收到的消息。</p>
+<p>另一个库函数<code>ipc_send</code>会负责反复调用<code>sys_ipc_try_send</code>，直到消息发送成功。这个函数的作用是帮助进程发送消息，并处理发送消息的结果。</p>
+<p>总的来说，这段内容描述的是进程间通信的发送和接收消息的过程，以及如何处理发送和接收消息的结果。</p>
+<h3 id="页面共享"><a class="header" href="#页面共享">页面共享</a></h3>
+<p>当一个进程调用<code>sys_ipc_recv</code>并提供一个有效的<code>dstva</code>参数（低于 UTOP）时，这个进程表示它愿意接收一个页面映射。如果发送进程在调用<code>sys_ipc_try_send</code>时发送了一个页面，那么这个页面将会在接收进程的地址空间中的<code>dstva</code>处映射。如果接收进程在<code>dstva</code>处已经映射了一个页面，那么会被覆盖。</p>
+<p>当一个进程以一个有效的<code>srcva</code>（低于 UTOP）调用<code>sys_ipc_try_send</code>时，它意味着发送者想要发送当前在<code>srcva</code>处映射的页面给接收者，权限为<code>perm</code>。在成功的 IPC 之后，发送者保留其在地址空间中<code>srcva</code>处的页面的原始映射，但接收者也在接收者的地址空间中获得了这个相同物理页面在接收者最初指定的<code>dstva</code>处的映射。结果，这个页面在发送者和接收者之间共享。</p>
+<p>简而言之就是将 srcva 对应的物理页面映射到 dstva 上。如果发送者或接收者都没有指示应该传输一个页面，那么不会传输页面。在任何 IPC 之后，内核都会将接收者的 Env 结构中的新字段<code>env_ipc_perm</code>设置为接收到的页面的权限，如果没有接收到页面，则为零。这是一种保护机制，确保只有在接收者明确表示愿意接收页面，并且发送者明确表示愿意发送页面的情况下，才会进行页面传输。</p>
+<p>这样设计的目的是为了实现进程间的内存共享。在许多情况下，进程间需要共享数据，而这些数据可能会存储在内存的页面中。通过这种设计，一个进程可以将其内存中的一个页面发送给另一个进程，而不需要复制页面的内容。这不仅可以节省内存，还可以提高数据传输的效率。</p>
+<p>此外，这种设计还提供了一种保护机制，确保只有在接收进程愿意接收页面，并且发送进程愿意发送页面的情况下，才会进行页面传输。这可以防止恶意进程无意义地发送页面，从而干扰其他进程的正常运行。</p>
+<p>总的来说，这种设计使得进程间的内存共享变得既高效又安全。</p>
+<h3 id="实现-sys_ipc_recv"><a class="header" href="#实现-sys_ipc_recv">实现 sys_ipc_recv</a></h3>
+<p>sys_ipc_recv 用于接收进程间通信（IPC）的消息。当一个进程调用这个函数时，它会阻塞并等待接收一个值。这个进程通过设置<code>env_ipc_recving</code>和<code>env_ipc_dstva</code>字段来记录它希望接收的信息。</p>
+<p><code>env_ipc_recving</code>字段表示这个进程正在等待接收一个值，<code>env_ipc_dstva</code>字段是一个虚拟地址，表示这个进程愿意接收一个页面的数据，并且这个页面应该映射到这个虚拟地址。</p>
+<pre><code class="language-c">static int
+sys_ipc_recv(void *dstva)
+{
+	// 如果dstva小于UTOP（用户空间的最大地址）并且dstva没有页对齐（即，它不是一个页的开始地址）
+	// 那么返回错误码-E_INVAL
+	if (dstva &lt; (void *)UTOP &amp;&amp; dstva != ROUNDDOWN(dstva, PGSIZE)) {
+		return -E_INVAL;
+	}
+	// 设置当前环境为接收状态，env_ipc_recving字段为1表示当前环境正在等待接收IPC消息
+	curenv-&gt;env_ipc_recving = 1;
+	// 将当前环境的状态设置为不可运行，这样调度器在下一次调度时不会选择这个环境运行
+	curenv-&gt;env_status = ENV_NOT_RUNNABLE;
+	// 设置当前环境期望接收的页面的虚拟地址
+	curenv-&gt;env_ipc_dstva = dstva;
+	// 调用sys_yield()让出CPU，等待其他环境发送IPC消息
+	sys_yield();
+	// 如果没有错误发生，那么返回0
+	return 0;
+}
+</code></pre>
+<p>如果<code>dstva</code>小于<code>UTOP</code>，那么这个进程愿意接收一个页面的数据。<code>dstva</code>是一个虚拟地址，表示接收的页面应该映射到的位置。</p>
+<p>这个函数只有在出错时才会返回，否则它会一直阻塞，直到接收到一个值。如果成功接收到一个值，那么系统调用最终会返回 0。</p>
+<p>如果出错，这个函数会返回一个负数。可能的错误包括：如果<code>dstva</code>小于<code>UTOP</code>但不是页面对齐的，那么会返回<code>-E_INVAL</code>错误。</p>
+<h3 id="实现-sys_ipc_try_send"><a class="header" href="#实现-sys_ipc_try_send">实现 sys_ipc_try_send</a></h3>
+<p><code>sys_ipc_try_send</code>函数是操作系统中用于进程间通信（IPC）的一部分。它尝试从当前环境（发送者）向由<code>envid</code>指定的另一个环境（接收者）发送一个值，以及可选的一块内存页。</p>
+<pre><code class="language-c">static int
+sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
+{
+	struct Env *rcvenv;  // 定义一个 Env 结构体指针 rcvenv
+	int ret = envid2env(envid, &amp;rcvenv, 0);  // 将 envid 转换为 Env 结构体指针
+	if (ret) return ret;  // 如果转换失败（返回值小于0），则返回错误码
+	if (!rcvenv-&gt;env_ipc_recving) return -E_IPC_NOT_RECV;  // 如果接收进程不在接收状态，则返回错误码
+
+	if (srcva &lt; (void*)UTOP) {  // 如果虚拟地址 srcva 小于 UTOP
+		pte_t *pte;  // 定义页表项指针 pte
+		struct PageInfo *pg = page_lookup(curenv-&gt;env_pgdir, srcva, &amp;pte);  // 在当前进程的页目录中查找虚拟地址 srcva 对应的物理页
+
+		if (srcva != ROUNDDOWN(srcva, PGSIZE)) return -E_INVAL;  // 如果虚拟地址 srcva 不是页对齐的，则返回错误码
+		if ((*pte &amp; perm) != perm) return -E_INVAL;  // 如果页表项的权限位和 perm 不匹配，则返回错误码
+		if (!pg) return -E_INVAL;  // 如果物理页不存在，则返回错误码
+		if ((perm &amp; PTE_W) &amp;&amp; !(*pte &amp; PTE_W)) return -E_INVAL;  // 如果 perm 中设置了写权限，但页表项中没有写权限，则返回错误码
+
+		if (rcvenv-&gt;env_ipc_dstva &lt; (void*)UTOP) {  // 如果接收进程的接收虚拟地址小于 UTOP
+			ret = page_insert(rcvenv-&gt;env_pgdir, pg, rcvenv-&gt;env_ipc_dstva, perm);  // 在接收进程的页目录中插入一个新的页表项，建立虚拟地址和物理页的映射关系
+			if (ret) return ret;  // 如果插入失败，则返回错误码
+			rcvenv-&gt;env_ipc_perm = perm;  // 设置接收进程的接收权限
+		}
+	}
+	rcvenv-&gt;env_ipc_recving = 0;  // 标记接收进程为非接收状态
+	rcvenv-&gt;env_ipc_from = curenv-&gt;env_id;  // 设置接收进程的发送进程 ID
+	rcvenv-&gt;env_ipc_value = value;  // 设置接收进程的接收值
+	rcvenv-&gt;env_status = ENV_RUNNABLE;  // 设置接收进程的状态为可运行
+	rcvenv-&gt;env_tf.tf_regs.reg_eax = 0;  // 设置接收进程的返回值为0
+	return 0;  // 返回0，表示发送成功
+}
+</code></pre>
+<p>函数首先将<code>envid</code>转换为一个环境结构体指针，如果转换失败则返回错误。然后检查接收环境是否准备好接收 IPC，如果没有则返回错误。</p>
+<p>如果<code>srcva</code>小于<code>UTOP</code>，表示发送者希望发送一块内存页。此时，函数会检查<code>srcva</code>是否页对齐，权限是否合法，以及<code>srcva</code>是否在发送者的地址空间中映射，如果发送者希望授予写权限，那么该页是否可写。如果任何检查失败，函数返回错误。</p>
+<p>如果接收环境准备好接收一块内存页（即<code>env_ipc_dstva</code>小于<code>UTOP</code>），函数会将该页插入到接收环境的页目录中，并赋予指定的权限。如果插入失败，函数返回错误。</p>
+<p>最后，函数更新接收环境的 IPC 字段，并将其标记为可运行。它将<code>env_ipc_recving</code>设置为 0 以阻止未来的发送，将<code>env_ipc_from</code>设置为发送者的<code>envid</code>，将<code>env_ipc_value</code>设置为<code>value</code>参数，如果传输了页，则将<code>env_ipc_perm</code>设置为<code>perm</code>。它还将暂停的<code>sys_ipc_recv</code>系统调用在接收者中的返回值设置为 0。</p>
+<p>函数在成功时返回 0，在失败时返回负的错误代码。</p>
+<h3 id="ipc_recv"><a class="header" href="#ipc_recv">ipc_recv</a></h3>
+<p>在用户空间，有一个库函数<code>ipc_recv</code>，它会调用<code>sys_ipc_recv</code>，然后在当前进程的<code>struct Env</code>中查找关于接收到的值的信息。这个函数的作用是帮助进程接收消息，并处理接收到的消息。</p>
+<pre><code class="language-c">int32_t
+ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
+{
+	// 如果 pg 为空，将 pg 设置为 (void *)-1，表示没有页面需要映射
+	if (pg == NULL) {
+		pg = (void *)-1;
+	}
+
+	// 调用系统调用 sys_ipc_recv，尝试接收 IPC 消息
+	int r = sys_ipc_recv(pg);
+
+	// 如果系统调用返回值小于0，表示系统调用失败
+	if (r &lt; 0) {
+		// 如果 from_env_store 非空，将其值设置为0
+		if (from_env_store) *from_env_store = 0;
+		// 如果 perm_store 非空，将其值设置为0
+		if (perm_store) *perm_store = 0;
+		// 返回系统调用的错误码
+		return r;
+	}
+
+	// 如果系统调用成功，且 from_env_store 非空，将发送者的进程 ID 存储在 *from_env_store 中
+	if (from_env_store)
+		*from_env_store = thisenv-&gt;env_ipc_from;
+
+	// 如果系统调用成功，且 perm_store 非空，将发送者的页面权限存储在 *perm_store 中
+	if (perm_store)
+		*perm_store = thisenv-&gt;env_ipc_perm;
+
+	// 返回发送者发送的值
+	return thisenv-&gt;env_ipc_value;
+}
+</code></pre>
+<p><code>ipc_recv</code>函数是用于接收进程间通信（IPC）的值，并将其返回。如果<code>pg</code>非空，那么发送者发送的任何页面都将映射到该地址。如果<code>from_env_store</code>非空，那么将 IPC 发送者的<code>envid</code>存储在<code>*from_env_store</code>中。如果<code>perm_store</code>非空，那么将 IPC 发送者的页面权限存储在<code>*perm_store</code>中。如果系统调用失败，那么在<code>*fromenv</code>和<code>*perm</code>中存储 0，并返回错误。否则，返回发送者发送的值。</p>
+<p>如果<code>pg</code>为空，那么传递给<code>sys_ipc_recv</code>一个它能理解为“无页面”的值。这里选择了<code>(void *)-1</code>，因为 0 是一个完全有效的映射页面的地方。</p>
+<p>首先，函数检查<code>pg</code>是否为空，如果为空，将其设置为<code>(void *)-1</code>。然后，调用<code>sys_ipc_recv</code>函数，将<code>pg</code>作为参数。如果<code>sys_ipc_recv</code>返回值小于 0，表示系统调用失败，此时，如果<code>from_env_store</code>和<code>perm_store</code>非空，将它们设置为 0，并返回错误码。</p>
+<p>如果系统调用成功，那么将<code>thisenv-&gt;env_ipc_from</code>的值存储在<code>*from_env_store</code>中，将<code>thisenv-&gt;env_ipc_perm</code>的值存储在<code>*perm_store</code>中，最后返回<code>thisenv-&gt;env_ipc_value</code>。</p>
+<h3 id="ipc_send"><a class="header" href="#ipc_send">ipc_send</a></h3>
+<p>在用户空间，另一个库函数<code>ipc_send</code>会负责反复调用<code>sys_ipc_try_send</code>，直到消息发送成功。这个函数的作用是帮助进程发送消息，并处理发送消息的结果。</p>
+<pre><code class="language-c">void
+ipc_send(envid_t to_env, uint32_t val, void *pg, int perm)
+{
+	// 如果 pg 为空，将 pg 设置为 (void *)-1，表示没有页面需要发送
+	if (pg == NULL) {
+		pg = (void *)-1;
+	}
+
+	int r;
+	// 循环尝试发送 IPC 消息，直到成功
+	while(1) {
+		// 调用系统调用 sys_ipc_try_send，尝试发送 IPC 消息
+		r = sys_ipc_try_send(to_env, val, pg, perm);
+		// 如果返回值为0，表示发送成功，函数返回
+		if (r == 0) {
+			return;
+		}
+		// 如果返回值为 -E_IPC_NOT_RECV，表示接收进程还没有准备好接收消息
+		// 此时，调用 sys_yield 让出 CPU，等待下一次调度
+		else if (r == -E_IPC_NOT_RECV) {
+			sys_yield();
+		}
+		// 如果返回其他错误码，表示发送过程中出现错误，调用 panic 函数打印错误信息并终止程序
+		else {
+			panic("ipc_send():%e", r);
+		}
+	}
+}
+</code></pre>
+<p><code>ipc_send</code>函数的主要目的是通过进程间通信（IPC）向指定的环境发送一个值。如果<code>pg</code>参数非空，那么它指向的页面将会被发送。函数首先检查<code>pg</code>是否为空，如果为空，将其设置为<code>(void *)-1</code>，表示没有页面需要发送。</p>
+<p>函数进入一个无限循环，尝试调用<code>sys_ipc_try_send</code>系统调用来发送 IPC 消息。如果系统调用返回 0，表示消息发送成功，函数就会返回。如果系统调用返回<code>-E_IPC_NOT_RECV</code>，表示接收进程还没有准备好接收消息，此时函数会调用<code>sys_yield</code>让出 CPU，等待下一次调度。如果系统调用返回其他错误码，表示发送过程中出现错误，函数就会调用<code>panic</code>函数打印错误信息并终止程序。这个过程会一直重复，直到消息成功发送。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>支持 IPC 实现完毕。通过 IPC 在两个进程之间传递数据或者共享同一个物理页。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../os/mult/os-irq.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../os/mult/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../os/mult/os-irq.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../os/mult/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/mult/os-ipc.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>HTTP 状态 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item expanded "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item expanded "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item expanded "><a href="../../net/http/state.html" class="active"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/net/http/state.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>这篇文章讲解 HTTP 为什么设计为无状态，以及讲解如何在此基础上增加状态。随后引入并讲解了 Cookie 和 Session，讲解了二者区别是什么，分布式 Session 如何处理等问题。</p>
+<h3 id="为什么-http-是无状态的"><a class="header" href="#为什么-http-是无状态的">为什么 HTTP 是无状态的？</a></h3>
+<p>HTTP 协议被设计为无状态的，主要是为了简化服务器的设计并提高其性能。在 HTTP 协议中，每个请求都是独立的，服务器不需要记住之前的请求。这样，服务器就可以同时处理大量的请求，而不需要为每个用户维护一个持久的连接状态。</p>
+<p>让我们来看一个具体的使用场景：假设你正在使用一个在线购物网站。每当你查看一个商品或者添加一个商品到购物车时，你的浏览器都会向服务器发送一个 HTTP 请求。如果 HTTP 是有状态的，那么服务器就需要为每个用户维护一个连接状态，记录他们的购物车内容。这将需要大量的内存和处理器资源，尤其是在有大量用户的情况下。</p>
+<p>然而，由于 HTTP 是无状态的，服务器不需要记住用户的购物车内容。相反，这些信息通常会被存储在用户的浏览器中（例如，使用 cookies）。当用户决定结账时，他们的购物车内容会作为 HTTP 请求的一部分发送给服务器。这样，服务器只需要处理当前的请求，而不需要记住之前的请求。</p>
+<p>总的来说，HTTP 的无状态设计使得服务器可以更简单、更高效地处理大量的并发请求。然而，这也意味着开发者需要找到其他的方法（例如，使用 cookies 或者 session）来跟踪用户的状态。</p>
+<h3 id="http-设计为无状态有哪些好处"><a class="header" href="#http-设计为无状态有哪些好处">HTTP 设计为无状态有哪些好处？</a></h3>
+<p>HTTP 协议设计为无状态的，主要有以下几个好处：</p>
+<ol>
+<li>
+<p><strong>简化服务器设计</strong>：由于服务器不需要为每个用户维护一个持久的连接状态，因此服务器的设计可以更简单。</p>
+</li>
+<li>
+<p><strong>提高服务器性能</strong>：服务器可以同时处理大量的请求，而不需要为每个用户维护一个持久的连接状态，这可以大大提高服务器的性能。</p>
+</li>
+<li>
+<p><strong>提高可扩展性</strong>：由于服务器不需要为每个用户维护一个持久的连接状态，因此可以更容易地添加更多的服务器来处理更多的请求。</p>
+</li>
+</ol>
+<p>让我们来看一个具体的例子：假设你正在使用一个在线购物网站。每当你查看一个商品或者添加一个商品到购物车时，你的浏览器都会向服务器发送一个 HTTP 请求。如果 HTTP 是有状态的，那么服务器就需要为每个用户维护一个连接状态，记录他们的购物车内容。这将需要大量的内存和处理器资源，尤其是在有大量用户的情况下。</p>
+<p>然而，由于 HTTP 是无状态的，服务器不需要记住用户的购物车内容。相反，这些信息通常会被存储在用户的浏览器中（例如，使用 cookies）。当用户决定结账时，他们的购物车内容会作为 HTTP 请求的一部分发送给服务器。这样，服务器只需要处理当前的请求，而不需要记住之前的请求。</p>
+<p>总的来说，HTTP 的无状态设计使得服务器可以更简单、更高效地处理大量的并发请求。然而，这也意味着开发者需要找到其他的方法（例如，使用 cookies 或者 session）来跟踪用户的状态。</p>
+<h3 id="cookie-是什么"><a class="header" href="#cookie-是什么">Cookie 是什么？</a></h3>
+<p>HTTP 协议是无状态的，这意味着服务器默认情况下不会保存用户的任何信息。然而，在实际的 Web 应用中，我们经常需要跟踪用户的状态，例如用户的登录状态、购物车内容等。这就需要使用到 Cookie。</p>
+<p>Cookie 是服务器发送给用户浏览器并保存在浏览器中的一小段数据，它可以包含各种用户的状态信息。当浏览器再次向服务器发送请求时，它会自动将这些 Cookie 一起发送给服务器。服务器可以通过读取这些 Cookie 来恢复用户的状态。</p>
+<p>让我们来看一个具体的使用场景：假设你正在使用一个在线购物网站。当你首次访问这个网站时，服务器会创建一个新的 Session，并将 Session ID 保存在一个 Cookie 中发送给你的浏览器。你的浏览器会保存这个 Cookie，并在之后的每个请求中都将它发送给服务器。</p>
+<p>当你添加一个商品到购物车时，服务器会更新你的 Session，记录你的购物车内容。然后，当你决定结账时，服务器可以通过读取你的 Session ID，找到对应的 Session，从而恢复你的购物车内容。</p>
+<p>总的来说，HTTP 通过使用 Cookie，可以在无状态的协议上实现状态的维护。这使得 Web 应用可以提供丰富的、个性化的用户体验，同时保持了 HTTP 协议的简单和高效。</p>
+<h3 id="cookie-的发展历史"><a class="header" href="#cookie-的发展历史">Cookie 的发展历史</a></h3>
+<p>Cookie 的发展历史可以追溯到1994年，当时的网景通讯公司为了解决无状态的HTTP协议无法进行会话跟踪的问题，引入了这种可以在客户端存储数据的方法。以下是 Cookie 的发展历史的一些关键点：</p>
+<ol>
+<li>
+<p><strong>1994年</strong>：网景通讯公司的工程师 Lou Montulli 提出了 Cookie 的概念，并在 Netscape Navigator 浏览器中实现了第一个版本的 Cookie。</p>
+</li>
+<li>
+<p><strong>1995年</strong>：Microsoft 在 Internet Explorer 浏览器中也开始支持 Cookie。</p>
+</li>
+<li>
+<p><strong>1997年</strong>：互联网工程任务组（IETF）发布了第一个 Cookie 的规范 RFC 2109。</p>
+</li>
+<li>
+<p><strong>2000年</strong>：IETF 发布了新的 Cookie 规范 RFC 2965，取代了 RFC 2109。</p>
+</li>
+<li>
+<p><strong>2009年</strong>：随着 Web 2.0 的兴起，Cookie 开始被广泛用于个性化网站内容、跟踪用户行为等。</p>
+</li>
+<li>
+<p><strong>2011年</strong>：由于隐私问题，欧盟通过了一项法律，要求网站在使用 Cookie 时必须获得用户的同意。</p>
+</li>
+<li>
+<p><strong>近年</strong>：随着现代浏览器开始支持各种各样的存储方式，例如 Web storage API（本地存储和会话存储）或 IndexedDB，Cookie 的使用逐渐减少。尽管如此，Cookie 仍然在某些场景下被广泛使用，例如用于存储用户的登录状态。</p>
+</li>
+</ol>
+<p>以上就是 Cookie 的发展历史的概述。</p>
+<h3 id="session"><a class="header" href="#session">Session</a></h3>
+<p>Session 是服务器端用来保存用户状态的一种技术。当用户首次访问一个网站时，服务器会创建一个新的 Session，并生成一个唯一的 Session ID。这个 Session ID 会被存储在用户的 Cookie 中，然后发送给用户的浏览器。当用户再次访问网站时，浏览器会将这个 Session ID 发送回服务器，服务器就可以通过这个 Session ID 找到对应的 Session，从而恢复用户的状态。</p>
+<p>让我们来看一个具体的使用场景：假设你正在使用一个在线购物网站。当你首次访问这个网站时，服务器会创建一个新的 Session，并将 Session ID 保存在一个 Cookie 中发送给你的浏览器。你的浏览器会保存这个 Cookie，并在之后的每个请求中都将它发送给服务器。</p>
+<p>当你添加一个商品到购物车时，服务器会更新你的 Session，记录你的购物车内容。然后，当你决定结账时，服务器可以通过读取你的 Session ID，找到对应的 Session，从而恢复你的购物车内容。</p>
+<p>总的来说，HTTP 通过使用 Session，可以在无状态的协议上实现状态的维护。这使得 Web 应用可以提供丰富的、个性化的用户体验，同时保持了 HTTP 协议的简单和高效。</p>
+<h3 id="session-的发展历史"><a class="header" href="#session-的发展历史">Session 的发展历史</a></h3>
+<p>Session 的发展历史与 Web 的发展密切相关。以下是 Session 的发展历史的一些关键点：</p>
+<ol>
+<li>
+<p><strong>1990年代初</strong>：随着 Web 的兴起，HTTP 协议被广泛使用。然而，HTTP 是无状态的，这意味着服务器无法跟踪用户的活动。这在某些情况下是一个问题，例如，当用户在网站上进行购物物车操作时，服务器需要知道这些操作是由同一用户进行的。</p>
+</li>
+<li>
+<p><strong>1994年</strong>：为了解决这个问题，网景通讯公司引入了 Cookie。服务器可以将一些数据（例如 Session ID）存储在 Cookie 中，然后将 Cookie 发送给用户的浏览器。当浏览器再次发送请求时，它会将 Cookie 一起发送，这样服务器就可以识别用户。</p>
+</li>
+<li>
+<p><strong>1995年</strong>：随着 Java 语言的发布，Java Servlet API 提供了对 Session 的支持。这使得开发者可以更容易地在 Web 应用程序中使用 Session。</p>
+</li>
+<li>
+<p><strong>2000年代初</strong>：随着 Web 应用程序的复杂性增加，开发者开始寻找更强大的 Session 管理工具。许多 Web 开发框架（例如 PHP、ASP.NET 和 Ruby on Rails）都提供了对 Session 的内置支持。</p>
+</li>
+<li>
+<p><strong>2000年代早期至今</strong>：随着云计算和分布式系统的兴起，Session 管理变得更加复杂。在这种环境下，服务器可能需要在多个服务器之间共享 Session 数据。为了解决这个问题，开发者开始使用各种 Session 存储解决方案，例如 Memcached 和 Redis。</p>
+</li>
+</ol>
+<p>以上就是 Session 的发展历史的概述。</p>
+<h3 id="cookie-和-session-的区别"><a class="header" href="#cookie-和-session-的区别">Cookie 和 Session 的区别</a></h3>
+<p>Cookie 和 Session 都是用来跟踪用户状态的技术，但它们在使用方式和存储位置上有所不同。</p>
+<ol>
+<li>
+<p><strong>存储位置</strong>：Cookie 是存储在客户端（即用户的浏览器）的数据，而 Session 是存储在服务器端的数据。</p>
+</li>
+<li>
+<p><strong>生命周期</strong>：Cookie 的生命周期由服务器和浏览器共同决定，可以是短暂的（如浏览器关闭时消失），也可以是持久的（如设置了过期时间）。而 Session 的生命周期通常是用户开始访问网站到用户关闭浏览器这段时间。</p>
+</li>
+<li>
+<p><strong>安全性</strong>：由于 Cookie 是存储在客户端，因此更容易被篡改或者窃取。而 Session 是存储在服务器端，相对来说更安全。</p>
+</li>
+</ol>
+<p>让我们来看一个具体的例子：假设你正在使用一个在线购物网站。</p>
+<p>当你首次访问这个网站时，服务器会创建一个新的 Session，并生成一个唯一的 Session ID。这个 Session ID 会被存储在一个 Cookie 中，然后发送给你的浏览器。这个 Cookie（包含 Session ID）就保存在你的浏览器中。</p>
+<p>当你添加一个商品到购物车时，服务器会更新你的 Session，记录你的购物车内容。然后，当你决定结账时，你的浏览器会将包含 Session ID 的 Cookie 发送回服务器，服务器就可以通过这个 Session ID 找到对应的 Session，从而恢复你的购物车内容。</p>
+<p>在这个例子中，Cookie 和 Session 都被用来维护用户的状态，但它们的使用方式和存储位置有所不同。</p>
+<h3 id="cookie-和-session-的字段组成及其作用"><a class="header" href="#cookie-和-session-的字段组成及其作用">Cookie 和 Session 的字段组成及其作用？</a></h3>
+<p>Cookie 和 Session 的字段组成如下：</p>
+<p><strong>Cookie</strong>：</p>
+<ul>
+<li><strong>Name</strong>：Cookie 的名称，例如 "SessionID"。</li>
+<li><strong>Value</strong>：Cookie 的值，例如一个 Session ID。</li>
+<li><strong>Domain</strong>：发出 Cookie 的网站的域名。</li>
+<li><strong>Path</strong>：Cookie 的作用路径，通常为 "/"，表示这个 Cookie 对整个网站都有效。</li>
+<li><strong>Expires/Max-Age</strong>：Cookie 的过期时间或最大生存时间，通常设置为较长的时间，以确保 Cookie 不会在用户的浏览器中过早地过期。</li>
+<li><strong>Secure</strong>：如果网站通过 HTTPS 提供服务，那么这个字段通常会被设置，以确保 Cookie 只能通过安全的连接发送。</li>
+<li><strong>HttpOnly</strong>：这个字段通常会被设置，以防止 JavaScript 代码访问这个 Cookie，从而提高安全性。</li>
+</ul>
+<p><strong>Session</strong>：</p>
+<ul>
+<li><strong>Session ID</strong>：一个唯一的标识符，用于在服务器端找到对应的 Session。</li>
+<li><strong>User Data</strong>：存储在 Session 中的用户数据，例如用户的登录状态、购物车内容等。</li>
+</ul>
+<h3 id="一个具体的例子用户登陆"><a class="header" href="#一个具体的例子用户登陆">一个具体的例子：用户登陆</a></h3>
+<p>在用户登录的场景中，Cookie 和 Session 的交互通常如下：</p>
+<ol>
+<li>
+<p>用户首次访问网站，浏览器会发送一个 HTTP 请求到服务器。这个请求通常不包含任何 Session 信息，因为用户还没有登录。</p>
+</li>
+<li>
+<p>服务器接收到这个请求后，会检查请求中是否包含 Session 信息。在这个场景中，因为用户还没有登录，所以请求中不包含 Session 信息。</p>
+</li>
+<li>
+<p>服务器发现请求中没有 Session 信息后，会创建一个新的 Session。这个 Session 通常会包含一些默认的状态信息，例如用户的登录状态（未登录）。</p>
+</li>
+<li>
+<p>服务器会为这个新创建的 Session 生成一个唯一的 Session ID。这个 Session ID 是服务器用来识别和跟踪 Session 的标识符。</p>
+</li>
+<li>
+<p>服务器会将这个 Session ID 存储在一个 Cookie 中，然后将这个 Cookie 发送给用户的浏览器。这样，浏览器在后续的请求中就可以携带这个 Cookie，服务器就可以通过 Cookie 中的 Session ID 来找到对应的 Session。这个 Cookie 的字段可能如下：</p>
+<ul>
+<li>
+<p><strong>Name</strong>：通常为 "SessionID" 或类似的名称。</p>
+</li>
+<li>
+<p><strong>Value</strong>：这就是前面提到的 Session ID，它是一个唯一的标识符，用于在服务器端找到对应的 Session。</p>
+</li>
+<li>
+<p><strong>Domain</strong>：通常为发出 Cookie 的网站的域名。</p>
+</li>
+<li>
+<p><strong>Path</strong>：通常为 "/"，表示这个 Cookie 对整个网站都有效。</p>
+</li>
+<li>
+<p><strong>Expires/Max-Age</strong>：这个字段的值通常较长，以确保 Cookie 不会在用户的浏览器中过早地过期。</p>
+</li>
+<li>
+<p><strong>Secure</strong>：如果网站通过 HTTPS 提供服务，那么这个字段通常会被设置，以确保 Cookie 只能通过安全的连接发送。</p>
+</li>
+<li>
+<p><strong>HttpOnly</strong>：这个字段通常会被设置，以防止 JavaScript 代码访问这个 Cookie，从而提高安全性。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>当用户在浏览器中输入他们的用户名和密码并点击登录按钮时，浏览器会将这个请求连同 Cookie 一起发送给服务器。</p>
+</li>
+<li>
+<p>服务器会检查用户名和密码是否正确，如果正确，服务器会在对应的 Session 中标记用户为已登录。</p>
+</li>
+<li>
+<p>当用户再次访问网站时，浏览器会自动将 Cookie 发送给服务器。服务器会读取 Cookie 中的 Session ID，并找到对应的 Session。如果这个 Session 标记为已登录，那么服务器就知道这个用户已经登录。</p>
+</li>
+</ol>
+<p>通过这种方式，服务器可以在无状态的 HTTP 协议上实现状态的维护，例如用户的登录状态。</p>
+<h3 id="cookie-和-session-什么时候被删除"><a class="header" href="#cookie-和-session-什么时候被删除">Cookie 和 Session 什么时候被删除？</a></h3>
+<p>在用户登录的场景下，Cookie 和 Session 的删除通常在以下情况下发生：</p>
+<ol>
+<li>
+<p><strong>用户注销</strong>：当用户点击注销按钮时，服务器通常会删除对应的 Session，并将一个新的、无效的 Session ID 存储在 Cookie 中，然后将这个 Cookie 发送给用户的浏览器。这样，旧的 Session ID 就被覆盖了，旧的 Session 也就无法再被访问。</p>
+</li>
+<li>
+<p><strong>Cookie 过期</strong>：如果 Cookie 的 Expires/Max-Age 字段被设置了一个具体的时间，那么当这个时间到达后，浏览器会自动删除这个 Cookie。服务器在接收到后续的请求时，如果没有收到包含 Session ID 的 Cookie，那么服务器通常会创建一个新的 Session。</p>
+</li>
+<li>
+<p><strong>Session 过期</strong>：服务器通常会为每个 Session 设置一个过期时间。如果一个 Session 长时间没有被访问（例如，用户长时间没有发送新的请求），那么服务器可能会删除这个 Session 以节省资源。当服务器接收到后续的请求时，如果服务器找不到对应的 Session，那么服务器通常会创建一个新的 Session。</p>
+</li>
+<li>
+<p><strong>用户清除浏览器数据</strong>：用户可以在浏览器的设置中手动清除浏览器数据，包括 Cookie。如果用户清除了 Cookie，那么浏览器在发送后续的请求时就不会再携带 Cookie，服务器在接收到这样的请求后通常会创建一个新的 Session。</p>
+</li>
+</ol>
+<p>以上就是在用户登录的场景下，Cookie 和 Session 何时被删除的情况。</p>
+<h3 id="如果浏览器禁用-cookie-的话怎么办"><a class="header" href="#如果浏览器禁用-cookie-的话怎么办">如果浏览器禁用 Cookie 的话怎么办？</a></h3>
+<p>如果浏览器禁用了 Cookie，那么服务器将无法通过 Cookie 来跟踪用户的状态。这可能会导致一些问题，例如：</p>
+<ul>
+<li>用户无法保持登录状态：因为服务器通常会将 Session ID 存储在 Cookie 中，如果浏览器禁用了 Cookie，那么服务器就无法识别用户，从而无法保持用户的登录状态。</li>
+<li>网站的个性化设置可能无法保存：许多网站会使用 Cookie 来保存用户的个性化设置，例如语言选择、主题颜色等。如果浏览器禁用了 Cookie，那么这些设置可能无法保存。</li>
+</ul>
+<p>在以下场景下，用户可能会禁用 Cookie：</p>
+<ul>
+<li><strong>隐私考虑</strong>：Cookie 可能会被用于跟踪用户的在线行为。一些用户出于对隐私的考虑，可能会选择禁用 Cookie。</li>
+<li><strong>安全考虑</strong>：虽然 Cookie 本身是安全的，但如果被恶意使用，可能会带来安全风险。例如，攻击者可能会通过 Cookie 来进行跨站脚本攻击（XSS）或跨站请求伪造攻击（CSRF）。因此，一些用户可能会选择禁用 Cookie。</li>
+</ul>
+<p>如果用户禁用了 Cookie，开发者可以考虑使用以下方法来维护用户的状态：</p>
+<ul>
+<li><strong>URL 重写</strong>：将 Session ID 直接附加到每个 URL 的末尾，这样服务器就可以从 URL 中获取 Session ID。但这种方法可能会带来安全问题，因为 Session ID 可能会被泄露。</li>
+<li><strong>隐藏表单字段</strong>：在每个表单中添加一个隐藏字段，用于存储 Session ID。当用户提交表单时，服务器就可以从表单数据中获取 Session ID。</li>
+<li><strong>使用 Local Storage</strong>：如果网站是单页应用（SPA），可以考虑使用浏览器的 Local Storage 来存储用户的状态。但需要注意的是，Local Storage 也可能被用户禁用。</li>
+</ul>
+<h3 id="session-安全性"><a class="header" href="#session-安全性">Session 安全性</a></h3>
+<p>Session 的安全性设计主要包括以下几个方面：</p>
+<ol>
+<li>
+<p><strong>Session ID 的生成</strong>：Session ID 应该是随机和唯一的，以防止攻击者通过猜测 Session ID 来获取用户的 Session。许多 Web 开发框架都提供了生成随机 Session ID 的功能。</p>
+</li>
+<li>
+<p><strong>Session ID 的传输</strong>：Session ID 通常在 Cookie 中传输，因此，应该使用 HTTPS 来保护 Cookie 的传输，防止 Session ID 在传输过程中被截获。</p>
+</li>
+<li>
+<p><strong>Session 的生命周期管理</strong>：Session 不应该永久有效，而应该有一个合理的超时时间。当用户登出或者超过一定时间没有活动后，应该销毁 Session。</p>
+</li>
+<li>
+<p><strong>Session 的存储</strong>：Session 数据通常存储在服务器端，因此，需要保护好服务器，防止攻击者直接获取 Session 数据。如果使用了分布式 Session 存储（例如 Memcached 或 Redis），那么这些存储系统也需要保护好。</p>
+</li>
+<li>
+<p><strong>防止 Session 劫持</strong>：可以通过一些手段来防止 Session 劫持，例如，可以绑定 Session 和 IP 地址，只有来自同一个 IP 地址的请求才能使用同一个 Session。但是，这种方法可能会导致一些问题，例如，如果用户的 IP 地址改变了（例如，用户从家里的 WiFi 切换到了移动网络），那么用户可能会失去 Session。</p>
+</li>
+<li>
+<p><strong>防止跨站请求伪造（CSRF）</strong>：可以通过一些手段来防止 CSRF 攻击，例如，可以在每个表单中添加一个隐藏的 CSRF 令牌，服务器在处理表单提交时会检查 CSRF 令牌。</p>
+</li>
+</ol>
+<p>以上就是 Session 的安全性设计的一些基本原则。具体的实现可能会根据 Web 开发框架和应用的需求有所不同。</p>
+<h3 id="分布式-session"><a class="header" href="#分布式-session">分布式 Session</a></h3>
+<p>分布式 Session 是一种在分布式系统中维护用户会话状态的技术。在单体应用中，用户的 Session 信息通常存储在单个服务器的内存中。然而，在分布式系统中，由于请求可能被路由到任何一个服务器，因此需要一种机制来在所有服务器之间共享 Session 信息。这就是分布式 Session 的主要作用。</p>
+<p>让我们来看一个具体的例子：假设你正在使用一个大型的在线购物网站，这个网站使用了多个服务器来处理用户的请求。当你登录并添加一些商品到购物车时，这些信息会被保存在你当前连接的服务器的 Session 中。然后，如果你的下一个请求被路由到了另一个服务器，那么这个服务器需要能够访问到你的 Session 信息，以便恢复你的购物车内容。</p>
+<p>分布式 Session 面临的主要问题包括：</p>
+<ol>
+<li>
+<p><strong>数据一致性</strong>：在分布式系统中，保持所有服务器上的 Session 数据的一致性是一个挑战。例如，如果用户在一个服务器上更新了他们的 Session，那么这个更新需要被快速地同步到所有其他的服务器。</p>
+</li>
+<li>
+<p><strong>性能</strong>：在所有服务器之间共享 Session 数据可能会导致性能问题。例如，如果每个请求都需要从一个中心化的 Session 存储中读取数据，那么这可能会成为一个性能瓶颈。</p>
+</li>
+<li>
+<p><strong>可扩展性</strong>：随着系统的扩展，需要处理的 Session 数据量也会增加。设计一个可以处理大量 Session 数据的分布式 Session 系统是一个挑战。</p>
+</li>
+</ol>
+<p>解决这些问题的方法包括：</p>
+<ol>
+<li>
+<p><strong>使用分布式缓存</strong>：例如，可以使用 Redis 或 Memcached 这样的分布式缓存来存储 Session 数据。这些系统提供了高性能的数据访问，并且可以在多个服务器之间共享数据。</p>
+</li>
+<li>
+<p><strong>使用数据库</strong>：可以使用数据库来存储 Session 数据。这可以提供持久性和一致性，但可能会牺牲一些性能。</p>
+</li>
+<li>
+<p><strong>使用 Session 复制</strong>：在这种方法中，每个服务器都会保存所有的 Session 数据的副本。当一个 Session 被更新时，这个更新会被复制到所有其他的服务器。这可以提供高性能和一致性，但需要更多的内存。</p>
+</li>
+<li>
+<p><strong>使用粘性 Session</strong>：在这种方法中，一旦一个用户的 Session 被创建在一个服务器上，那么该用户的所有后续请求都会被路由到同一个服务器。这可以避免在服务器之间共享 Session 数据，但可能会限制系统的可扩展性。例如使用 Nginx 的 ip_hash 策略，确保来自同一客户端 IP 地址的所有请求都被路由到同一台后端服务器。</p>
+</li>
+</ol>
+<h3 id="jwt-token-来处理分布式-session"><a class="header" href="#jwt-token-来处理分布式-session">JWT Token 来处理分布式 Session</a></h3>
+<p>JWT（JSON Web Token）的设计使其非常适合于在多台服务器之间共享。这是因为 JWT 是自包含的，它包含了所有必要的信息，无需额外的外部存储。这使得 JWT 可以在任何服务器上验证，只要这些服务器都知道用于签名 JWT 的密钥。</p>
+<p>在分布式系统中，JWT 可以用于处理 Session，其工作原理如下：</p>
+<ol>
+<li>
+<p><strong>用户登录</strong>：用户向服务器发送登录请求，包含其凭证（如用户名和密码）。</p>
+</li>
+<li>
+<p><strong>生成 JWT</strong>：服务器验证用户的凭证。如果凭证有效，服务器会生成一个 JWT，其中包含用户的标识信息（如用户 ID），并将其签名。</p>
+</li>
+<li>
+<p><strong>发送 JWT</strong>：服务器将生成的 JWT 发送回用户。用户将此 JWT 存储在本地，例如在 Cookie 或 Local Storage 中。</p>
+</li>
+<li>
+<p><strong>用户请求</strong>：当用户向服务器发送请求时，会在请求中包含此 JWT，通常是在 Authorization 头中。</p>
+</li>
+<li>
+<p><strong>验证 JWT</strong>：服务器收到请求后，会验证 JWT 的签名。如果签名有效，服务器就知道这是一个有效用户，并处理其请求。</p>
+</li>
+<li>
+<p><strong>刷新 JWT</strong>：JWT 通常有一个过期时间。当 JWT 过期时，用户需要重新登录以获取新的 JWT。或者，服务器可以提供一个刷新令牌机制，允许用户在不重新登录的情况下获取新的 JWT。</p>
+</li>
+</ol>
+<p>使用 JWT 处理 Session 的优点是，服务器不需要存储 Session 数据，这在分布式系统中非常有用，因为它消除了在多个服务器之间共享 Session 数据的需要。此外，JWT 也可以跨域使用，这在微服务架构中非常有用。</p>
+<p>然而，使用 JWT 也有一些缺点。例如，一旦 JWT 被颁发，就无法从服务器端撤销，除非服务器存储已颁发的 JWT 列表，并在每个请求中检查 JWT 是否在此列表中。此外，JWT 通常比 Session ID 大，因此在每个请求中发送 JWT 可能会增加网络负载。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../net/http/histroy.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../cpp/basic/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../net/http/histroy.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../cpp/basic/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "net/http/state.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

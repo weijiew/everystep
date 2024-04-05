@@ -1,0 +1,605 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Linux 常用命令使用场景 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item expanded "><a href="../os/shell-know.html" class="active"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/shell-know.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>下面是一些阅读<strong>命令行艺术</strong>的笔记，原文只是列了一个大纲告诉你需要了解哪些内容可以更顺手的使用 Linux 系统，但是还需要自己进一步的去查询。本文是原文的基础上整理归纳，将难以理解的地方展开讲解，补充了一些常见的使用场景和使用示例。</p>
+<h2 id="遇到不会的命令如何使用-help-"><a class="header" href="#遇到不会的命令如何使用-help-">遇到不会的命令如何使用 help ？</a></h2>
+<p>建议直接问 GPT ，下面是传统的做法，可以用来交叉验证，毕竟 GPT 有胡说八道的可能。🤬</p>
+<p>在 Unix 和 Linux 系统中，<code>man</code>，<code>apropos</code> 和 <code>help</code> 是非常有用的命令，它们可以帮助我们查找和理解其他命令的用法。</p>
+<ul>
+<li>
+<p><code>man</code>：这个命令用于查看手册页。例如，<code>man ls</code> 会显示 <code>ls</code> 命令的手册页。这个手册页包含了命令的描述，选项和用法等信息。</p>
+</li>
+<li>
+<p><code>apropos</code>：这个命令用于搜索手册页。例如，<code>apropos copy</code> 会显示所有与 <code>copy</code> 相关的手册页。这个命令非常有用，当你不确定应该使用哪个命令时，你可以使用 <code>apropos</code> 来查找相关的命令。</p>
+</li>
+<li>
+<p><code>help</code>：这个命令用于查看 Bash 内置命令的帮助信息。例如，<code>help cd</code> 会显示 <code>cd</code> 命令的帮助信息。如果你想查看所有的 Bash 内置命令，你可以使用 <code>help -d</code> 命令。</p>
+</li>
+<li>
+<p><code>type</code>：这个命令用于查看命令的类型。例如，<code>type ls</code> 会显示 <code>ls</code> 是一个可执行文件，<code>type cd</code> 会显示 <code>cd</code> 是一个 shell 内置命令。这个命令非常有用，当你不确定一个命令是可执行文件、shell 内置命令还是别名时，你可以使用 <code>type</code> 命令来查看。</p>
+</li>
+</ul>
+<p>这些命令都是在命令行中使用的，你可以在任何时候使用这些命令来查找和理解其他命令的用法。</p>
+<h2 id="重定向"><a class="header" href="#重定向">重定向</a></h2>
+<p>在 Unix 和 Linux 系统中，我们可以使用 <code>&gt;</code>，<code>&lt;</code> 和 <code>|</code> 来重定向输入和输出。这些符号允许我们控制命令行程序的输入和输出。</p>
+<ul>
+<li>
+<p><code>&gt;</code>：这个符号用于重定向输出。它会将命令的输出写入到一个文件中，如果文件已经存在，它会被覆盖。例如，<code>ls &gt; file.txt</code> 会将 <code>ls</code> 命令的输出写入到 <code>file.txt</code> 文件中。</p>
+</li>
+<li>
+<p><code>&gt;&gt;</code>：这个符号也用于重定向输出，但是它会将输出追加到一个已经存在的文件的末尾，而不是覆盖它。例如，<code>ls &gt;&gt; file.txt</code> 会将 <code>ls</code> 命令的输出追加到 <code>file.txt</code> 文件的末尾。</p>
+</li>
+<li>
+<p><code>&lt;</code>：这个符号用于重定向输入。它会将文件的内容作为命令的输入。例如，<code>sort &lt; file.txt</code> 会将 <code>file.txt</code> 文件的内容作为 <code>sort</code> 命令的输入。</p>
+</li>
+<li>
+<p><code>|</code>：这个符号用于管道。它会将一个命令的输出作为另一个命令的输入。例如，<code>ls | sort</code> 会将 <code>ls</code> 命令的输出作为 <code>sort</code> 命令的输入。</p>
+</li>
+<li>
+<p>使用 <code>find</code> 命令查找特定的文件，然后使用 <code>xargs</code> 命令删除它们：<code>find . -name "*.tmp" | xargs rm</code>。这个命令会在当前目录及其子目录中查找所有以 ".tmp" 结尾的文件，然后删除它们。</p>
+</li>
+<li>
+<p>使用 <code>sort</code> 和 <code>uniq</code> 命令删除重复的行：<code>sort file.txt | uniq &gt; output.txt</code>。这个命令会将 <code>file.txt</code> 文件的内容排序，然后删除重复的行，最后将结果写入到 <code>output.txt</code> 文件中。</p>
+</li>
+<li>
+<p>使用 <code>grep</code> 命令搜索特定的文本：<code>cat file.txt | grep "search term"</code>。这个命令会将 <code>file.txt</code> 文件的内容作为 <code>cat</code> 命令的输入，然后将 <code>cat</code> 命令的输出作为 <code>grep</code> 命令的输入，搜索包含 "search term" 的行。</p>
+</li>
+</ul>
+<p>在 Unix 和 Linux 系统中，我们有两种类型的输出：标准输出（stdout）和标准错误（stderr）。默认情况下，这两种输出都会被发送到终端。我们可以使用 <code>&gt;</code> 和 <code>&gt;&gt;</code> 来重定向这两种输出，但是需要注意的是，这两个符号只能重定向标准输出。如果我们想要重定向标准错误，我们需要使用 <code>2&gt;</code> 和 <code>2&gt;&gt;</code>。例如，<code>command 2&gt; error.txt</code> 会将 <code>command</code> 命令的标准错误输出重定向到 <code>error.txt</code> 文件中。</p>
+<h2 id="通配符"><a class="header" href="#通配符">通配符</a></h2>
+<p>在 Unix 和 Linux 系统中，我们可以使用通配符 <code>*</code>，<code>?</code> 和 <code>[...]</code> 来匹配文件和目录。这些通配符可以在很多命令中使用，例如 <code>ls</code>，<code>rm</code>，<code>cp</code> 等。</p>
+<p><code>*</code>：这个通配符可以匹配任何数量的任何字符。例如，<code>ls *.txt</code> 会列出所有以 <code>.txt</code> 结尾的文件。</p>
+<p>复制所有 <code>.txt</code> 文件到另一个目录：<code>cp *.txt /path/to/destination/</code>。这个命令会将当前目录下所有以 <code>.txt</code> 结尾的文件复制到 <code>/path/to/destination/</code> 目录。</p>
+<p><code>?</code>：这个通配符可以匹配任何单个字符。例如，<code>ls ?.txt</code> 会列出所有只有一个字符并且以 <code>.txt</code> 结尾的文件。</p>
+<p>删除所有只有一个字符的 <code>.txt</code> 文件：<code>rm ?.txt</code>。这个命令会删除所有只有一个字符并且以 <code>.txt</code> 结尾的文件。</p>
+<p><code>[...]</code>：这个通配符可以匹配方括号中的任何一个字符。例如，<code>ls [abc].txt</code> 会列出名为 <code>a.txt</code>，<code>b.txt</code> 和 <code>c.txt</code> 的文件。</p>
+<p>列出所有以 <code>a</code>，<code>b</code> 或 <code>c</code> 开头的文件：<code>ls [abc]*</code>。这个命令会列出所有以 <code>a</code>，<code>b</code> 或 <code>c</code> 开头的文件。</p>
+<p>使用单引号 <code>'</code> 处理包含特殊字符的字符串：<code>echo 'Hello, $USER'</code>。这个命令会输出 <code>Hello, $USER</code>，而不是 <code>Hello,</code> 后面跟着当前用户的用户名。因为在单引号中，所有字符都会被视为普通字符，不会被解析为特殊字符。单引号会保留字符串中的所有字符的字面值，即它会禁止所有的转义序列和变量替换。</p>
+<p><code>"</code>：双引号会保留字符串中的大部分字符的字面值，但是它会允许变量替换和某些转义序列。例如，如果你在终端中输入 <code>echo "$HOME"</code>，它会输出 <code>$HOME</code> 这个环境变量的值，例如 <code>/home/username</code>。这是因为在双引号中，<code>$</code> 符号表示变量替换，它会将 <code>$HOME</code> 替换为这个环境变量的值。</p>
+<p>使用双引号 <code>"</code> 处理包含特殊字符的字符串：<code>echo "Hello, $USER"</code>。这个命令会输出 <code>Hello,</code> 后面跟着当前用户的用户名。因为在双引号中，某些特殊字符（例如 <code>$</code>）会被解析，而不是被视为普通字符。</p>
+<p>在 Unix 和 Linux 系统中，我们可以使用单引号 <code>'</code> 和双引号 <code>"</code> 来处理包含特殊字符的字符串。这两种引号的处理方式有所不同。</p>
+<p>这两种引号的主要区别在于是否允许变量替换和转义序列。在单引号中，所有的字符都被视为字面值，不会进行任何转义或替换。而在双引号中，某些字符，例如 <code>$</code> 和 <code>\</code>，有特殊的含义，它们可以用于变量替换和转义序列。</p>
+<p>这些特性使得我们可以更灵活地处理文件和目录，以及处理包含特殊字符的字符串。</p>
+<h2 id="bash-中的任务管理工具"><a class="header" href="#bash-中的任务管理工具">Bash 中的任务管理工具</a></h2>
+<p>在 Unix 和 Linux 系统中，Bash 提供了一套强大的任务管理工具，可以帮助我们在后台运行任务，暂停任务，恢复任务，查看任务状态，以及结束任务。以下是一些使用示例和使用场景：</p>
+<h3 id="后台执行任务"><a class="header" href="#后台执行任务">后台执行任务</a></h3>
+<ul>
+<li><code>&amp;</code>：这个符号可以让我们在后台运行任务。例如，<code>python script.py &amp;</code> 会在后台运行 <code>script.py</code> 脚本。</li>
+</ul>
+<p>在 Unix 和 Linux 系统中，<code>&amp;</code> 符号通常用于以下场景：</p>
+<ol>
+<li>
+<p>长时间运行的任务：如果你有一个需要运行很长时间的任务，例如数据分析或者大规模的文件处理，你可能希望在后台运行这个任务，这样你就可以在等待任务完成的同时做其他的事情。</p>
+</li>
+<li>
+<p>多任务处理：如果你需要同时运行多个任务，你可以使用 <code>&amp;</code> 符号在后台运行这些任务。这样，你可以在一个任务运行的同时开始另一个任务。</p>
+</li>
+<li>
+<p>服务器脚本：在服务器环境中，你可能需要运行一些持续运行的脚本或服务，例如 Web 服务器或数据库服务器。这些脚本或服务通常在后台运行，这样它们就可以在用户退出终端后继续运行。</p>
+</li>
+</ol>
+<p>例如，如果你有一个 Python 脚本 <code>script.py</code>，这个脚本需要运行很长时间，你可以使用以下命令在后台运行这个脚本：</p>
+<pre><code class="language-bash">python script.py &amp;
+</code></pre>
+<p>这个命令会立即返回，你可以继续在终端中输入其他的命令。你的 Python 脚本会在后台运行，直到它完成。</p>
+<h3 id="如何查看任务状态"><a class="header" href="#如何查看任务状态">如何查看任务状态？</a></h3>
+<p><code>jobs</code>：这个命令可以让我们查看当前所有的任务和它们的状态。例如，我们可以运行 <code>jobs</code> 命令来查看所有的任务。</p>
+<p>在 Unix 和 Linux 系统中，<code>jobs</code> 命令用于列出当前 shell 中的所有后台任务。这个命令非常有用，特别是当你在一个终端会话中启动了多个后台任务时。</p>
+<p>例如，假设你在终端中启动了两个 Python 脚本在后台运行：</p>
+<pre><code class="language-bash">python script1.py &amp;
+python script2.py &amp;
+</code></pre>
+<p>然后，你可以使用 <code>jobs</code> 命令来查看这两个任务的状态：</p>
+<pre><code class="language-bash">jobs
+</code></pre>
+<p>输出可能如下：</p>
+<pre><code class="language-bash">[1]  - running    python script1.py
+[2]  + running    python script2.py
+</code></pre>
+<p>这个输出告诉你，你有两个后台任务正在运行。<code>[1]</code> 和 <code>[2]</code> 是任务的编号，你可以使用这些编号来引用这些任务，例如使用 <code>fg</code> 命令将任务移到前台，或者使用 <code>kill</code> 命令结束任务。</p>
+<p>这个命令在你需要管理多个后台任务时非常有用，例如你可能需要检查哪些任务仍在运行，或者你可能需要将某个任务移到前台来查看它的输出或者交互式地控制它。</p>
+<h3 id="任务前后台如何切换"><a class="header" href="#任务前后台如何切换">任务前后台如何切换？</a></h3>
+<p>在 Unix 和 Linux 系统中，<code>fg</code>，<code>bg</code> 和 <code>kill</code> 命令是任务管理的重要工具，它们可以帮助我们在前台和后台之间切换任务，以及结束任务。以下是一些具体的使用示例和使用场景：</p>
+<ol>
+<li>假设你正在运行一个需要很长时间的 Python 脚本 <code>long_script.py</code>，你可以使用 <code>&amp;</code> 符号在后台运行这个脚本：</li>
+</ol>
+<pre><code class="language-bash">python long_script.py &amp;
+</code></pre>
+<ol start="2">
+<li>然后，你可以使用 <code>jobs</code> 命令查看当前所有的后台任务：</li>
+</ol>
+<pre><code class="language-bash">jobs
+</code></pre>
+<p>输出可能如下：</p>
+<pre><code class="language-bash">[1]  + running    python long_script.py
+</code></pre>
+<ol start="3">
+<li>如果你想将这个后台运行的任务移到前台来查看它的输出或者交互式地控制它，你可以使用 <code>fg</code> 命令：</li>
+</ol>
+<pre><code class="language-bash">fg %1
+</code></pre>
+<p>这个命令会将任务 1 移到前台来继续运行。</p>
+<ol start="4">
+<li>如果你想暂停这个前台运行的任务，并将其移到后台继续运行，你可以首先按下 <strong>ctrl-z</strong> 来暂停这个任务，然后使用 <code>bg</code> 命令：</li>
+</ol>
+<pre><code class="language-bash">bg %1
+</code></pre>
+<p>这个命令会让任务 1 在后台继续运行。</p>
+<ol start="5">
+<li>如果你想结束这个任务，你可以使用 <code>kill</code> 命令：</li>
+</ol>
+<pre><code class="language-bash">kill %1
+</code></pre>
+<p>这个命令会结束任务 1。</p>
+<p>以上就是在 Unix 和 Linux 系统中使用 <code>fg</code>，<code>bg</code> 和 <code>kill</code> 命令的一些具体的使用示例和使用场景，希望对你有所帮助。</p>
+<h3 id="如何取消和暂停任务"><a class="header" href="#如何取消和暂停任务">如何取消和暂停任务？</a></h3>
+<p><strong>ctrl-z</strong> 和 <strong>ctrl-c</strong> 都是 Unix 和 Linux 系统中常用的命令行快捷键，但它们的功能是不同的：</p>
+<ul>
+<li>
+<p><strong>ctrl-z</strong>：这个快捷键用于暂停当前正在运行的任务，并将其放入后台。这意味着任务并没有被终止，而是被暂停了，你可以随时使用 <code>fg</code> 命令将其恢复到前台继续运行。</p>
+</li>
+<li>
+<p><strong>ctrl-c</strong>：这个快捷键用于终止当前正在运行的任务。这意味着任务会被立即停止，无法恢复。如果你需要重新运行这个任务，你需要重新启动它。</p>
+</li>
+</ul>
+<p>所以，主要的区别在于，<strong>ctrl-z</strong> 是暂停任务，而 <strong>ctrl-c</strong> 是终止任务。</p>
+<h2 id="ssh"><a class="header" href="#ssh">SSH</a></h2>
+<p>SSH (Secure Shell) 是一种网络协议，用于安全地连接到远程服务器。以下是如何使用 SSH 进行远程命令行登录的基本步骤：</p>
+<ol>
+<li>首先，你需要在本地机器上生成 SSH 密钥对。你可以使用 <code>ssh-keygen</code> 命令来生成密钥对。这将生成一个公钥和一个私钥。</li>
+</ol>
+<pre><code class="language-bash">ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+</code></pre>
+<ol start="2">
+<li>然后，你需要将公钥添加到远程服务器的 <code>~/.ssh/authorized_keys</code> 文件中。你可以使用 <code>ssh-copy-id</code> 命令来完成这个任务。</li>
+</ol>
+<pre><code class="language-bash">ssh-copy-id user@remote_host
+</code></pre>
+<ol start="3">
+<li>现在，你应该能够使用 SSH 命令来登录到远程服务器，而无需输入密码。</li>
+</ol>
+<pre><code class="language-bash">ssh user@remote_host
+</code></pre>
+<p>SSH Agent 是一个帮助管理私钥的程序，它可以记住你的私钥和密码，所以你不需要每次使用 SSH 时都输入密码。以下是如何使用 <code>ssh-agent</code> 和 <code>ssh-add</code> 命令来实现基础的无密码认证登录：</p>
+<ol>
+<li>首先，你需要启动 SSH Agent。在大多数系统中，SSH Agent 会在启动时自动运行。你可以使用 <code>ssh-agent</code> 命令来启动它。</li>
+</ol>
+<pre><code class="language-bash">eval "$(ssh-agent -s)"
+</code></pre>
+<ol start="2">
+<li>然后，你可以使用 <code>ssh-add</code> 命令将你的私钥添加到 SSH Agent 中。这样，当你使用 SSH 命令时，SSH Agent 就会自动提供你的私钥，而无需你手动输入。</li>
+</ol>
+<pre><code class="language-bash">ssh-add ~/.ssh/id_rsa
+</code></pre>
+<p>现在，你应该能够使用 SSH 命令来登录到远程服务器，而无需输入密码。</p>
+<h2 id="文件管理工具"><a class="header" href="#文件管理工具">文件管理工具</a></h2>
+<p>文件管理工具是在命令行环境中操作和管理文件和目录的重要工具。以下是一些基本的文件管理命令的使用示例和场景：</p>
+<h3 id="列出目录中的文件"><a class="header" href="#列出目录中的文件">列出目录中的文件</a></h3>
+<p><code>ls</code> 和 <code>ls -l</code>：<code>ls</code> 命令用于列出目录中的文件和子目录。<code>ls -l</code> 命令以长格式列出文件和目录的详细信息，包括文件类型、权限、链接数、所有者、组、大小、最后修改时间和文件名。例如：</p>
+<p>例如，假设我们有一个目录，其中包含两个文件：<code>file1.txt</code> 和 <code>file2.txt</code>。</p>
+<p>如果我们运行 <code>ls</code> 命令，输出可能如下：</p>
+<pre><code class="language-bash">file1.txt  file2.txt
+</code></pre>
+<p>这只显示了目录中的文件名。</p>
+<p>然而，如果我们运行 <code>ls -l</code> 命令，输出可能如下：</p>
+<pre><code class="language-bash">-rw-r--r--  1 user  staff  0 Jan  1 00:00 file1.txt
+-rw-r--r--  1 user  staff  0 Jan  1 00:00 file2.txt
+</code></pre>
+<p>这里，每一行都对应一个文件或目录，每一列的信息如下：</p>
+<ul>
+<li>第一列显示文件权限。</li>
+<li>第二列显示链接数。</li>
+<li>第三列显示文件所有者。</li>
+<li>第四列显示文件所属的组。</li>
+<li>第五列显示文件大小（以字节为单位）。</li>
+<li>第六、七、八列显示文件最后修改的日期和时间。</li>
+<li>最后一列显示文件或目录的名称。</li>
+</ul>
+<p>因此，<code>ls -l</code> 命令提供了比 <code>ls</code> 命令更详细的文件和目录信息。</p>
+<h3 id="查看文件内容"><a class="header" href="#查看文件内容">查看文件内容</a></h3>
+<p><code>less</code> 命令是一个非常有用的工具，用于在命令行环境中查看文件内容。它的主要优点是可以向前和向后浏览文件，这在查看大文件时特别有用。</p>
+<p>例如，假设我们有一个名为 <code>log.txt</code> 的日志文件，我们想查看其内容。我们可以使用以下命令：</p>
+<pre><code class="language-bash">less log.txt
+</code></pre>
+<p>这将打开 <code>log.txt</code> 文件，并显示其内容。你可以使用以下键来导航：</p>
+<ul>
+<li><code>空格键</code> 或 <code>Page Down</code> 键向下翻页。</li>
+<li><code>b</code> 键或 <code>Page Up</code> 键向上翻页。</li>
+<li><code>上箭头</code> 和 <code>下箭头</code> 键可以逐行滚动。</li>
+<li><code>/</code> 键后跟一个字符串可以在文件中搜索该字符串。</li>
+<li><code>q</code> 键退出 <code>less</code> 命令。</li>
+</ul>
+<p>这些是 <code>less</code> 命令的基本使用方法，它是 Linux 文件查看和导航的重要工具。</p>
+<p><code>head</code> 和 <code>tail</code>：<code>head</code> 命令用于显示文件的前几行，<code>tail</code> 命令用于显示文件的最后几行。<code>tail -f</code> 命令用于实时查看文件的更新。例如：</p>
+<pre><code class="language-bash">head filename
+tail filename
+tail -f filename
+</code></pre>
+<h3 id="软链接和硬链接"><a class="header" href="#软链接和硬链接">软链接和硬链接</a></h3>
+<p><code>ln</code> 和 <code>ln -s</code> 命令用于在 Unix-like 系统中创建链接。链接是文件系统中的一个重要概念，它允许一个文件名引用另一个文件的数据。</p>
+<p>硬链接 (<code>ln</code>) 是指向文件数据的指针。创建硬链接的命令格式为 <code>ln source_file hard_link</code>。这将创建一个名为 <code>hard_link</code> 的新条目，它和 <code>source_file</code> 指向同一块数据。例如，如果我们有一个名为 <code>file1.txt</code> 的文件，我们可以创建一个硬链接 <code>file2.txt</code>，如下：</p>
+<pre><code class="language-bash">ln file1.txt file2.txt
+</code></pre>
+<p>现在，<code>file1.txt</code> 和 <code>file2.txt</code> 都指向同一块数据。如果我们修改其中一个文件的内容，另一个文件的内容也会改变。</p>
+<p>软链接（也称为符号链接或 symlink）是指向另一个链接的指针。创建软链接的命令格式为 <code>ln -s source_file soft_link</code>。这将创建一个名为 <code>soft_link</code> 的新条目，它指向 <code>source_file</code>。例如，如果我们有一个名为 <code>file1.txt</code> 的文件，我们可以创建一个软链接 <code>file2.txt</code>，如下：</p>
+<pre><code class="language-bash">ln -s file1.txt file2.txt
+</code></pre>
+<p>现在，<code>file2.txt</code> 是 <code>file1.txt</code> 的软链接。如果我们打开 <code>file2.txt</code>，我们会看到 <code>file1.txt</code> 的内容。但是，如果我们删除 <code>file1.txt</code>，<code>file2.txt</code> 将变成一个指向不存在的文件的链接。</p>
+<p>总的来说，硬链接和软链接都是链接，但它们的工作方式略有不同。硬链接是指向文件数据的指针，而软链接是指向另一个链接的指针。</p>
+<h3 id="文件权限"><a class="header" href="#文件权限">文件权限</a></h3>
+<p><code>chown</code> 和 <code>chmod</code>：<code>chown</code> 命令用于更改文件的所有者，<code>chmod</code> 命令用于更改文件的权限。</p>
+<p>例如，假设我们有一个名为 <code>file.txt</code> 的文件，我们想将其所有者更改为 <code>user1</code>，我们可以使用以下命令：</p>
+<pre><code class="language-bash">chown user1 file.txt
+</code></pre>
+<p>现在，<code>file.txt</code> 的所有者是 <code>user1</code>。</p>
+<p><code>chmod</code> 命令用于更改文件或目录的权限。权限分为三组：用户（u）、组（g）和其他（o）。每组权限可以有读（r）、写（w）和执行（x）权限。权限可以用数字表示，读（r）为4，写（w）为2，执行（x）为1。</p>
+<p>例如，如果我们想给 <code>file.txt</code> 的用户设置读、写和执行权限，给组设置读和执行权限，给其他设置只读权限，我们可以使用以下命令：</p>
+<pre><code class="language-bash">chmod 754 file.txt
+</code></pre>
+<p>现在，<code>file.txt</code> 的权限被设置为 <code>rwxr-xr--</code>。</p>
+<h3 id="文件磁盘使用情况"><a class="header" href="#文件磁盘使用情况">文件磁盘使用情况</a></h3>
+<p><code>du</code>：<code>du</code> 命令用于查看文件和目录的磁盘使用情况。<code>du -hs *</code> 命令用于查看当前目录下所有文件和目录的大小。</p>
+<p>例如，如果我们想查看 <code>file.txt</code> 的大小，我们可以使用以下命令：</p>
+<pre><code class="language-bash">du file.txt
+</code></pre>
+<p>这将显示 <code>file.txt</code> 的大小（以字节为单位）。</p>
+<p>如果我们想查看当前目录下所有文件和目录的大小，我们可以使用以下命令：</p>
+<pre><code class="language-bash">du -hs *
+</code></pre>
+<p>这将显示当前目录下每个文件和目录的大小，以及总大小。<code>-h</code> 选项使得大小以人类可读的格式（如 K、M、G）显示，<code>-s</code> 选项使得只显示总大小，不显示每个子目录的大小。</p>
+<h3 id="管理文件系统"><a class="header" href="#管理文件系统">管理文件系统</a></h3>
+<p><code>df</code>，<code>mount</code>，<code>fdisk</code>，<code>mkfs</code>，<code>lsblk</code> 这些命令都是用于管理文件系统的重要工具。以下是这些命令的使用示例和场景：</p>
+<ol>
+<li><code>df</code>：<code>df</code> 命令用于显示磁盘空间的使用情况。例如，如果我们想查看系统中所有文件系统的磁盘使用情况，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">df
+</code></pre>
+<p>这将显示每个文件系统的总空间、已用空间、可用空间和使用百分比。</p>
+<ol start="2">
+<li><code>mount</code>：<code>mount</code> 命令用于挂载文件系统。例如，如果我们有一个设备 <code>/dev/sda1</code>，我们想将其挂载到 <code>/mnt</code> 目录，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">mount /dev/sda1 /mnt
+</code></pre>
+<p>现在，<code>/dev/sda1</code> 的内容可以在 <code>/mnt</code> 目录中访问。</p>
+<ol start="3">
+<li><code>fdisk</code>：<code>fdisk</code> 命令用于查看和管理磁盘分区。例如，如果我们想查看 <code>/dev/sda</code> 磁盘的分区情况，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">fdisk /dev/sda
+</code></pre>
+<p>这将进入 <code>fdisk</code> 的交互模式，我们可以在这里查看、创建、删除和修改分区。</p>
+<ol start="4">
+<li><code>mkfs</code>：<code>mkfs</code> 命令用于格式化分区。例如，如果我们有一个分区 <code>/dev/sda1</code>，我们想将其格式化为 <code>ext4</code> 文件系统，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">mkfs -t ext4 /dev/sda1
+</code></pre>
+<p>现在，<code>/dev/sda1</code> 分区已经被格式化为 <code>ext4</code> 文件系统。</p>
+<ol start="5">
+<li><code>lsblk</code>：<code>lsblk</code> 命令用于列出所有可用的块设备。例如，如果我们想查看系统中所有的块设备，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">lsblk
+</code></pre>
+<p>这将显示系统中所有的块设备，包括设备名、挂载点、文件系统类型等信息。</p>
+<h3 id="文件元数据"><a class="header" href="#文件元数据">文件元数据</a></h3>
+<p>inode 是 Unix 和 Unix-like 系统（如 Linux）文件系统中的一个重要概念。每个文件和目录都有一个与之关联的 inode，它包含了文件的元数据，如文件大小、创建时间、所有者、文件权限等。inode 还包含了文件数据块的位置信息，这使得系统能够访问和读取文件的内容。</p>
+<p><code>ls -i</code> 命令可以显示文件的 inode 号。例如，如果我们有一个名为 <code>file.txt</code> 的文件，我们想查看其 inode 号，我们可以使用以下命令：</p>
+<pre><code class="language-bash">ls -i file.txt
+</code></pre>
+<p>这将显示 <code>file.txt</code> 文件的 inode 号。</p>
+<p><code>df -i</code> 命令用于显示 inode 的使用情况。它显示了文件系统的 inode 总数、已用数、可用数和使用百分比。例如，如果我们想查看系统中 inode 的使用情况，我们可以使用以下命令：</p>
+<pre><code class="language-bash">df -i
+</code></pre>
+<p>这将显示每个文件系统的 inode 总数、已用数、可用数和使用百分比。</p>
+<p>inode 的概念对于理解 Unix 和 Unix-like 系统的文件系统非常重要。它是文件系统如何组织和访问文件的基础。</p>
+<h2 id="网络"><a class="header" href="#网络">网络</a></h2>
+<p><code>ip</code> 和 <code>ifconfig</code> 是用于管理和查看网络接口的命令，而 <code>dig</code> 是用于查询 DNS 的工具。以下是这些命令的使用示例和场景：</p>
+<ol>
+<li><code>ip</code> 或 <code>ifconfig</code>：这些命令用于查看和管理网络接口。例如，如果我们想查看系统中所有网络接口的信息，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">ip addr
+</code></pre>
+<p>或者</p>
+<pre><code class="language-bash">ifconfig
+</code></pre>
+<p>这将显示每个网络接口的信息，包括接口名、IP 地址、MAC 地址等。</p>
+<p>如果我们想启用或禁用一个网络接口，我们可以使用以下命令：</p>
+<pre><code class="language-bash">ip link set eth0 up
+ip link set eth0 down
+</code></pre>
+<p>或者</p>
+<pre><code class="language-bash">ifconfig eth0 up
+ifconfig eth0 down
+</code></pre>
+<p>这将启用或禁用名为 <code>eth0</code> 的网络接口。</p>
+<ol start="2">
+<li><code>dig</code>：<code>dig</code> 命令用于查询 DNS。例如，如果我们想查询 <code>www.example.com</code> 的 IP 地址，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">dig www.example.com
+</code></pre>
+<p>这将显示 <code>www.example.com</code> 的 DNS 查询结果，包括其 IP 地址。</p>
+<p>如果我们想查询一个 IP 地址的反向 DNS 记录，我们可以使用以下命令：</p>
+<pre><code class="language-bash">dig -x 192.0.2.1
+</code></pre>
+<p>这将显示 <code>192.0.2.1</code> 的反向 DNS 查询结果。</p>
+<p>这些命令是网络管理和故障排查的重要工具，对于理解和管理网络非常有帮助。</p>
+<h2 id="正则表达式"><a class="header" href="#正则表达式">正则表达式</a></h2>
+<p><code>grep</code> 和 <code>egrep</code> 是用于文本搜索的命令，它们支持正则表达式，可以在文件或者输入流中搜索匹配的行。以下是这些命令的使用示例和场景：</p>
+<ol>
+<li><code>-i</code>：这个参数表示忽略大小写。例如，如果我们想在 <code>file.txt</code> 中搜索 <code>hello</code>，不区分大小写，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">grep -i "hello" file.txt
+</code></pre>
+<ol start="2">
+<li><code>-o</code>：这个参数表示只输出匹配的部分，而不是整行。例如，如果我们想在 <code>file.txt</code> 中搜索 <code>hello</code>，并且只输出匹配的部分，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">grep -o "hello" file.txt
+</code></pre>
+<ol start="3">
+<li><code>-v</code>：这个参数表示反转匹配，也就是输出不匹配的行。例如，如果我们想在 <code>file.txt</code> 中搜索不包含 <code>hello</code> 的行，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">grep -v "hello" file.txt
+</code></pre>
+<ol start="4">
+<li><code>-A</code>：这个参数表示输出匹配行的后几行。例如，如果我们想在 <code>file.txt</code> 中搜索 <code>hello</code>，并且输出匹配行的后两行，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">grep -A 2 "hello" file.txt
+</code></pre>
+<ol start="5">
+<li><code>-B</code>：这个参数表示输出匹配行的前几行。例如，如果我们想在 <code>file.txt</code> 中搜索 <code>hello</code>，并且输出匹配行的前两行，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">grep -B 2 "hello" file.txt
+</code></pre>
+<ol start="6">
+<li><code>-C</code>：这个参数表示输出匹配行的前后几行。例如，如果我们想在 <code>file.txt</code> 中搜索 <code>hello</code>，并且输出匹配行的前后两行，我们可以使用以下命令：</li>
+</ol>
+<pre><code class="language-bash">grep -C 2 "hello" file.txt
+</code></pre>
+<p><code>egrep</code> 命令和 <code>grep</code> 命令类似，但是它支持扩展的正则表达式，例如 <code>+</code>，<code>?</code> 和 <code>|</code>。</p>
+<p>这些命令是文本处理和日志分析的重要工具，对于理解和使用正则表达式非常有帮助。</p>
+<h2 id="总结"><a class="header" href="#总结">总结</a></h2>
+<p>这篇文章主要介绍了在 Unix 和 Linux 系统中一些常见命令的使用。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../os/sleep-lock.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../os/appendix/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../os/sleep-lock.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../os/appendix/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/shell-know.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/custom.js"></script>
+        <script src="../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

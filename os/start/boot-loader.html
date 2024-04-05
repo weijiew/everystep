@@ -1,0 +1,467 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>OS 启动 Boot Loader 汇编实现细节 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item expanded "><a href="../../os/start/boot-loader.html" class="active"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/start/boot-loader.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>BIOS 启动计算机，检查和准备硬件后，接下来会将控制权传递给 Boot Loader。Boot Loader 负责将操作系统从磁盘加载到内存中。接下来讲解 Boot Loader 的实现细节。</p>
+<p>在 JOS 中 Boot Loader 分为了汇编和 C 语言两部分来实现的，这章节讲解汇编部分 <code>boot/boot.S</code>，下一章讲解 C 语言部分<code>boot/main.c</code>。</p>
+<h3 id="为什么拆分为两部分"><a class="header" href="#为什么拆分为两部分">为什么拆分为两部分？</a></h3>
+<p>简单来说无法全部用 C 语言来实现，例如将处理器从实模式切换到保护模式。这个过程需要直接操作处理器的控制寄存器，这些操作在高级语言中通常是不支持的，因此需要使用汇编语言来完成。</p>
+<p>此外在系统启动时，硬件处于一个未知的状态，需要进行初始化。这部分工作通常包括设置中断，初始化内存，检测硬件设备等，这些工作需要直接操作硬件，而汇编语言可以直接操作硬件，因此通常使用汇编语言来完成。</p>
+<p>当处理器切换到保护模式后，引导加载器需要加载内核到内存，并跳转到内核的入口点开始执行。这部分工作可以使用高级语言（如 C 语言）来完成，因为高级语言更易于编写和维护，同时也可以利用高级语言的各种特性，如函数、结构体等。</p>
+<p>总的来说，使用汇编和 C 语言两部分来实现引导加载器，既可以利用汇编语言直接操作硬件的优势，又可以利用高级语言易于编写和维护的优势。</p>
+<h3 id="主引导记录mbr"><a class="header" href="#主引导记录mbr">主引导记录（MBR）</a></h3>
+<p>主引导记录（Master Boot Record，MBR）是位于硬盘驱动器的第一个扇区（即硬盘的第一个物理扇区，通常是第 0 柱面，第 0 磁头，第 1 扇区）的一段引导代码。它的大小为 512 字节，主要包含以下两部分内容：</p>
+<ol>
+<li>
+<p><strong>引导加载器（Boot Loader）</strong>：这是一段小程序，它的任务是加载并执行操作系统的引导程序。引导加载器的大小通常非常小，因为它需要适应 MBR 的大小限制。在引导加载器中，通常会包含一些基本的硬件初始化代码，以及加载操作系统引导程序的代码。</p>
+</li>
+<li>
+<p><strong>分区表（Partition Table）</strong>：分区表是硬盘分区信息的列表。它描述了硬盘上的各个分区的位置和大小。分区表通常位于 MBR 的最后，占用 64 字节，可以描述最多 4 个分区。</p>
+</li>
+</ol>
+<p>当计算机启动时，BIOS 会首先读取硬盘的 MBR，并执行其中的引导加载器代码。引导加载器会根据分区表的信息，找到操作系统的引导程序所在的位置，然后加载并执行它，从而启动操作系统。</p>
+<p>需要注意的是，由于 MBR 的大小限制，引导加载器通常只能完成最基本的加载任务。对于一些复杂的操作系统，可能需要使用更复杂的引导加载器。在这种情况下，MBR 中的引导加载器的任务就是加载这个更复杂的引导加载器，这个更复杂的引导加载器通常被存储在硬盘的其他位置。</p>
+<p>此外，MBR 也有一些局限性。例如，它只能支持最大 2TB 的硬盘，只能创建最多 4 个主分区等。为了解决这些问题，现代的计算机系统通常使用 GUID 分区表（GPT）来代替 MBR。</p>
+<p>JOS 中 BIOS 最后会将 512 字节的引导扇区加载到物理地址 <code>0x7c00</code> 到 <code>0x7dff</code> 的内存中，其中包含了 Boot Loader 程序。随后使用指令 jmp 将 <code>CS:IP</code> 设置为 <code>0000:7c00</code> 并将控制权传递给 Boot Loader，最后 Boot Loader 负责将 OS 从磁盘加载到内存中。</p>
+<h3 id="为什么是-512-字节"><a class="header" href="#为什么是-512-字节">为什么是 512 字节？</a></h3>
+<p>这个大小是由历史原因决定的，因为在早期的硬盘中，512 字节是一个很合适的大小，既可以满足存储引导加载器的需要，又不会浪费太多的空间。</p>
+<p>PC 是以扇区位单位进行读取的数据的，一个扇区是 512 字节。为什么 PC 是以扇区为单位从磁盘中读取数据，主要有两个原因：</p>
+<ol>
+<li>
+<p>兼容性：由于历史原因，很多操作系统和硬件设备都假设硬盘的扇区大小为 512 字节。如果改变这个大小，可能会导致一些软件和硬件设备无法正常工作。</p>
+</li>
+<li>
+<p>效率：硬盘的读写操作有一定的开销，如果每次只读写很小的数据，这个开销就会变得很大。因此，硬盘通常会一次读写一个扇区的数据，这样可以提高数据的读写效率。</p>
+</li>
+</ol>
+<p>在现代的硬盘中，扇区的大小可能会大于 512 字节，例如 4096 字节。但是为了兼容老的软件和硬件设备，这些硬盘通常会提供一个 512 字节扇区的模拟模式。</p>
+<h3 id="启用-a20"><a class="header" href="#启用-a20">启用 A20</a></h3>
+<p>Boot Loader 拿到控制权后会先执行启用 A20 线，使得可以访问超过 1MB 的内存地址。</p>
+<p>下面这段代码是用于启用 A20 线的。A20 线是计算机内存的一个地址线，它可以访问的内存地址超过 1MB。在早期的 PC 机中，为了保持向后兼容性，物理地址线 20 默认被拉低，这意味着所有超过 1MB 的内存地址都会回绕到零，也就是说，它们会被映射到内存的开始位置。</p>
+<p>"拉低"在硬件设计中通常指的是将某个电平设置为低电平（通常是 0V），这在数字逻辑中通常表示逻辑"0"。"A20 线被拉低"意味着 A20 地址线被禁用，这限制了 CPU 访问的物理内存地址范围。</p>
+<p>在早期的 PC 机中，为了保持与 IBM PC 和 IBM PC/XT 的向后兼容性，A20 线在启动时默认被禁用（或者说被"拉低"）。这意味着，尽管 CPU 的地址总线有 21 根线（A0-A20），可以寻址 2^21（即 2MB）的内存空间，但由于 A20 线被禁用，实际上只能访问到 1MB 的内存空间。</p>
+<p>启用 A20 线（或者说"拉高"A20 线）可以让 CPU 访问超过 1MB 的内存空间。这在运行需要大量内存的现代操作系统时是必要的。</p>
+<p>然而，随着计算机硬件的发展，内存容量已经远远超过了 1MB，因此需要解除这一限制，以便能够访问更多的内存。这就是为什么需要启用 A20 线。</p>
+<pre><code>seta20.1:
+  inb     $0x64,%al               # Wait for not busy
+  testb   $0x2,%al
+  jnz     seta20.1
+
+  movb    $0xd1,%al               # 0xd1 -&gt; port 0x64
+  outb    %al,$0x64
+
+seta20.2:
+  inb     $0x64,%al               # Wait for not busy
+  testb   $0x2,%al
+  jnz     seta20.2
+
+  movb    $0xdf,%al               # 0xdf -&gt; port 0x60
+  outb    %al,$0x60
+</code></pre>
+<p>这段代码的目的就是解除这一限制，启用 A20 线，使得可以访问超过 1MB 的内存地址。具体来说，代码首先等待键盘控制器（端口 0x64）不忙，然后向键盘控制器发送命令 0xd1，这个命令的作用是告诉键盘控制器接下来要写入的数据是一个命令字节。然后代码再次等待键盘控制器不忙，最后向键盘控制器的数据端口（端口 0x60）写入命令 0xdf，这个命令的作用是启用 A20 线。</p>
+<p>在早期的 IBM PC 兼容机中，键盘控制器（通常是 Intel 8042 芯片）不仅负责处理键盘输入，还负责处理一些系统级别的功能，其中之一就是控制 A20 线的状态。这是因为在设计这些系统时，人们需要找到一种方法来禁用 A20 线以保持与旧的 8086 处理器的兼容性，而键盘控制器恰好有一些未使用的输出线，所以人们选择了使用键盘控制器来控制 A20 线。</p>
+<p>在这段代码中，首先通过读取端口 0x64 的状态，等待键盘控制器不忙。然后向端口 0x64 写入 0xd1，这是一个特殊的命令，告诉键盘控制器接下来要写入的数据是一个命令字节，而不是普通的数据。然后再次等待键盘控制器不忙，最后向数据端口 0x60 写入 0xdf，这个命令的作用是启用 A20 线。</p>
+<p>这样做的原因是，键盘控制器的某个输出线被连接到了 A20 线的门控，当这个输出线被设置为高电平时，A20 线就会被启用，允许 CPU 访问超过 1MB 的内存地址。而 0xdf 这个命令就是用来设置这个输出线为高电平的。</p>
+<h3 id="16-位实模式切换到-32-位保护模式"><a class="header" href="#16-位实模式切换到-32-位保护模式">16 位实模式切换到 32 位保护模式</a></h3>
+<p>A20 线开启后接下来将 16 位实模式切换到 32 位保护模式，在 JOS 操作系统中，处理器从 16 位模式切换到 32 位模式的过程发生在引导加载器（boot loader）的早期阶段。这个过程通常在引导加载器的汇编语言部分中完成。</p>
+<p>切换到 32 位模式的关键步骤是设置和启用保护模式。这是通过设置控制寄存器 CR0 的 PE（保护使能）位来实现的。当 PE 位被设置为 1 时，处理器就会进入保护模式，此时可以执行 32 位代码。</p>
+<p>以上就是处理器从 16 位模式切换到 32 位模式的过程。下面是具体的切换代码。</p>
+<pre><code>  # 通过使用引导GDT（全局描述符表）和段翻译，
+  # 从实模式切换到保护模式，使虚拟地址与物理地址相同，
+  # 以确保在切换期间内存映射保持不变。
+  lgdt    gdtdesc
+  movl    %cr0, %eax
+  orl     $CR0_PE_ON, %eax
+  movl    %eax, %cr0
+
+  # 跳转到下一条指令，但在32位代码段中执行。
+  # 这将使处理器切换到32位模式。
+  ljmp    $PROT_MODE_CSEG, $protcseg
+</code></pre>
+<p>这段代码描述的是从 16 位实模式切换到 32 位保护模式的过程。在 x86 架构的早期，处理器在启动时会处于 16 位的实模式，这种模式下，处理器可以直接访问物理内存，但是只能访问到 1MB 的内存空间。为了能够访问更多的内存和提供更好的内存保护机制，处理器需要切换到 32 位的保护模式。</p>
+<p>切换到保护模式的过程如下：</p>
+<ol>
+<li>
+<p><code>lgdt gdtdesc</code>：这条指令用于加载全局描述符表（GDT）。GDT 是一种数据结构，它定义了各种不同的内存段，包括它们的基地址、限制和访问权限等信息。在切换到保护模式之前，需要先设置好 GDT。</p>
+</li>
+<li>
+<p><code>movl %cr0, %eax</code> 和 <code>orl $CR0_PE_ON, %eax</code>：这两条指令用于修改控制寄存器 CR0 的 PE（保护使能）位，将其设置为 1。CR0 是一个 32 位的寄存器，它的第 0 位是 PE 位，当 PE 位被设置为 1 时，处理器会切换到保护模式。</p>
+</li>
+<li>
+<p><code>movl %eax, %cr0</code>：这条指令将修改后的 CR0 值写回 CR0 寄存器，完成模式切换。</p>
+</li>
+<li>
+<p><code>ljmp $PROT_MODE_CSEG, $protcseg</code>：这条指令执行一个长跳转，跳转到标签<code>protcseg</code>指向的地址，并且在跳转后，处理器会开始在 32 位代码段中执行代码。这条指令的执行会导致处理器更新代码段寄存器 CS，从而使处理器开始执行 32 位代码。</p>
+</li>
+</ol>
+<p>这样，处理器就从 16 位实模式切换到了 32 位保护模式。</p>
+<h3 id="设置堆栈指针并调用-c-语言函数"><a class="header" href="#设置堆栈指针并调用-c-语言函数">设置堆栈指针并调用 C 语言函数。</a></h3>
+<p>下面这段代码是在设置保护模式下的数据段寄存器，并设置堆栈指针，然后调用 C 语言函数<code>bootmain</code>。</p>
+<pre><code>protcseg:
+  # 设置保护模式下的数据段寄存器
+  movw    $PROT_MODE_DSEG, %ax    # Our data segment selector
+  movw    %ax, %ds                # -&gt; DS: Data Segment
+  movw    %ax, %es                # -&gt; ES: Extra Segment
+  movw    %ax, %fs                # -&gt; FS
+  movw    %ax, %gs                # -&gt; GS
+  movw    %ax, %ss                # -&gt; SS: Stack Segment
+
+  # 设置堆栈指针并调用C语言函数。
+  movl    $start, %esp
+  call bootmain
+
+# 如果 bootmain 返回（它不应该返回），则进入循环。
+spin:
+  jmp spin
+</code></pre>
+<p>首先，<code>movw $PROT_MODE_DSEG, %ax</code>将<code>PROT_MODE_DSEG</code>（保护模式下的数据段选择器）的值移动到寄存器<code>%ax</code>中。然后，<code>movw %ax, %ds</code>等指令将<code>%ax</code>中的值复制到各个段寄存器（DS、ES、FS、GS 和 SS）中。这样做是为了在保护模式下设置正确的数据和堆栈段。</p>
+<p>在 x86 架构中，DS、ES、FS、GS、SS 是段寄存器，它们在保护模式下用于存储段选择器，用于指定内存访问的段。</p>
+<ol>
+<li>DS（Data Segment）：数据段寄存器，通常用于存储操作数和结果的内存段的段选择器。</li>
+<li>ES（Extra Segment）：附加段寄存器，通常用于字符串和其他数据块操作的目标地址的段选择器。</li>
+<li>FS、GS：这是在 80386 中新增的两个段寄存器，主要用于操作系统，可以用于存储任何段选择器。</li>
+<li>SS（Stack Segment）：堆栈段寄存器，用于存储堆栈的段选择器。</li>
+</ol>
+<p>在这段代码中，所有这些段寄存器都被设置为同一个值（<code>PROT_MODE_DSEG</code>），这是因为在这个特定的上下文中，所有的内存访问都应该在同一个内存段中进行。这样做可以简化内存管理，因为处理器不需要在不同的内存段之间切换。</p>
+<p>接着，<code>movl $start, %esp</code>将堆栈指针<code>%esp</code>设置为<code>start</code>的地址。这是为了在调用<code>bootmain</code>函数之前设置正确的堆栈。</p>
+<p>在 x86 架构中，<code>%esp</code>寄存器是堆栈指针寄存器(Stack Pointer Register)。它的主要作用是指向当前的栈顶。当我们在程序中调用函数、保存临时变量或者保存 CPU 的状态时，这些信息通常会被压入栈中，而<code>%esp</code>寄存器就是用来追踪当前栈顶位置的。</p>
+<p>例如，当我们调用一个函数时，返回地址通常会被压入栈中，然后<code>%esp</code>寄存器的值会减小（在 x86 架构中，栈是向下增长的），以指向新的栈顶。当函数返回时，返回地址会从栈中弹出，<code>%esp</code>寄存器的值会增大，以指向新的栈顶。</p>
+<p>因此，<code>%esp</code>寄存器在函数调用、异常处理以及任务切换等操作中都起着非常重要的作用。</p>
+<p>然后，<code>call bootmain</code>调用<code>bootmain</code>函数。这个函数应该包含了引导加载器的主要逻辑，例如加载内核到内存，然后跳转到内核的入口点。</p>
+<p>最后，如果<code>bootmain</code>函数返回（实际上它不应该返回），代码会进入一个无限循环<code>spin</code>。这是一个安全措施，防止执行未定义的指令。如果<code>bootmain</code>函数意外返回，CPU 将会在这个无限循环中停止，而不是继续执行可能存在的随机指令。</p>
+<h3 id="全局描述表-gdt"><a class="header" href="#全局描述表-gdt">全局描述表 GDT</a></h3>
+<p>下面这段代码定义了一个全局描述符表（Global Descriptor Table，简称 GDT）。GDT 是 x86 架构中用于实现内存保护和分段内存管理的重要数据结构。每个段描述符定义了一个段的属性，如基地址、限制和访问权限等。</p>
+<pre><code># Bootstrap GDT
+.p2align 2                                # force 4 byte alignment
+gdt:
+  SEG_NULL				# null seg
+  SEG(STA_X|STA_R, 0x0, 0xffffffff)	# code seg
+  SEG(STA_W, 0x0, 0xffffffff)	        # data seg
+
+gdtdesc:
+  .word   0x17                            # sizeof(gdt) - 1
+  .long   gdt                             # address gdt
+</code></pre>
+<p>在这段代码中，定义了一个包含三个段描述符的 GDT：</p>
+<ol>
+<li>
+<p>第一个描述符是一个空描述符（<code>SEG_NULL</code>），在 x86 架构中，第一个描述符必须是空描述符。</p>
+</li>
+<li>
+<p>第二个描述符定义了一个代码段（<code>SEG(STA_X|STA_R, 0x0, 0xffffffff)</code>）。<code>STA_X</code>和<code>STA_R</code>表示这个段是可读的并且可执行的。<code>0x0</code>和<code>0xffffffff</code>分别是这个段的基地址和限制，表示这个段覆盖了整个 4GB 的地址空间。</p>
+</li>
+<li>
+<p>第三个描述符定义了一个数据段（<code>SEG(STA_W, 0x0, 0xffffffff)</code>）。<code>STA_W</code>表示这个段是可写的。同样，这个段也覆盖了整个 4GB 的地址空间。</p>
+</li>
+</ol>
+<p><code>gdtdesc</code>定义了一个 GDT 描述符，它包含了 GDT 的大小和地址。在切换到保护模式之前，处理器需要知道 GDT 的位置和大小，这就是通过加载这个 GDT 描述符来实现的。因为在保护模式下，处理器通过段选择器和偏移量来访问内存，其中段选择器是一个 16 位的值，它的高 13 位是索引，用于在 GDT 中查找对应的段描述符。在这里，<code>0x17</code>是 GDT 的大小减 1（因为 GDT 的大小是以字节为单位，所以需要减 1），<code>gdt</code>是 GDT 的地址。</p>
+<pre><code>+------------------------+
+| GDT Header             |
++------------------------+
+| Segment Descriptor 1   |       +----------------------+
++------------------------+       | Segment Descriptor 2 |
+| Segment Descriptor 2   |       +----------------------+
++------------------------+       | Segment Descriptor 3 |
+| Segment Descriptor 3   |       +----------------------+
+|         ...            |       |         ...          |
++------------------------+       +----------------------+
+| Segment Descriptor n   |       | Segment Descriptor n |
++------------------------+       +----------------------+
+</code></pre>
+<p>上面的文本图形化展示了全局描述符表（GDT）的基本结构。GDT 是用于在 x86 架构中进行内存分段和保护的重要数据结构。以下是各个部分的解释：</p>
+<ul>
+<li>
+<p><strong>GDT Header：</strong> GDT 的开头包含一个简单的头部，其中包括 GDT 的大小等信息。</p>
+</li>
+<li>
+<p><strong>Segment Descriptor 1, 2, 3, ..., n：</strong> GDT 包含一系列段描述符，每个描述符对应一个内存段。每个段描述符包含了关于该段的信息，如基地址、段限制、访问权限等。这些描述符以数组的形式存在，可以根据需要添加更多的描述符。</p>
+</li>
+</ul>
+<p>每个段描述符的结构大致如下：</p>
+<pre><code>+------------------------+------------------------+
+|       Base Address     |      Segment Limit     |    &lt;-- 64 bits
++------------------------+------------------------+
+| G | D/B | 0 | AVL | P  | Limit | AVL | S | Type |    &lt;-- 32 bits
++------------------------+--------+-------+-------+
+</code></pre>
+<ul>
+<li>
+<p><strong>Base Address：</strong> 段的基地址，指示段在内存中的起始位置。</p>
+</li>
+<li>
+<p><strong>Segment Limit：</strong> 段的限制，指示段的大小。</p>
+</li>
+<li>
+<p><strong>G (Granularity)：</strong> 指示段限制的单位，如果为 1，表示以 4KB 为单位；如果为 0，表示以字节为单位。</p>
+</li>
+<li>
+<p><strong>D/B (Default/Big)：</strong> 当为 1 时表示 32 位操作模式，当为 0 时表示 16 位操作模式。</p>
+</li>
+<li>
+<p><strong>AVL (Available)：</strong> 可由系统或程序自由使用的位。</p>
+</li>
+<li>
+<p><strong>P (Present)：</strong> 表示段是否在内存中存在。</p>
+</li>
+<li>
+<p><strong>S (System/Segment)：</strong> 如果为 0，表示是系统段；如果为 1，表示是代码或数据段。</p>
+</li>
+<li>
+<p><strong>Type：</strong> 指示段的类型，如代码段、数据段等。</p>
+</li>
+</ul>
+<p>以上图示仅为简化的表示，实际 GDT 可能会更复杂，包括特权级、段的类型、权限等更多信息。这里的图示主要用于概述 GDT 的基本结构。</p>
+<h3 id="保护模式下的寻址方式"><a class="header" href="#保护模式下的寻址方式">保护模式下的寻址方式</a></h3>
+<p>在 x86 架构中，当处理器运行在保护模式下时，内存访问不再是直接通过物理地址，而是通过一个叫做"段选择器"的值加上一个偏移量来完成的。这种方式提供了更好的内存保护和更大的内存访问范围。</p>
+<p>段选择器是一个 16 位的值，它的高 13 位是索引，用于在全局描述符表（GDT）中查找对应的段描述符，剩余的 3 位就被用来表示请求者的特权级别和选择使用的表，为访问控制和隔离提供了更多的灵活性。段描述符包含了段的基地址、限制和访问权限等信息。</p>
+<p>假设我们有一个段选择器，它的值为<code>0x1234</code>，那么它的二进制表示为<code>0001 0010 0011 0100</code>。其中，高 13 位（<code>0001 0010 0011 0</code>）是索引，用于在 GDT 中查找对应的段描述符。</p>
+<p>在 GDT 中，每个段描述符占用 8 个字节，所以我们可以通过索引乘以 8 来计算段描述符在 GDT 中的偏移量。在这个例子中，索引的值为<code>0x123</code>（十进制的 291），所以段描述符在 GDT 中的偏移量为<code>0x123 * 8 = 0x918</code>。</p>
+<p>然后，处理器会将这个偏移量加上 GDT 的基地址，得到段描述符在内存中的物理地址。处理器会从这个地址处读取 8 个字节的数据，得到段描述符的内容。</p>
+<p>最后，处理器会根据段描述符的内容和偏移量来访问内存。例如，如果偏移量为<code>0x5678</code>，那么处理器会访问的物理地址就是段的基地址加上<code>0x5678</code>。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>整体来说，Boot Loader 是在启动过程中的关键步骤，它设置了 CPU 的运行环境，从实模式切换到保护模式，并准备好跳转到高级语言编写的引导程序。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../os/start/bios.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../os/start/boot-main.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../os/start/bios.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../os/start/boot-main.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/start/boot-loader.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

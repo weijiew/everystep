@@ -1,0 +1,373 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>C++中的静态类型安全 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item expanded "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item expanded "><a href="../../cpp/basic/p2.html" class="active"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/cpp/basic/p2.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>在编写程序时，我们应该尽可能地让编译器在编译阶段就能检测出类型错误，而不是在运行时才发现。</p>
+<h3 id="为什么"><a class="header" href="#为什么">为什么？</a></h3>
+<p>这种做法的主要原因有以下几点：</p>
+<p><strong>提前发现错误</strong>：如果在编译阶段就能发现类型错误，那么我们就可以在程序运行之前修复这些错误，避免程序在运行时崩溃。</p>
+<p><strong>提高代码质量</strong>：静态类型检查可以帮助我们编写更安全、更健壮的代码。因为编译器会在编译阶段检查我们的代码，确保我们没有进行不安全的类型转换或者使用错误的类型。</p>
+<p><strong>提高开发效率</strong>：如果在编译阶段就能发现错误，那么我们就不需要花费大量的时间在调试程序上。这可以大大提高我们的开发效率。</p>
+<p><strong>提高程序性能</strong>：静态类型语言通常可以生成更优化的代码，因为编译器在编译阶段就知道了所有变量的类型。这可以提高程序的运行效率。</p>
+<p>总的来说，静态类型安全可以帮助我们提前发现错误，提高代码质量和开发效率，以及提高程序性能。</p>
+<h3 id="有哪些具体措施"><a class="header" href="#有哪些具体措施">有哪些具体措施？</a></h3>
+<p>联合：联合（Union）是一种可以存储不同类型数据的变量，但是一次只能存储其中一种类型的数据。在C++中，使用联合可能会导致类型安全问题。例如：</p>
+<pre><code class="language-cpp">union Data {
+   int i;
+   float f;
+   char str[20];
+} data;
+
+data.i = 10;  // 此时，data中存储的是int类型的数据
+data.f = 220.5;  // 现在，data中存储的是float类型的数据，之前的int类型数据被覆盖
+</code></pre>
+<p>在C++17中，我们可以使用<code>std::variant</code>来替代联合，它是类型安全的：</p>
+<pre><code class="language-cpp">std::variant&lt;int, float, std::string&gt; data;
+data = 10;  // 存储int类型的数据
+data = 220.5f;  // 存储float类型的数据，不会覆盖之前的数据
+</code></pre>
+<p>强制转换：强制转换可能会导致类型安全问题，因为它可以将任何类型的数据转换为任何其他类型的数据。在C++中，我们应该尽量避免使用强制转换，而是使用模板来实现类型安全的转换。</p>
+<p>数组衰减：在C++中，当数组作为函数参数时，它会自动转换（衰减）为指向数组首元素的指针，这可能会导致类型安全问题。我们可以使用<code>gsl::span</code>来替代原生数组，它可以保持数组的大小信息，从而避免数组衰减：</p>
+<pre><code class="language-cpp">void foo(gsl::span&lt;int&gt; arr) {
+    // 使用arr，它包含数组的大小信息
+}
+
+int arr[10];
+foo(arr);  // 传递数组到函数，不会发生数组衰减
+</code></pre>
+<p>范围错误：当我们访问数组或其他容器时，如果索引超出了容器的范围，就会发生范围错误。我们可以使用<code>gsl::span</code>来避免范围错误，因为它会在访问超出范围的元素时抛出异常。</p>
+<p>缩小转换：缩小转换是指将一个大范围的类型转换为小范围的类型，这可能会导致数据丢失或溢出。我们应该尽量避免使用缩小转换，如果必须使用，可以使用<code>gsl::narrow</code>或<code>gsl::narrow_cast</code>来进行安全的缩小转换：</p>
+<pre><code class="language-cpp">int i = gsl::narrow&lt;int&gt;(1234567890L);  // 安全的缩小转换，如果数据丢失或溢出，会抛出异常
+</code></pre>
+<p>以上就是关于静态类型安全的一些具体措施，希望对你有所帮助。</p>
+<h3 id="有哪些只能在运行时检查的例子"><a class="header" href="#有哪些只能在运行时检查的例子">有哪些只能在运行时检查的例子？</a></h3>
+<p>然而在编译期检查出所有错误是不可能的，有些情况只能放到运行时做检查。</p>
+<p>例如下的例子，以数组传递为例：</p>
+<pre><code class="language-cpp">    extern void f(int* p);
+
+    void g(int n)
+    {
+        f(new int[n]);
+    }
+</code></pre>
+<p>这段代码中，函数 <code>g</code> 创建了一个动态数组，并将数组的首地址传递给了函数 <code>f</code>。然而，这里存在一个问题，那就是 <code>f</code> 函数并不知道这个数组的大小。这是因为在 C++ 中，原生数组并不知道自己的大小，而且这个信息也没有被传递给 <code>f</code> 函数。</p>
+<p>这种设计使得错误检测变得非常困难。静态分析可能无法确定数组的大小，因为这个信息在编译时并不可用。同时，如果 <code>f</code> 函数是一个应用二进制接口（ABI）的一部分，那么在运行时进行动态检查也可能非常困难，因为我们不能添加额外的信息来帮助我们跟踪这个指针。</p>
+<p>一种可能的解决方案是将数组的大小信息嵌入到自由存储中，但这需要对系统和可能对编译器进行全局更改，这可能是不可行的。</p>
+<p>因此，这段代码展示了一个不良的设计，它使得错误检测变得非常困难。在实际编程中，我们应该尽量避免这种设计。例如，我们可以使用标准库中的 <code>std::vector</code> 或 <code>std::array</code>，这些容器知道自己的大小，并且可以安全地传递给其他函数。</p>
+<h3 id="增加参数"><a class="header" href="#增加参数">增加参数</a></h3>
+<p>下面这段代码中，函数 <code>g2</code> 创建了一个动态数组，并将数组的首地址和大小一起传递给了函数 <code>f2</code>。这种做法比仅传递数组的首地址要好，因为它使得 <code>f2</code> 函数能够知道数组的大小。</p>
+<pre><code class="language-cpp">    extern void f2(int* p, int n);
+
+    void g2(int n)
+    {
+        f2(new int[n], m);  
+    }
+</code></pre>
+<p>然而，这里仍然存在一个问题。在调用 <code>f2</code> 函数时，传递的数组大小是 <code>m</code>，而不是 <code>n</code>。这是一个拼写错误，但是它可能会引入一个严重的错误。因为 <code>m</code> 可能并不等于 <code>n</code>，所以 <code>f2</code> 函数可能会以错误的大小来处理数组，这可能会导致数组越界等问题。</p>
+<p>此外，这段代码还暗示了 <code>f2</code> 函数应该负责删除它接收的数组。这是因为数组是在 <code>g2</code> 函数中通过 <code>new</code> 创建的，但是并没有在 <code>g2</code> 函数中被删除。如果 <code>f2</code> 函数并没有删除这个数组，那么这个数组就会成为一个内存泄漏。这是一个设计问题，因为它使得内存管理的责任变得不清晰。</p>
+<p>总的来说，这段代码展示了一种将数组的大小和首地址一起传递的做法，这种做法比仅传递数组的首地址要好。然而，它也展示了一些可能的问题，包括拼写错误和内存管理的问题。在实际编程中，我们应该尽量避免这些问题。例如，我们可以使用标准库中的 <code>std::vector</code>，这个容器可以自动管理内存，并且它的大小是明确的，可以安全地传递给其他函数。</p>
+<h3 id="使用智能指针"><a class="header" href="#使用智能指针">使用智能指针</a></h3>
+<p>这段代码中，函数 <code>g3</code> 创建了一个动态数组，并使用 <code>std::unique_ptr</code> 来管理这个数组的内存。然后，它将这个 <code>std::unique_ptr</code> 和数组的大小一起传递给了函数 <code>f3</code>。</p>
+<pre><code class="language-cpp">    extern void f3(unique_ptr&lt;int[]&gt;, int n);
+
+    void g3(int n)
+    {
+        f3(make_unique&lt;int[]&gt;(n), m);   
+    }
+</code></pre>
+<p><code>std::unique_ptr</code> 是一个智能指针，它可以自动管理它所指向的内存。当 <code>std::unique_ptr</code> 被销毁时，它会自动删除它所指向的内存。这样可以避免内存泄漏的问题。</p>
+<p>然而，这里仍然存在一个问题。在调用 <code>f3</code> 函数时，传递的数组大小是 <code>m</code>，而不是 <code>n</code>。这是一个拼写错误，但是它可能会引入一个严重的错误。因为 <code>m</code> 可能并不等于 <code>n</code>，所以 <code>f3</code> 函数可能会以错误的大小来处理数组，这可能会导致数组越界等问题。</p>
+<p>此外，这段代码将数组的所有权和大小分别传递给了 <code>f3</code> 函数。这意味着 <code>f3</code> 函数需要同时管理这个数组的内存和大小。这可能会使得代码变得复杂，因为 <code>f3</code> 函数需要同时处理内存管理和数组大小的问题。</p>
+<p>总的来说，这段代码展示了一种使用 <code>std::unique_ptr</code> 来管理动态数组的内存的做法，这种做法可以避免内存泄漏的问题。然而，它也展示了一些可能的问题，包括拼写错误和将数组的所有权和大小分别传递的问题。在实际编程中，我们应该尽量避免这些问题。例如，我们可以使用标准库中的 <code>std::vector</code>，这个容器可以自动管理内存，并且它的大小是明确的，可以安全地传递给其他函数。</p>
+<h3 id="使用-vector"><a class="header" href="#使用-vector">使用 vector</a></h3>
+<p>这段代码中，函数 <code>g3</code> 创建了一个 <code>std::vector&lt;int&gt;</code> 对象 <code>v</code>，并将其传递给了函数 <code>f4</code>。<code>std::vector</code> 是一个动态数组，它知道自己的大小，并且可以自动管理内存。</p>
+<pre><code class="language-cpp">    extern void f4(vector&lt;int&gt;&amp;);   
+    extern void f4(span&lt;int&gt;);      
+
+    void g3(int n)
+    {
+        vector&lt;int&gt; v(n);
+        f4(v);                     
+        f4(span&lt;int&gt;{v});          
+    }
+</code></pre>
+<p>在这里，<code>f4</code> 函数有两个重载版本。一个接受 <code>std::vector&lt;int&gt;&amp;</code> 作为参数，另一个接受 <code>std::span&lt;int&gt;</code> 作为参数。<code>std::span</code> 是一个轻量级的对象，它可以视为一个数组或其他类型的连续序列的视图。它包含一个指向序列开始的指针和一个表示序列大小的值。</p>
+<p>在 <code>g3</code> 函数中，首先调用了接受 <code>std::vector&lt;int&gt;&amp;</code> 参数的 <code>f4</code> 函数。这个调用将 <code>v</code> 的引用传递给 <code>f4</code>，这意味着 <code>f4</code> 可以访问和修改 <code>v</code>，但是 <code>v</code> 的所有权仍然在 <code>g3</code> 函数中。</p>
+<p>然后，调用了接受 <code>std::span&lt;int&gt;</code> 参数的 <code>f4</code> 函数。这个调用创建了一个 <code>std::span</code> 对象，它是 <code>v</code> 的视图，然后将这个视图传递给 <code>f4</code>。这意味着 <code>f4</code> 可以访问 <code>v</code>，但是不能修改 <code>v</code>，并且 <code>v</code> 的所有权仍然在 <code>g3</code> 函数中。</p>
+<p>这种设计将数组的大小和首地址作为一个整体对象进行传递，这可以避免一些错误，例如拼写错误和内存管理的问题。同时，由于 <code>std::vector</code> 和 <code>std::span</code> 都知道自己的大小，所以可以在运行时进行动态检查。</p>
+<h3 id="参数返回值传递方式"><a class="header" href="#参数返回值传递方式">参数返回值传递方式</a></h3>
+<p>这段代码中，函数 <code>f5</code>、<code>f6</code> 和 <code>f7</code> 都创建了一个大小为 <code>n</code> 的数组，并返回这个数组。这些函数的目的都是传递数组的所有权，但是它们的实现方式和效果是不同的。</p>
+<pre><code class="language-cpp">    vector&lt;int&gt; f5(int n)    
+    {
+        vector&lt;int&gt; v(n);
+        // ... 初始化 v ...
+        return v;
+    }
+</code></pre>
+<p>函数 <code>f5</code> 创建了一个 <code>std::vector&lt;int&gt;</code> 对象 <code>v</code>，并返回这个对象。<code>std::vector</code> 是一个动态数组，它知道自己的大小，并且可以自动管理内存。当 <code>v</code> 被返回时，它的所有权会被移动到调用者那里，这是通过移动语义实现的。这种做法是安全的，因为 <code>std::vector</code> 会自动删除它所管理的内存，所以不会出现内存泄漏的问题。同时，由于 <code>std::vector</code> 知道自己的大小，所以调用者可以安全地使用这个数组。</p>
+<pre><code class="language-cpp">    unique_ptr&lt;int[]&gt; f6(int n)   
+    {
+        auto p = make_unique&lt;int[]&gt;(n);
+        // ... 初始化 *p ...
+        return p;
+    }
+</code></pre>
+<p>函数 <code>f6</code> 创建了一个 <code>std::unique_ptr&lt;int[]&gt;</code> 对象 <code>p</code>，并返回这个对象。<code>std::unique_ptr</code> 是一个智能指针，它可以自动管理它所指向的内存。然而，这里存在一个问题，那就是 <code>p</code> 并不知道它所指向的数组的大小。这是因为在 C++ 中，原生数组并不知道自己的大小，而 <code>std::unique_ptr</code> 也没有提供一种方式来获取这个大小。因此，调用者需要以某种方式知道这个数组的大小，否则它可能会以错误的方式来使用这个数组。</p>
+<pre><code class="language-cpp">    owner&lt;int*&gt; f7(int n)    
+    {
+        owner&lt;int*&gt; p = new int[n];
+        // ... 初始化 *p ...
+        return p;
+    }
+</code></pre>
+<p>函数 <code>f7</code> 创建了一个原生数组，并返回这个数组的首地址。这个首地址被封装在一个 <code>owner&lt;int*&gt;</code> 对象中，这个对象的目的是表明返回的指针是一个所有权指针，也就是说，调用者需要负责删除这个数组。然而，这里存在两个问题。首先，和 <code>f6</code> 函数一样，返回的指针并不知道它所指向的数组的大小。其次，虽然 <code>owner&lt;int*&gt;</code> 表明了返回的指针是一个所有权指针，但是它并没有提供一种自动删除数组的机制，所以调用者可能会忘记删除这个数组，这会导致内存泄漏的问题。</p>
+<p>总的来说，这段代码展示了三种传递数组所有权的做法。其中，<code>f5</code> 函数的做法是最好的，因为它可以安全地传递数组的所有权，并且可以保证调用者知道数组的大小。<code>f6</code> 和 <code>f7</code> 函数的做法存在一些问题，主要是它们丢失了数组的大小信息，而 <code>f7</code> 函数还可能导致内存泄漏的问题。在实际编程中，我们应该尽量避免这些问题，例如，我们可以使用 <code>std::vector</code> 或其他知道自己大小的容器来代替原生数组。</p>
+<h3 id="参考"><a class="header" href="#参考">参考</a></h3>
+<ol>
+<li>C++ Core Guidelines.</li>
+</ol>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../cpp/basic/p1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../cpp/modern/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../cpp/basic/p1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../cpp/modern/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "cpp/basic/p2.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

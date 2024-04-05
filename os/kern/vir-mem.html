@@ -1,0 +1,577 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>OS 如何建立虚拟内存映射？ - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item expanded "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item expanded "><a href="../../os/kern/vir-mem.html" class="active"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/kern/vir-mem.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>上篇文章已经将物理内存初始化设置完毕了，接下来讲解如何建立虚拟内存到物理内存之间的映射。在讲解映射之前要先讲解虚拟内存，虚拟内存将内核和用户软件使用的虚拟地址映射到物理内存的地址。</p>
+<h3 id="虚拟地址线性地址和物理地址三者的区别"><a class="header" href="#虚拟地址线性地址和物理地址三者的区别">虚拟地址、线性地址和物理地址三者的区别</a></h3>
+<p>在计算机系统中，我们通常会遇到三种类型的地址：虚拟地址（Virtual Address）、线性地址（Linear Address）和物理地址（Physical Address）。这三种地址在内存管理中各有其特定的用途和含义。</p>
+<ol>
+<li>
+<p>虚拟地址（Virtual Address）：虚拟地址是由 CPU 生成的，程序在运行时使用的地址。这些地址是虚拟的，也就是说它们并不直接对应实际的物理内存地址。虚拟地址空间的大小由 CPU 的架构决定，例如在 32 位系统中，虚拟地址空间的大小为 4GB。</p>
+</li>
+<li>
+<p>线性地址（Linear Address）：线性地址是虚拟地址经过分段（Segmentation）转换后得到的地址。在分段转换过程中，虚拟地址会加上一个段基址得到线性地址。在许多现代操作系统中，由于使用了平坦模型（Flat Model），分段转换通常不会改变地址，因此虚拟地址和线性地址往往是相同的。</p>
+</li>
+<li>
+<p>物理地址（Physical Address）：物理地址是实际存在于 RAM 中的地址。线性地址经过分页（Paging）转换后得到物理地址。分页转换是通过页表（Page Table）完成的，页表将线性地址空间分割成固定大小的页（Page），并将每个页映射到物理内存中的具体位置。</p>
+</li>
+</ol>
+<p>总的来说，虚拟地址是程序直接使用的地址，线性地址是虚拟地址经过分段转换后的地址，物理地址是实际对应到 RAM 中的地址。这三种地址的转换过程是由 CPU 的内存管理单元（MMU）自动完成的。</p>
+<h3 id="内存管理单元mmu"><a class="header" href="#内存管理单元mmu">内存管理单元（MMU）</a></h3>
+<p>内存管理单元（MMU）是计算机系统中的一个关键组件，它负责处理虚拟内存和物理内存之间的映射。MMU 的工作过程可以分为以下几个步骤：</p>
+<ol>
+<li>
+<p>当 CPU 需要访问内存时，它会生成一个虚拟地址。这个虚拟地址是由程序生成的，可以被视为一个抽象的概念，它并不直接对应物理内存中的实际位置。</p>
+</li>
+<li>
+<p>这个虚拟地址会被送到 MMU 进行处理。MMU 会使用一种叫做页表的数据结构来存储虚拟地址到物理地址的映射信息。</p>
+</li>
+<li>
+<p>MMU 会查找页表，找到虚拟地址对应的物理地址。这个过程叫做地址转换或地址映射。</p>
+</li>
+<li>
+<p>一旦找到了对应的物理地址，MMU 就会将这个物理地址返回给 CPU，CPU 就可以直接访问物理内存了。</p>
+</li>
+<li>
+<p>如果在页表中找不到虚拟地址对应的物理地址，那么 MMU 就会触发一个页面错误（Page Fault）。这通常意味着程序试图访问一个并未分配的内存区域，或者试图进行一种不被允许的操作，例如写入一个只读的内存区域。</p>
+</li>
+<li>
+<p>在处理页面错误时，操作系统会介入，它可能会分配新的内存，或者终止发生错误的程序。</p>
+</li>
+</ol>
+<p>在这个过程中，MMU 起到了一个关键的角色，它使得程序可以使用虚拟地址来访问内存，而不需要关心物理内存的实际布局。这大大简化了内存管理的复杂性，同时也提供了一种有效的内存保护机制。</p>
+<h3 id="地址转换"><a class="header" href="#地址转换">地址转换</a></h3>
+<p>此前在 <code>boot/boot.S</code> 中，已经设置了一个全局描述符表（GDT），其中将所有段基地址设置为 0，限制为 <code>0xffffffff</code> ，有效地禁用了段转换。所以"Selector" 没有产生效果，故线性地址总是等于虚拟地址的偏移量。所以在后续的内容中虚拟地址等同于线性地址。可以忽略分段，仅专注于页面转换。</p>
+<pre><code>           Selector  +--------------+         +-----------+
+          ----------&gt;|              |         |           |
+                     | Segmentation |         |  Paging   |
+Software             |              |--------&gt;|           |----------&gt;  RAM
+            Offset   |  Mechanism   |         | Mechanism |
+          ----------&gt;|              |         |           |
+                     +--------------+         +-----------+
+            Virtual                   Linear                Physical
+</code></pre>
+<h3 id="线性地址组成"><a class="header" href="#线性地址组成">线性地址组成</a></h3>
+<p>接下来讲解虚拟地址的组成组成部分，一个线性地址（'la'）被分解为三个部分：</p>
+<ul>
+<li>页目录索引（Page Directory Index）</li>
+<li>页表索引（Page Table Index）</li>
+<li>页内偏移（Offset within Page）</li>
+</ul>
+<pre><code>+--------10------+-------10-------+---------12----------+
+| Page Directory |   Page Table   | Offset within Page  |
+|      Index     |      Index     |                     |
++----------------+----------------+---------------------+
+ \--- PDX(la) --/ \--- PTX(la) --/ \---- PGOFF(la) ----/
+ \---------- PGNUM(la) ----------/
+</code></pre>
+<p>这里的 10 和 12 是位数，表示每个部分占用的位数。页目录索引和页表索引各占 10 位，页内偏移占 12 位。</p>
+<p><code>PDX(la)</code>、<code>PTX(la)</code>、<code>PGOFF(la)</code>和<code>PGNUM(la)</code>这四个宏用于分解线性地址。例如，<code>PDX(la)</code>用于获取线性地址<code>la</code>的页目录索引。</p>
+<p>如果你有页目录索引、页表索引和页内偏移，你可以使用<code>PGADDR(PDX(la), PTX(la), PGOFF(la))</code>这个宏来构造一个线性地址。</p>
+<p>下面是这几个宏对应的实现细节：</p>
+<pre><code class="language-c">// page number field of address
+#define PGNUM(la)	(((uintptr_t) (la)) &gt;&gt; PTXSHIFT)
+
+// page directory index
+#define PDX(la)		((((uintptr_t) (la)) &gt;&gt; PDXSHIFT) &amp; 0x3FF)
+
+// page table index
+#define PTX(la)		((((uintptr_t) (la)) &gt;&gt; PTXSHIFT) &amp; 0x3FF)
+
+// offset in page
+#define PGOFF(la)	(((uintptr_t) (la)) &amp; 0xFFF)
+
+// construct linear address from indexes and offset
+#define PGADDR(d, t, o)	((void*) ((d) &lt;&lt; PDXSHIFT | (t) &lt;&lt; PTXSHIFT | (o)))
+</code></pre>
+<h3 id="页目录和页表"><a class="header" href="#页目录和页表">页目录和页表</a></h3>
+<p>Page Directory 可以理解为数组，其中每一个元素分别是 Page Directory Entry (PDE) 。每个 PDE 指向一个 Page Table。下面是一个简化的 Page Directory 的文本图形化表示：</p>
+<pre><code>+-----------+-----------+-----------+-----------+-----------+
+|   PDE 0   |   PDE 1   |   PDE 2   |   PDE 3   |    ...    |
++-----------+-----------+-----------+-----------+-----------+
+|   ...     |   ...     |   ...     |   ...     |    ...    |
++-----------+-----------+-----------+-----------+-----------+
+</code></pre>
+<p>Page Table 也是一个数组，一个位置对应一个 Page Table Entry (PTE)。每个 PTE 指向一个物理页框。下面是一个简化的 Page Table 的文本图形化表示：</p>
+<pre><code>+-----------+-----------+-----------+-----------+-----------+
+|   PTE 0   |   PTE 1   |   PTE 2   |   PTE 3   |    ...    |
++-----------+-----------+-----------+-----------+-----------+
+|   ...     |   ...     |   ...     |   ...     |    ...    |
++-----------+-----------+-----------+-----------+-----------+
+</code></pre>
+<p>每个 PTE 包含一些信息，例如指向对应物理页框的地址等。在这个图中，每个格子代表一个 PTE。</p>
+<p>Page Directory 和 Page Table 之间的关系如下：</p>
+<pre><code>Page Directory        Page Table
++-----------+         +-----------+
+|   PDE 0   |--------&gt;|   PTE 0   |
++-----------+         +-----------+
+|   PDE 1   |--------&gt;|   PTE 1   |
++-----------+         +-----------+
+|   PDE 2   |--------&gt;|   PTE 2   |
++-----------+         +-----------+
+|   PDE 3   |--------&gt;|   PTE 3   |
++-----------+         +-----------+
+</code></pre>
+<p>这里，箭头表示指向关系。每个 Page Directory Entry 指向一个对应的 Page Table，而每个 Page Table Entry 指向一个物理页框。这种结构允许通过两级查找，从虚拟地址找到物理地址。</p>
+<h3 id="建立映射的过程"><a class="header" href="#建立映射的过程">建立映射的过程</a></h3>
+<p>接下来结合具体的代码讲解页目录和页表，进一步具像化，了解在代码中是如何使用的。函数<code>pgdir_walk</code>的作用是在给定的页目录<code>pgdir</code>中查找虚拟地址<code>va</code>对应的页表项。如果页表项不存在，它可以选择创建一个新的页表页。</p>
+<pre><code class="language-c">pte_t *
+pgdir_walk(pde_t *pgdir, const void *va, int create)
+{
+	pde_t *pde;
+	pte_t *pte;
+	struct PageInfo *pp;
+
+	// 获取页目录项
+	pde = &amp;pgdir[PDX(va)];
+
+	if (*pde &amp; PTE_P) {
+		// 页目录项存在，获取页表
+		pte = (pte_t*) KADDR(PTE_ADDR(*pde));
+	} else {
+		if (!create || (pp = page_alloc(ALLOC_ZERO)) == NULL) {
+			// 页目录项不存在，且不创建新的页表页，或者创建失败
+			return NULL;
+		}
+
+		// 设置新页表页的物理地址到页目录项中
+		*pde = page2pa(pp) | PTE_U | PTE_W | PTE_P;
+		// 增加引用计数
+		pp-&gt;pp_ref++;
+
+		// 获取页表
+		pte = (pte_t*) page2kva(pp);
+	}
+
+	// 返回页表项
+	return &amp;pte[PTX(va)];
+}
+</code></pre>
+<p><code>pgdir</code> 是一个页目录，它是一个数组，每个元素都是一个页目录项（Page Directory Entry，简称 PDE）。每个页目录项都包含一个页表的物理地址和一些权限位。</p>
+<p>通过<code>PDX(va)</code>宏获取虚拟地址<code>va</code>的页目录索引，并使用该索引从页目录<code>pgdir</code>中获取对应的页目录项<code>pde</code>。<code>pde_t *pde</code> 是一个指向页目录项的指针。<code>pte_t *pte</code> 是一个指向页表项的指针。</p>
+<p>然后，函数检查页目录项<code>pde</code>是否存在。如果存在（即<code>*pde &amp; PTE_P</code>为真），则说明对应的页表已经存在。随后通过 <code>pte = (pte_t*) KADDR(PTE_ADDR(*pde));</code> 获取页表的虚拟地址。</p>
+<ul>
+<li>
+<p>其中 <code>PTE_ADDR</code>，它用于获取页表项（Page Table Entry，简称 PTE）中的物理地址。之前已经提及，在 x86 架构的分页内存管理中，页表项中存储了物理页的物理地址和一些权限位。这个宏通过与操作<code>&amp; ~0xFFF</code>将页表项<code>pte</code>的低 12 位清零，从而获取到物理地址。这是因为在 x86 架构中，物理地址的低 12 位用于存储权限位和其他信息，而高位存储的才是实际的物理地址。</p>
+</li>
+<li>
+<p>通过<code>KADDR(PTE_ADDR(*pde))</code>将页目录项<code>pde</code>中存储的物理地址转换为内核虚拟地址，并将其视为页表<code>pte</code>。</p>
+</li>
+</ul>
+<p>如果页目录项<code>pde</code>不存在，函数会根据<code>create</code>参数决定是否创建新的页表页。如果<code>create</code>为假或者创建新的页表页失败（即<code>page_alloc(ALLOC_ZERO)</code>返回 NULL），函数会返回 NULL 表示失败。</p>
+<p>如果创建新的页表页成功，函数会将新页表页的物理地址和一些权限位设置到页目录项<code>pde</code>中，并增加新页表页的引用计数。然后，函数将新页表页的物理地址转换为内核虚拟地址，并将其视为页表<code>pte</code>。</p>
+<p>最后，函数通过<code>PTX(va)</code>宏获取虚拟地址<code>va</code>的页表索引，并返回页表<code>pte</code>中对应的页表项的地址。</p>
+<p>这个函数是虚拟内存管理的关键部分，它实现了虚拟地址到物理地址的映射。</p>
+<h3 id="范围映射"><a class="header" href="#范围映射">范围映射</a></h3>
+<p>通过 <code>pgdir_walk</code> 实现了虚拟地址到物理地址的映射。接下来在这个函数的基础上增加其他功能，例如给出起始地址和长度，建立多个地址的映射。</p>
+<p><code>boot_map_region</code> 将虚拟地址空间<code>[va, va+size)</code>映射到物理地址<code>[pa, pa+size)</code>、通过 <code>page_lookup</code> 返回虚拟地址'va'映射的页，通过 <code>page_remove</code> 取消映射虚拟地址'va'的物理页，通过 <code>page_insert</code> 将物理页'pp'映射到虚拟地址'va'。</p>
+<p>研究如何使用 boot_map_region ，下面是一个具体的使用示例。boot_map_region 实现后，就需要用到下面的代码，其中将虚拟地址 UPAGES 处映射 'pages' 数组。此前已经讲过 pages 数组了，其中包含所有物理页面信息的数组，每个元素是一个<code>struct PageInfo</code>结构体，表示一个物理页面的状态。</p>
+<pre><code class="language-c">boot_map_region(kern_pgdir, UPAGES, pages_size, PADDR(pages), PTE_U | PTE_P);
+</code></pre>
+<p>所以，这个函数调用的作用是将虚拟地址<code>UPAGES</code>到<code>UPAGES + pages_size</code>的范围映射到物理地址<code>PADDR(pages)</code>到<code>PADDR(pages) + pages_size</code>的范围，权限设置为用户可读且页面存在。这样，内核就可以通过访问虚拟地址<code>UPAGES</code>来访问和管理<code>pages</code>数组了。</p>
+<p>接下来讲解如何实现 boot_map_region ，下面是实现代码，后续讲解每行代码的含义。</p>
+<pre><code class="language-c">static void
+boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
+{
+	// 计算需要映射的页数
+	size_t num_pages = size / PGSIZE;
+
+	for (size_t i = 0; i &lt; num_pages; i++) {
+		// 计算当前页的虚拟地址和物理地址
+		uintptr_t cur_va = va + i * PGSIZE;
+		physaddr_t cur_pa = pa + i * PGSIZE;
+
+		// 获取当前页的页表项
+		pte_t *pte = pgdir_walk(pgdir, (void *)cur_va, 1);
+
+		// 如果获取页表项失败（例如，内存不足），则退出函数
+		if (!pte) {
+			return;
+		}
+
+		// 设置页表项的值为物理地址和权限位的组合
+		*pte = cur_pa | perm | PTE_P;
+	}
+}
+</code></pre>
+<p>之前已经讲解过一遍<code>boot_map_region</code>参数的含义了，接下来再重复一遍。即在给定的页目录<code>pgdir</code>中，将虚拟地址<code>va</code>到<code>va + size</code>的范围映射到物理地址<code>pa</code>到<code>pa + size</code>的范围。<code>size</code>是以字节为单位的大小，是<code>PGSIZE</code>的倍数，<code>va</code>和<code>pa</code>都应该是页对齐的。</p>
+<ol>
+<li>
+<p>计算需要映射的页数，这是通过将<code>size</code>除以<code>PGSIZE</code>得到的。</p>
+</li>
+<li>
+<p>对于每一页，计算当前页的虚拟地址和物理地址。这是通过将<code>i * PGSIZE</code>加到<code>va</code>和<code>pa</code>上得到的。</p>
+</li>
+<li>
+<p>获取当前页的页表项。这是通过调用<code>pgdir_walk</code>函数得到的，该函数返回一个指向页表项的指针。如果页表项不存在，<code>pgdir_walk</code>会创建一个新的页表页。</p>
+</li>
+<li>
+<p>如果获取页表项失败（例如，内存不足），则退出函数。</p>
+</li>
+<li>
+<p>设置页表项的值为物理地址和权限位的组合。这是通过将<code>cur_pa</code>、<code>perm</code>和<code>PTE_P</code>进行位或操作得到的。<code>PTE_P</code>是一个标志位，表示页表项有效。</p>
+</li>
+</ol>
+<p>这段代码的目的是在页目录中设置虚拟地址到物理地址的映射，这是建立虚拟内存系统的一个重要步骤。</p>
+<h3 id="查找虚拟地址对应的物理页面"><a class="header" href="#查找虚拟地址对应的物理页面">查找虚拟地址对应的物理页面</a></h3>
+<p>接下来 <code>page_lookup</code> 的函数，它在给定的页目录 <code>pgdir</code> 中查找虚拟地址 <code>va</code> 映射的物理页面。</p>
+<pre><code class="language-c">struct PageInfo *
+page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
+{
+	// 使用 pgdir_walk 获取虚拟地址 va 的页表项
+	pte_t *pte = pgdir_walk(pgdir, va, 0);
+	if (!pte)
+		return NULL;  // 如果页表项不存在，返回 NULL
+
+	// 如果 pte_store 不为零，存储页表项的地址
+	if (pte_store)
+		*pte_store = pte;
+
+	// 使用 pa2page 将页表项中的物理地址转换为页面信息结构
+	return pa2page(PTE_ADDR(*pte));
+}
+</code></pre>
+<p>函数的参数包括：</p>
+<ul>
+<li><code>pgdir</code>：页目录的指针，它是一个数组，每个元素都是一个页目录项（Page Directory Entry，简称 PDE）。</li>
+<li><code>va</code>：需要查找的虚拟地址。</li>
+<li><code>pte_store</code>：一个指向页表项（Page Table Entry，简称 PTE）指针的指针。如果 <code>pte_store</code> 不为零，那么函数会在其中存储找到的页表项的地址。</li>
+</ul>
+<p>函数的返回值是一个指向 <code>PageInfo</code> 结构的指针，这个结构包含了物理页面的信息。如果虚拟地址 <code>va</code> 没有映射的物理页面，函数会返回 <code>NULL</code>。</p>
+<p>函数的主要步骤如下：</p>
+<ol>
+<li>使用 <code>pgdir_walk</code> 函数获取虚拟地址 <code>va</code> 的页表项。如果页表项不存在，函数返回 <code>NULL</code>。</li>
+<li>如果 <code>pte_store</code> 不为零，那么在 <code>pte_store</code> 指向的位置存储页表项的地址。</li>
+<li>使用 <code>pa2page</code> 函数将页表项中的物理地址转换为 <code>PageInfo</code> 结构，然后返回这个结构的指针。</li>
+</ol>
+<p>这个函数主要用于查找虚拟地址映射的物理页面，以及获取虚拟地址对应的页表项。</p>
+<h3 id="删除虚拟地址和物理页面之间的映射关系"><a class="header" href="#删除虚拟地址和物理页面之间的映射关系">删除虚拟地址和物理页面之间的映射关系</a></h3>
+<p>这个函数主要用于取消虚拟地址映射的物理页面，以及释放不再使用的物理页面。</p>
+<pre><code class="language-c">void
+page_remove(pde_t *pgdir, void *va)
+{
+	pte_t *pte;
+	struct PageInfo *pp;
+	// 使用 page_lookup 获取虚拟地址 va 映射的页
+	pp = page_lookup(pgdir, va, &amp;pte);
+	if (!pp)
+		return;  // 如果没有物理页，什么都不做
+
+	// 减少物理页的引用计数
+	pp-&gt;pp_ref--;
+
+	// 如果引用计数达到 0，释放物理页
+	if (pp-&gt;pp_ref == 0)
+		page_free(pp);
+
+	// 将页表项设置为 0
+	*pte = 0;
+
+	// 使 TLB 无效
+	tlb_invalidate(pgdir, va);
+}
+</code></pre>
+<p>函数的参数包括：</p>
+<ul>
+<li><code>pgdir</code>：页目录的指针，它是一个数组，每个元素都是一个页目录项（Page Directory Entry，简称 PDE）。</li>
+<li><code>va</code>：需要取消映射的虚拟地址。</li>
+</ul>
+<p>函数的主要步骤如下：</p>
+<ol>
+<li>使用 <code>page_lookup</code> 函数获取虚拟地址 <code>va</code> 映射的物理页面。如果没有映射的物理页面，函数直接返回。</li>
+<li>减少物理页面的引用计数。如果引用计数达到 0，释放物理页面。</li>
+<li>将虚拟地址 <code>va</code> 对应的页表项设置为 0，即取消映射。</li>
+<li>使用 <code>tlb_invalidate</code> 函数使 TLB（Translation Lookaside Buffer，快表）无效。因为页表项已经改变，所以需要使 TLB 无效，以防止 CPU 使用过时的映射信息。</li>
+</ol>
+<h3 id="page_insert"><a class="header" href="#page_insert">page_insert</a></h3>
+<p>这段代码的作用是将物理页面 <code>pp</code> 映射到虚拟地址 <code>va</code>。</p>
+<pre><code class="language-c">int
+page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
+{
+	pte_t *pte;
+
+	// 使用 pgdir_walk 获取虚拟地址 va 的页表项
+	pte = pgdir_walk(pgdir, va, 1);
+	if (!pte)
+		return -E_NO_MEM;  // 如果获取页表项失败（例如，内存不足），返回 -E_NO_MEM
+
+	// 如果页表项存在，使用 page_remove 取消映射
+	if (*pte &amp; PTE_P) {
+		if (PTE_ADDR(*pte) == page2pa(pp)) {
+			// 如果重复插入同一个页面，只需要更新权限
+			*pte = page2pa(pp) | perm | PTE_P;
+			return 0;
+		}
+		page_remove(pgdir, va);
+	}
+
+	// 将物理页面 pp 映射到虚拟地址 va
+	*pte = page2pa(pp) | perm | PTE_P;
+
+	// 增加引用计数
+	pp-&gt;pp_ref++;
+	return 0;
+}
+</code></pre>
+<p>函数的参数包括：</p>
+<ul>
+<li><code>pgdir</code>：页目录的指针，它是一个数组，每个元素都是一个页目录项（Page Directory Entry，简称 PDE）。</li>
+<li><code>pp</code>：需要映射的物理页面，它是一个 <code>PageInfo</code> 结构的指针，这个结构包含了物理页面的信息。</li>
+<li><code>va</code>：需要映射的虚拟地址。</li>
+<li><code>perm</code>：映射的权限位。</li>
+</ul>
+<p>函数的主要步骤如下：</p>
+<ol>
+<li>使用 <code>pgdir_walk</code> 函数获取虚拟地址 <code>va</code> 的页表项。如果页表项不存在，函数返回 <code>NULL</code>。</li>
+<li>如果页表项存在，那么使用 <code>page_remove</code> 函数取消映射。如果重复插入同一个页面，只需要更新权限。</li>
+<li>将物理页面 <code>pp</code> 映射到虚拟地址 <code>va</code>，并设置权限位。</li>
+<li>增加物理页面 <code>pp</code> 的引用计数。</li>
+</ol>
+<p>这个函数主要用于在虚拟地址空间中映射物理页面。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>本文结合具体的代码讲解了虚拟内存的映射过程，接下来将会讲解内核如何调用这些代码进一步建立映射。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../os/kern/phy-manage.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../os/kern/map.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../os/kern/phy-manage.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../os/kern/map.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/kern/vir-mem.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

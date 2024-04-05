@@ -1,0 +1,453 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>OS 进程内部的实现细节 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item expanded "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../os/user/process-mem.html" class="active"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/user/process-mem.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>这篇文章结合具体的代码讲解什么是进程，在内核中是如何表示一个进程的。</p>
+<h3 id="什么是进程"><a class="header" href="#什么是进程">什么是进程？</a></h3>
+<p>进程是计算机中的程序关于某个数据集合上的一次运行活动，是系统进行资源分配和调度的基本单位。具体来说，进程是一个具有一定独立功能的程序关于一个数据集合的一次动态执行过程。它是操作系统动态执行的基本单元，在传统的操作系统中，进程既是基本的分配单元，也是基本的执行单元。</p>
+<p>下面这段代码定义了一个名为<code>Env</code>的结构体，它代表了一个进程（在这个上下文中，可以理解为一个进程）。<code>Env</code>结构体中包含了以下字段：</p>
+<p>此外，代码还定义了一个名为<code>EnvType</code>的枚举类型，用于表示特殊的进程类型。目前只定义了一个值<code>ENV_TYPE_USER</code>，表示用户类型的进程。</p>
+<pre><code class="language-c">struct Env {
+	struct Trapframe env_tf;	// 保存的寄存器状态
+	struct Env *env_link;		// 指向下一个空闲的`Env`的指针
+	envid_t env_id;			    // 进程的唯一标识符
+	envid_t env_parent_id;		// 父进程的唯一标识符
+	enum EnvType env_type;		// 表示特殊系统进程的类型，例如区分用户进程或内核进程
+	unsigned env_status;		// 进程的状态
+	uint32_t env_runs;		    // 进程运行的次数
+
+	// Address space
+	pde_t *env_pgdir;		    // 页目录的内核虚拟地址
+};
+</code></pre>
+<h3 id="如何区分不同的进程"><a class="header" href="#如何区分不同的进程">如何区分不同的进程？</a></h3>
+<p>通过进程 id 来区分不同的进程，即<code>envid_t</code>是一个 32 位的整数，用于唯一标识一个进程。envid_t ID 的结构如下：</p>
+<ul>
+<li>最高位（第 32 位）是符号位，如果小于零表示错误，大于零表示其他进程，等于零表示当前进程。</li>
+<li>中间的 21 位（第 11 位到第 31 位）是唯一标识符（Uniqueifier），用于区分在不同时间创建但共享相同进程索引的进程。</li>
+<li>最低的 10 位（第 1 位到第 10 位）是进程索引（Environment Index），等于进程在<code>envs[]</code>数组中的索引。</li>
+</ul>
+<pre><code>+1+---------------21-----------------+--------10--------+
+|0|          Uniqueifier             |   Environment    |
+| |                                  |      Index       |
++------------------------------------+------------------+
+                                      \--- ENVX(eid) --/
+</code></pre>
+<p>这种设计使得进程 ID 既包含了进程的唯一标识，又包含了进程在进程数组中的位置，从而方便了进程的管理和查找。</p>
+<h3 id="进程状态有哪些"><a class="header" href="#进程状态有哪些">进程状态有哪些？</a></h3>
+<p>下面这段代码定义了一个枚举类型，用于表示<code>Env</code>结构体中的<code>env_status</code>字段的状态。<code>env_status</code>字段表示该进程的运行状态。枚举类型中的每个值代表一种可能的状态：</p>
+<ul>
+<li><code>ENV_FREE</code>：进程是空闲的，没有运行任何进程。</li>
+<li><code>ENV_DYING</code>：进程正在结束，进程正在被销毁。</li>
+<li><code>ENV_RUNNABLE</code>：进程中的进程可以运行，但当前没有运行。</li>
+<li><code>ENV_RUNNING</code>：进程中的进程正在运行。</li>
+<li><code>ENV_NOT_RUNNABLE</code>：进程中的进程不能运行。</li>
+</ul>
+<p>这种设计使得操作系统可以通过检查<code>env_status</code>字段来快速确定一个进程的状态，从而决定如何管理和调度进程中的进程。</p>
+<h3 id="进程初始化"><a class="header" href="#进程初始化">进程初始化</a></h3>
+<p>在 OS 中，每个进程都有自己的地址空间，这个地址空间是由操作系统管理的。OS 会将进程数组 'envs' 映射到 UENVS 处，使得用户程序可以读取但不能写入这个数组。这样做的目的是为了让用户程序能够获取到进程的信息，但是不能修改这些信息，以保证系统的稳定性和安全性。</p>
+<p>'envs' 数组存储了系统中所有进程的信息，每个元素是一个 'struct Env' 结构体，包含了进程的状态、进程的页目录、进程的运行时间等信息。通过将 'envs' 数组映射到用户空间，用户程序可以读取这些信息，了解系统的运行状态，例如可以查看其他进程的状态，或者计算自己的 CPU 使用率等。</p>
+<p>下面是具体的申请内存，将 'envs' 数组映射到用户空间的具体代码，和此前 Page 的映射过程类似。</p>
+<pre><code class="language-c">// 申请内存
+size_t envs_size = ROUNDUP(NENV * sizeof(struct Env), PGSIZE);
+envs = (struct Env *) boot_alloc(envs_size);
+memset(envs, 0, envs_size);
+
+// ...
+
+// 在虚拟地址 UPAGES 处映射 'pages' 数组
+boot_map_region(kern_pgdir, UENVS, envs_size, PADDR(envs), PTE_U | PTE_P);
+</code></pre>
+<p>总的来说，将 'envs' 数组映射到 UENVS 处，是为了让用户程序能够访问到进程的信息，同时防止用户程序修改这些信息，保证系统的稳定性和安全性。</p>
+<p>下面是 UENVS 在虚拟内存中的具体位置。</p>
+<pre><code>   UVPT      ----&gt;  +------------------------------+ 0xef400000
+                    |          RO PAGES            | R-/R-  PTSIZE
+   UPAGES    ----&gt;  +------------------------------+ 0xef000000
+                    |           RO ENVS            | R-/R-  PTSIZE
+UTOP,UENVS ------&gt;  +------------------------------+ 0xeec00000
+UXSTACKTOP -/       |     User Exception Stack     | RW/RW  PGSIZE
+                    +------------------------------+ 0xeebff000
+                    |       Empty Memory (*)       | --/--  PGSIZE
+   USTACKTOP  ---&gt;  +------------------------------+ 0xeebfe000
+</code></pre>
+<p><code>UXSTACKTOP</code>：这是用户异常栈的顶部。当用户模式的代码触发异常时，处理器会切换到这个栈。</p>
+<p>这些地址的定义对于操作系统来说非常重要，因为它们定义了用户空间的内存布局和权限。例如，<code>UVPT</code>、<code>UPAGES</code> 和 <code>UENVS</code> 都是只读的，这意味着用户程序不能修改这些区域的内容，但可以读取它们。这有助于保护操作系统的关键数据结构不被恶意或错误的用户程序修改。</p>
+<h3 id="初始化进程"><a class="header" href="#初始化进程">初始化进程</a></h3>
+<p>接下来会初始化进程数组 'envs' 中的状态，下面是具体的初始化代码：</p>
+<pre><code class="language-c">void
+env_init(void)
+{
+	int i;
+	for (i = NENV - 1; i &gt;= 0; --i) {
+		envs[i].env_id = 0;
+		envs[i].env_status = ENV_FREE;
+		envs[i].env_link = env_free_list;
+		env_free_list = &amp;envs[i];
+	}
+
+	// Per-CPU part of the initialization
+	env_init_percpu();
+}
+</code></pre>
+<p>这段代码的功能是初始化进程数组 <code>envs</code>。在操作系统中，这段代码的主要任务是将所有进程标记为自由（即未被使用），并将它们插入到自由进程列表 <code>env_free_list</code> 中。</p>
+<p>代码首先定义了一个整数 <code>i</code>，然后使用一个倒序的循环遍历 <code>envs</code> 数组。对于数组中的每个进程，它将进程的 <code>env_id</code> 设置为 0，将进程的状态 <code>env_status</code> 设置为 <code>ENV_FREE</code>，然后将进程的 <code>env_link</code> 设置为当前的 <code>env_free_list</code>。然后，它将 <code>env_free_list</code> 更新为当前进程。这样，<code>env_free_list</code> 就成为了一个链表，链表中的每个元素都是一个自由的进程，链表的顺序与 <code>envs</code> 数组中的顺序相同。</p>
+<p>最后，代码调用 <code>env_init_percpu</code> 函数来完成每个 CPU 的进程初始化。这是因为在多处理器系统中，每个处理器都有自己的当前进程。</p>
+<p>总的来说，这段代码的目的是为操作系统创建和初始化一个进程池，操作系统可以从这个进程池中分配新的进程来运行新的进程或线程。</p>
+<h3 id="进程相关的虚拟内存设置"><a class="header" href="#进程相关的虚拟内存设置">进程相关的虚拟内存设置</a></h3>
+<p>在操作系统中，每个进程都有自己的虚拟地址空间，这个地址空间被分为用户空间和内核空间两部分。用户空间是每个进程独有的，用于存放进程的代码、数据和堆栈等。而内核空间则是所有进程共享的，主要用于存放内核代码和数据，以及为内核模式下的执行提供运行进程。</p>
+<p>内核空间对所有进程是共享的，主要有以下几个原因：</p>
+<ol>
+<li>
+<p>提高效率：如果每个进程都有自己的内核空间，那么在进程切换时，除了要保存和恢复用户空间的状态，还需要保存和恢复内核空间的状态，这将大大增加进程切换的开销。而如果内核空间是共享的，那么在进程切换时，就无需切换内核空间，从而可以提高效率。</p>
+</li>
+<li>
+<p>方便通信：内核空间是所有进程共享的，这意味着一个进程可以通过在内核空间中留下信息，来与其他进程或者内核进行通信。</p>
+</li>
+<li>
+<p>简化设计：如果内核空间对每个进程都不同，那么内核就需要处理更多的复杂情况，比如说，当一个进程在用户模式下运行时，它可能需要访问的内核空间是一个版本，而当它在内核模式下运行时，可能需要访问的内核空间又是另一个版本。这将大大增加设计和实现的复杂性。</p>
+</li>
+</ol>
+<p>因此，为了提高效率、方便通信以及简化设计，操作系统通常会选择让所有进程共享内核空间。</p>
+<p>下面的代码实现为每个进程申请对应的虚拟内存，并且设置了共享内核空间。</p>
+<pre><code class="language-c">static int
+env_setup_vm(struct Env *e)
+{
+	int i;
+	struct PageInfo *p = NULL;
+
+	// Allocate a page for the page directory
+	if (!(p = page_alloc(ALLOC_ZERO)))
+		return -E_NO_MEM;
+
+	// 现在，设置 e-&gt;env_pgdir 并初始化页目录。
+	e-&gt;env_pgdir = (pde_t *)page2kva(p);
+
+	// 增加页目录的引用计数 p-&gt;pp_ref++;
+	p-&gt;pp_ref++;
+
+	// 复制内核的地址空间
+	memcpy(e-&gt;env_pgdir, kern_pgdir, PGSIZE);
+
+	// UVPT 将 env 的自己的页表映射为只读。
+	// 权限: kernel R, user R
+	e-&gt;env_pgdir[PDX(UVPT)] = PADDR(e-&gt;env_pgdir) | PTE_P | PTE_U;
+
+	return 0;
+}
+</code></pre>
+<p>这段代码的目的是为新的进程设置和初始化其虚拟内存布局。以下是每个步骤的详细解释：</p>
+<ol>
+<li>
+<p>分配一个页面用于页目录：在 x86 架构中，页目录是用于管理虚拟内存到物理内存映射的数据结构。每个进程都需要有自己的页目录。</p>
+</li>
+<li>
+<p>设置 <code>e-&gt;env_pgdir</code> 并初始化页目录：<code>e-&gt;env_pgdir</code> 是指向页目录的指针，这一步将其设置为新分配的页目录，并进行初始化。</p>
+</li>
+<li>
+<p>增加页目录的引用计数：这是为了防止在还有进程使用该页目录时被错误地释放。</p>
+</li>
+<li>
+<p>复制内核的地址空间到新进程的页目录中：这是因为在用户空间和内核空间中，内核空间是共享的，每个进程的页目录中的内核部分都是一样的。</p>
+</li>
+<li>
+<p>设置 <code>UVPT</code> 映射进程自己的页表为只读：<code>UVPT</code> 是一个特殊的虚拟地址，在用户空间的顶部，使得进程可以读取自己的页表。这是为了让进程能够查看和修改自己的内存布局，但是为了安全，它是只读的。</p>
+</li>
+</ol>
+<p>总的来说，这段代码的目的是创建和初始化一个新的进程的虚拟内存布局。</p>
+<h3 id="如何创建进程"><a class="header" href="#如何创建进程">如何创建进程？</a></h3>
+<p>接下来讲解如何创建一个进程，下面的这段代码是在操作系统内核中创建一个新的进程的函数。函数的输入参数是一个二进制文件和一个进程类型。</p>
+<pre><code class="language-c">//
+// 使用 env_alloc 分配一个新的进程，
+// 使用 load_icode 将指定的 elf 二进制文件加载到其中，并设置其 env_type。
+// 此函数仅在内核初始化期间调用，运行第一个用户模式进程之前。
+// 新进程的父 ID 设置为 0。
+//
+void
+env_create(uint8_t *binary, enum EnvType type)
+{
+	struct Env *newenv;
+	int ret;
+
+	// 分配一个新的进程
+	ret = env_alloc(&amp;newenv, 0);
+	if (ret &lt; 0) {
+		panic("env_create: env_alloc failed");
+	}
+
+	// 加载 ELF 二进制文件到新进程中
+	load_icode(newenv, binary);
+
+	// 设置进程类型
+	newenv-&gt;env_type = type;
+
+	// 如果新进程的类型是用户进程，那么将其设置为可运行状态
+	if (newenv-&gt;env_type == ENV_TYPE_USER) {
+		newenv-&gt;env_status = ENV_RUNNABLE;
+	}
+}
+</code></pre>
+<ol>
+<li>
+<p>首先，函数定义了一个新的进程变量 <code>newenv</code> 和一个返回值 <code>ret</code>。</p>
+</li>
+<li>
+<p>然后，函数调用 <code>env_alloc</code> 函数来分配一个新的进程。<code>env_alloc</code> 的输入参数是新进程的父进程的 ID，这里设置为 0，表示这个新进程没有父进程。如果 <code>env_alloc</code> 函数返回值小于 0，表示进程分配失败，函数将会 panic 并输出错误信息。</p>
+</li>
+<li>
+<p>如果进程分配成功，函数将调用 <code>load_icode</code> 函数来加载 ELF 二进制文件到新进程中。ELF 二进制文件通常是一个可执行程序，<code>load_icode</code> 函数将会把这个程序加载到新进程的地址空间中。</p>
+</li>
+<li>
+<p>加载完二进制文件后，函数将设置新进程的类型。进程类型是一个枚举类型，可能的值包括用户进程、内核进程等。</p>
+</li>
+<li>
+<p>最后，如果新进程的类型是用户进程，那么将其状态设置为可运行状态。这表示操作系统可以开始调度这个进程运行了。</p>
+</li>
+</ol>
+<p>这个函数是操作系统创建新进程或线程的关键步骤，它将一个程序加载到新的进程中，并设置好进程的状态，使得操作系统可以开始运行这个程序。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>本文介绍了进程的概念、表示和创建过程，通过具体的代码例子使读者更好地理解操作系统中进程的实现。接下来讲解如何将程序加载到虚拟内存中。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../os/kern/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../os/user/process-load.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../os/kern/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../os/user/process-load.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/user/process-mem.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>C/C++ 发展历史 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../cpp/basic/cpp-iso.html" class="active"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/cpp/basic/cpp-iso.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>这篇文章主要讲述了汇编语言、B语言、C语言和C++语言的历史、特性、应用领域以及它们的优缺点。</p>
+<h3 id="汇编语言"><a class="header" href="#汇编语言">汇编语言</a></h3>
+<p>在汇编语言出现之前，人们主要使用机器语言进行编程。机器语言是一种低级语言，直接由计算机硬件执行，它由二进制代码组成，对人类来说非常难以理解和编写。</p>
+<p>例如，一个简单的机器语言指令可能看起来像这样：</p>
+<pre><code>10110000 01100001
+</code></pre>
+<p>这个指令可能代表将数字97（01100001）加载到寄存器中。但是，对于人类来说，这样的代码非常难以理解和编写。</p>
+<p>汇编语言是一种稍微高级一点的语言，它使用了一些人类可读的符号来代替机器语言的二进制代码。例如，上面的机器语言指令在汇编语言中可能看起来像这样：</p>
+<pre><code>MOV AL, 61h
+</code></pre>
+<p>这个指令的意思是将十六进制数61（等于十进制的97）加载到寄存器AL中。相比于机器语言，汇编语言更容易理解和编写。</p>
+<p>然而，尽管汇编语言比机器语言更易于理解和编写，但它仍然存在一些问题：</p>
+<ol>
+<li>编程效率低：汇编语言的指令非常简单，因此完成复杂任务需要大量的代码。这使得编程效率非常低。</li>
+<li>可读性差：尽管汇编语言使用了一些人类可读的符号，但它仍然非常难以理解。除非你非常熟悉汇编语言，否则你可能很难理解一个汇编程序的功能。</li>
+<li>可移植性差：汇编语言是一种低级语言，它直接与特定的硬件架构相关。这意味着一个为特定硬件编写的汇编程序可能无法在其他硬件上运行。</li>
+<li>缺乏高级语言的特性：汇编语言缺乏高级语言的许多特性，如函数、对象和异常处理等。这使得用汇编语言编程更加困难。</li>
+</ol>
+<h3 id="b-语言"><a class="header" href="#b-语言">B 语言</a></h3>
+<p>1969年，Dennis M. Ritchie和Ken Thompson在AT&amp;T的贝尔实验室开始开发一个新的操作系统，这个操作系统被命名为UNIX。这个操作系统的目标是能够供一千个用户同时使用，这在当时是一项非常雄心勃勃的目标。</p>
+<p>在UNIX的早期版本中，整个系统都是用汇编语言编写的。汇编语言是一种非常低级的编程语言，它直接操作硬件，没有任何抽象层。这使得编写和维护代码非常困难，因为程序员需要对硬件有深入的理解，并且需要手动管理所有的内存和资源。</p>
+<p>为了提高开发效率，UNIX系统中引入了Fortran和B语言的解释器。Fortran是一种早期的高级编程语言，主要用于科学计算。B语言是一种更通用的高级编程语言，它是C语言的直接前身。</p>
+<p>B语言的引入使得UNIX的开发变得更加高效。使用B语言，程序员可以用几行代码完成以前需要写很多汇编代码才能完成的任务。然而，B语言也有一些限制。它不支持数据类型，所有的值都是机器字（machine word）。这意味着程序员需要手动管理内存，并且不能利用编译器进行类型检查。此外，B语言也不支持结构（structure），这是一种可以将多个相关的值组合在一起的数据结构。"机器字"是指计算机硬件一次操作的数据的位数。例如，如果你的计算机是32位的，那么它的机器字就是32位。这意味着计算机一次可以操作32位的数据。</p>
+<p>在B语言中，所有的值都是机器字，这意味着所有的数据都是相同的大小，并且没有数据类型。例如，你不能在B语言中声明一个整数或一个浮点数，你只能声明一个机器字。这个机器字可以代表任何类型的数据，取决于你如何使用它。</p>
+<p>例如，你可能有一个机器字，你可以将它视为一个整数，如下所示：</p>
+<pre><code>x = 1234;
+</code></pre>
+<p>你也可以将同一个机器字视为一个布尔值，如下所示：</p>
+<pre><code>x = true;
+</code></pre>
+<p>在这两个例子中，<code>x</code>都是一个机器字，但是它代表的数据类型（整数或布尔值）完全取决于你如何使用它。这就是B语言中没有数据类型的含义。</p>
+<h3 id="c-语言"><a class="header" href="#c-语言">C 语言</a></h3>
+<p>C语言的出现解决了B语言的一些限制。C语言在B语言的基础上添加了数据类型和结构，使得代码更加易于理解和维护。C语言的开发工作在1970年代进行，1988年，他们提供了最终的标准定义ANSI C。</p>
+<p>在C语言中，我们可以声明不同的数据类型，如整数（int）、浮点数（float）、字符（char）等。这使得程序员可以更清楚地知道每个变量的类型，从而更好地管理内存和资源。例如，我们可以在C语言中声明一个整数和一个浮点数，如下所示：</p>
+<pre><code class="language-c">int a = 10;
+float b = 20.5;
+</code></pre>
+<p>在这个例子中，<code>a</code>是一个整数，<code>b</code>是一个浮点数。编译器会检查我们是否正确地使用了这些变量。例如，如果我们试图将一个字符串赋值给<code>a</code>，编译器会报错，因为<code>a</code>是一个整数，不能接受字符串。</p>
+<p>此外，C语言还引入了结构（structure），这是一种可以将多个相关的值组合在一起的数据结构。例如，我们可以定义一个名为<code>Person</code>的结构，它包含一个字符串（用于存储姓名）和一个整数（用于存储年龄）：</p>
+<pre><code class="language-c">struct Person {
+    char name[50];
+    int age;
+};
+</code></pre>
+<p>然后，我们可以创建一个<code>Person</code>结构的实例，并给它的字段赋值：</p>
+<pre><code class="language-c">struct Person p;
+strcpy(p.name, "Alice");
+p.age = 20;
+</code></pre>
+<p>C语言的应用领域非常广泛，其中包括操作系统、嵌入式系统、电脑游戏等。C语言的强大功能和灵活性使其成为了许多重要软件项目的首选语言。C语言的出现也推动了计算机科学的发展，许多现代的编程语言，如C++、Java和Python，都受到了C语言的影响。</p>
+<p>UNIX操作系统就是一个很好的例子。UNIX是由AT&amp;T的贝尔实验室在20世纪70年代开发的。在最初的版本中，UNIX是用汇编语言编写的。然而，随着系统的复杂性增加，汇编语言的低级特性使得开发和维护变得越来越困难。为了解决这个问题，Dennis M. Ritchie开发了C语言，并用它重写了UNIX操作系统。这使得UNIX的代码变得更加易于理解和维护，同时也使得UNIX可以在不同的硬件平台上运行。</p>
+<p>电脑游戏也是C语言应用的一个重要领域。在20世纪80年代，电脑游戏开始流行起来。许多经典的电脑游戏，如《星球大战》的特效，都是用C语言编写的。C语言的高效性和对硬件的直接控制使得它非常适合用于电脑游戏的开发。例如，游戏开发者可以使用C语言直接操作图形硬件，以实现复杂的图形效果。</p>
+<p>总的来说，C语言的历史和它的应用领域紧密相连。C语言的出现极大地推动了计算机科学的发展，并且它的应用领域仍在不断扩大。</p>
+<h3 id="c"><a class="header" href="#c">C++</a></h3>
+<p>C++编程语言，最初被命名为“带类的C”，是由AT&amp;T的贝尔实验室的员工Bjarne Stroustrup设计的。C++的设计初衷是在C语言的基础上增加面向对象的特性，以便更好地支持抽象和复用。</p>
+<p>Bjarne Stroustrup从1979年开始研究C with Classes。这个项目的目标是在C语言的基础上添加类的概念，从而支持面向对象编程。面向对象编程是一种编程范式，它通过将数据和操作数据的函数封装在一起，以创建可重用的软件组件，从而提高软件的可维护性和可复用性。</p>
+<p>在C++的名字中，“++”是C语言的操作符，用于增加变量的值。这个名字象征着C++是C语言的一个增强版，它在C语言的基础上添加了新的特性。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/842912/1710234939327-b119ef80-aded-4820-a6e5-e2dd1bf757f5.png#averageHue=%23f1eeec&amp;clientId=u3c25fbd8-468b-4&amp;from=paste&amp;height=320&amp;id=uc116606d&amp;originHeight=640&amp;originWidth=1370&amp;originalType=binary&amp;ratio=2&amp;rotation=0&amp;showTitle=true&amp;size=395389&amp;status=done&amp;style=none&amp;taskId=u094bc070-ea20-4518-be40-844e8fe14ba&amp;title=C%2FC%2B%2B%20%E7%9A%84%E8%BF%9B%E5%8C%96%E8%BF%87%E7%A8%8B&amp;width=685" alt="C/C++ 的进化过程" title="C/C++ 的进化过程" /></p>
+<p>C++语言的第一个商业版本发布于1985年10月。这个版本包含了许多新的特性，包括类、虚函数、运算符重载和模板等。这些特性使得C++成为一种非常强大的编程语言，它既可以进行低级的系统编程，也可以进行高级的面向对象编程。</p>
+<p>自从1985年发布以来，C++已经经历了多次重大的更新，包括C++98、C++03、C++11、C++14、C++17和C++20等。这些更新进一步增强了C++的功能，使其成为了现代软件开发的重要工具。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/842912/1710234974035-0528bd41-e1cc-4795-ad0f-cbbb56f81fe3.png#averageHue=%23f5f5f4&amp;clientId=u3c25fbd8-468b-4&amp;from=paste&amp;height=597&amp;id=u48b1ff4c&amp;originHeight=1194&amp;originWidth=1288&amp;originalType=binary&amp;ratio=2&amp;rotation=0&amp;showTitle=true&amp;size=474009&amp;status=done&amp;style=none&amp;taskId=ucf94eb0e-e3f1-4194-8401-b053beabdfb&amp;title=C%2B%2B%20%E7%89%88%E6%9C%AC%E5%8F%98%E8%BF%81&amp;width=644" alt="C++ 版本变迁" title="C++ 版本变迁" /></p>
+<h3 id="c-的应用"><a class="header" href="#c-的应用">C++ 的应用</a></h3>
+<p>C++是一种广泛使用的编程语言，全球可能有超过2000亿行的C/C++代码。C++的主要特点是性能优越，没有其他编程语言能提供C++的性能关键设施。C++为程序员提供了对性能每个方面的控制，没有留给低级语言的空间。</p>
+<p>C++的普遍性也是其优势之一，它可以在各种环境中运行，从低功耗的嵌入式设备到大规模的超级计算机。C++支持多种编程范式，包括面向对象编程和泛型编程，这使得程序员可以编写高效的代码而不失高级抽象。</p>
+<p>C++还允许编写低级代码，如驱动程序、内核和汇编等。C++有一个丰富的生态系统，包括许多支持工具，如调试器、内存检查器、覆盖工具、静态分析工具和性能分析工具等。</p>
+<p>C++有40年的历史，许多软件问题已经得到解决，开发实践已经得到研究。C++被广泛用于各种应用领域，包括操作系统（如Windows、Android、OS X和Linux）、编译器（如LLVM和Swift编译器）、人工智能（如TensorFlow、Caffe和Microsoft Cognitive Toolkit）、图像编辑（如Adobe Premier、Photoshop和Illustrator）、网页浏览器（如Firefox和Chrome）、高性能计算、嵌入式系统、科学计算、数据库、视频游戏、娱乐、金融等。</p>
+<p>例如，NASA的火星无人机的飞行代码和<strong>Webb</strong>望远镜的软件主要是用C++编写的。Google和Microsoft也使用C++进行网页索引。这些都充分证明了C++的强大和广泛应用。</p>
+<h3 id="c-设计哲学"><a class="header" href="#c-设计哲学">C++ 设计哲学</a></h3>
+<p>C++哲学的一个重要方面是性能。在C++中，性能被视为至关重要的，除非作为最后的手段，否则不应牺牲性能。这就是所谓的“零开销原则”或“零成本抽象”。</p>
+<p>零开销原则是指，如果你有一个抽象，它不应该比写等效的低级代码花费更多。换句话说，使用抽象不应该导致性能的损失。例如，如果你有一个矩阵乘法的抽象，它应该被写成这样，你不能降低到C级别的抽象并使用数组和指针等运行得更快。这意味着，使用C++的抽象结构（如类和模板）编写的代码，其性能应该与使用C语言的低级结构（如数组和指针）编写的等效代码相当。</p>
+<p>这个原则是由C++的创造者Bjarne Stroustrup提出的，他强调，C++的设计目标是提供高级的抽象，同时保持与C语言相当的性能。这使得C++成为一种非常强大的编程语言，既可以进行低级的系统编程，也可以进行高级的面向对象编程。</p>
+<p>C++是一种静态类型语言，这意味着类型检查在编译时进行，而不是在运行时。这是C++哲学的一个重要方面，即尽可能在编译时强制安全。C++编译器提供类型安全，并在编译时捕获许多错误，而不是运行时。这对许多商业应用来说是关键的考虑因素，因为它可以在代码运行之前发现并修复错误，从而提高代码的质量和可靠性。</p>
+<p>类型注解使代码更易读，因为它们提供了关于变量和函数期望的输入和输出的信息。这也有助于编译器优化和提高运行时效率，因为编译器可以根据类型信息生成更有效的代码。</p>
+<p>C++还允许用户定义自己的类型系统，这是通过类和结构体实现的。这使得程序员可以创建复杂的数据结构，以满足特定应用的需求。</p>
+<p>C++的编程模型强调隔离，只有当它们解决实际问题时才添加特性，并允许完全控制。这意味着C++提供了一种机制，允许程序员只使用他们需要的特性，而不是强制使用所有的特性。</p>
+<p>C++设计为可预测的运行时，没有垃圾收集器，没有动态类型系统，这使得它非常适合实时系统。这是因为垃圾收集和动态类型系统可能会引入运行时的不确定性，这在需要快速响应的系统中是不可接受的。</p>
+<p>C++还设计为低资源消耗，包括低内存和能耗，这使得它非常适合受限的硬件平台，如嵌入式系统。</p>
+<p>C++非常适合静态分析，这是因为它的静态类型系统和明确的语义使得工具可以在代码运行之前分析代码的行为。这对于安全关键的软件非常重要，因为它可以帮助发现和修复潜在的安全问题。</p>
+<p>最后，C++的可移植性是其主要优势之一。现代C++标准具有高度的可移植性，这意味着用C++编写的代码可以在多种不同的硬件和操作系统上运行，只需很少或不需要修改。</p>
+<h3 id="c-适合谁"><a class="header" href="#c-适合谁">C++ 适合谁？</a></h3>
+<p>C++是一种非常强大的编程语言，它被设计为那些想要非常好地使用硬件并通过抽象来管理这种复杂性的人。这意味着，C++适合那些需要直接控制硬件，如内存和处理器的程序员。这包括系统编程，如操作系统和数据库，以及需要高性能的应用，如游戏和实时系统。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/842912/1710236322353-3b336d81-4136-4a4c-afb2-06e743dc28ff.png#averageHue=%23fbfbfa&amp;clientId=u3c25fbd8-468b-4&amp;from=paste&amp;height=437&amp;id=ucd2db3e8&amp;originHeight=874&amp;originWidth=1682&amp;originalType=binary&amp;ratio=2&amp;rotation=0&amp;showTitle=true&amp;size=1138119&amp;status=done&amp;style=none&amp;taskId=u81857f77-f123-4b12-a031-cc6b93962ff&amp;title=%E8%B4%B9%E6%9B%BC&amp;width=841" alt="费曼" title="费曼" />
+然而，C++并不适合每个人。C++是一种复杂的语言，它提供了许多强大的特性，但是使用这些特性需要深入的理解和精确的控制。因此，C++被视为专业人士的锐利和有效的工具，基本上肯定是为那些追求某种精确度的人设计的。这包括专业的系统程序员，以及那些需要编写高性能代码的开发者。</p>
+<h3 id="c-的缺点"><a class="header" href="#c-的缺点">C++ 的缺点</a></h3>
+<p>Bjarne Stroustrup，C++之父，用一个比喻来形容C++的困难性：“C使得你很容易射中自己的脚；C++使得这更难，但是当你这样做时，它会炸掉你的整条腿”。</p>
+<p>Perl语言的创造者Larry Wall也指出，C++的一个问题是它要求你在做任何事情之前必须知道一切。这是因为C++有许多复杂的特性和规则，如果不完全理解这些特性和规则，就很容易犯错误。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/842912/1710236331998-0025044a-7e6d-47a5-9e44-b0958dcf462b.png#averageHue=%2328373b&amp;clientId=u3c25fbd8-468b-4&amp;from=paste&amp;height=351&amp;id=u7b9a21e2&amp;originHeight=702&amp;originWidth=1616&amp;originalType=binary&amp;ratio=2&amp;rotation=0&amp;showTitle=true&amp;size=110974&amp;status=done&amp;style=none&amp;taskId=u1295f1fc-c7e0-4046-9243-6b2facfd90a&amp;title=C%E8%AF%AD%E8%A8%80%E4%B9%8B%E7%88%B6&amp;width=808" alt="C语言之父" title="C语言之父" />
+魁北克大学的教授Daniel Lemire也分享了他的经验，即即使有20年的C++经验，但当他第一次编译一个非平凡的代码块时，如果没有任何错误或警告，他也会感到怀疑。这是因为C++的复杂性使得在没有错误或警告的情况下编译通过的代码可能仍然存在潜在的问题。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>汇编语言是一种低级语言，直接由计算机硬件执行，对人类来说非常难以理解和编写。B语言是一种更通用的高级编程语言，它是C语言的直接前身。C语言在B语言的基础上添加了数据类型和结构，使得代码更加易于理解和维护。C++在C语言的基础上增加了面向对象的特性，以便更好地支持抽象和复用。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../cpp/basic/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../cpp/basic/paradigm.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../cpp/basic/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../cpp/basic/paradigm.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "cpp/basic/cpp-iso.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

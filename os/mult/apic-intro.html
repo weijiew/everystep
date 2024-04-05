@@ -1,0 +1,422 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>多核 OS 初始化细节 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item expanded "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../os/mult/apic-intro.html" class="active"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/mult/apic-intro.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>本文主要讲解了在多处理器系统中，如何通过对称多处理（SMP）和高级可编程中断控制器（APIC）来实现处理器的并行运行。</p>
+<h3 id="什么是-smp"><a class="header" href="#什么是-smp">什么是 SMP？</a></h3>
+<p>"对称多处理"（SMP）是一种多处理器模型，其中所有的处理器（CPU）对系统资源（如内存和 I/O 总线）具有等效的访问权限。这意味着每个处理器都可以独立地访问任何内存或 I/O 设备。这种模型的优点是它可以提供良好的性能扩展性，因为增加更多的处理器可以直接增加系统的处理能力。</p>
+<p>在 SMP 系统中，综上，第一个启动的 CPU 是 BSP，后续启动的 CPU 是 AP 。下面是两种类型处理器的详细区别：</p>
+<ol>
+<li>
+<p>引导程序处理器（Bootstrap Processor，简称 BSP）：BSP 是在系统启动时负责初始化系统和引导操作系统的处理器。它<strong>首先启动</strong>，注意是第一个启动的 CPU，并执行所有的系统初始化任务，包括初始化内存控制器、I/O 子系统等。然后，它加载并启动操作系统。一旦操作系统启动并运行，BSP 就可以像系统中的其他处理器一样执行常规的计算任务。</p>
+</li>
+<li>
+<p>应用程序处理器（Application Processor，简称 AP）：AP 是在操作系统启动并运行后由 BSP 激活的处理器。一旦被激活，AP 就可以执行常规的计算任务。在多处理器系统中，可以有多个 AP。</p>
+</li>
+</ol>
+<p>在系统启动过程中，哪个处理器作为 BSP 是由硬件和 BIOS 决定的。在这个过程完成后，所有的处理器在功能上都是相同的，都可以执行用户级和内核级的代码。</p>
+<h3 id="什么是-apic"><a class="header" href="#什么是-apic">什么是 APIC？</a></h3>
+<p>APIC 解决了在多处理器系统中分发和处理中断的问题。在没有 APIC 的系统中，所有的中断都会发送到一个中央处理器，这可能会导致处理器过载。通过使用 APIC，每个处理器都可以处理自己的中断，从而提高了系统的整体性能。</p>
+<p>APIC（高级可编程中断控制器）是一种硬件设备，用于管理和控制中断。在一个对称多处理（SMP）系统中，每个 CPU 都有一个相应的本地 APIC（LAPIC）单元。本地 APIC 可以接收来自 I/O APIC 的中断，并将其传递给处理器。此外，本地 APIC 还可以发送和接收来自其他本地 APIC 的中断，这使得处理器之间可以相互通信。</p>
+<h3 id="参数读取细节"><a class="header" href="#参数读取细节">参数读取细节</a></h3>
+<p>当 CPU 执行到 i386_init 时会执行 mp_init 将读取到的参数绑定到结构体上，随后执行 lapic_init 初始化 APIC 。</p>
+<pre><code class="language-c">void
+i386_init(void)
+{
+    // ...
+	mp_init();
+	lapic_init();
+    // ...
+}
+</code></pre>
+<p>参数是 Intel 多处理器规范的一部分，用于描述系统的硬件配置，包括处理器、总线、I/O APIC 等的信息。<code>mp_init()</code> 函数读取的数据主要来自多处理器配置表，这个配置表由 BIOS 在系统启动时生成，并存储在内存中的特定位置。</p>
+<p>在启动应用程序处理器（APs）之前，引导服务处理器（BSP）应首先收集关于多处理器系统的信息，例如 CPU 的总数、它们的 APIC ID 以及 LAPIC 单元的 MMIO 地址。</p>
+<p><code>mp_init()</code>函数（在<code>kern/mpconfig.c</code>中）通过读取位于 BIOS 内存区域的 MP 配置表来获取这些信息。接下来讲解 <code>mp_init()</code> 是如何获取参数的。</p>
+<p>在 <code>mp_init()</code> 中会先执行 <code>bootcpu = &amp;cpus[0];</code>，这行代码的作用是将 <code>bootcpu</code> 指针指向 <code>cpus</code> 数组的第一个元素。将 <code>bootcpu</code> 指向系统中的第一个 CPU，即 BSP。这样，我们就可以通过 <code>bootcpu</code> 指针来访问和操作 BSP 的信息。<code>bootcpu</code> 是一个全局变量，即 <code>struct CpuInfo *bootcpu;</code>，是用来指向启动 CPU（Bootstrap Processor，简称 BSP）的信息的。</p>
+<p>因此，<code>bootcpu</code> 通常被用来在初始化过程中访问和操作 BSP 的信息。<code>cpus</code> 是一个 <code>CpuInfo</code> 结构体数组，用于存储系统中所有 CPU 的信息。<code>CpuInfo</code> 结构体包含了关于 CPU 的信息，例如 CPU 的 ID，状态等。</p>
+<p>接下来 <code>mp_init</code> 函数中遍历了多处理器配置表中的每个处理器条目，并为每个处理器设置了相应的 <code>CpuInfo</code> 结构。具体来说，它将每个处理器的 ID 设置为其在 <code>cpus</code> 数组中的索引，并将 <code>cpu_status</code> 设置为 <code>CPU_STARTED</code>。如果处理器是引导处理器（BSP），则 <code>bootcpu</code> 指针会被设置为指向该处理器的 <code>CpuInfo</code> 结构。</p>
+<h3 id="apic-是如何初始化的"><a class="header" href="#apic-是如何初始化的">APIC 是如何初始化的？</a></h3>
+<p><code>lapic_init</code> 主要是初始化和配置本地高级可编程中断控制器（Local APIC）。首先，它会检查并映射 Local APIC 的物理地址，然后启用 Local APIC 并设置伪中断。接着，它会初始化和配置 Local APIC 的定时器，以便执行定时任务。此外，它还会根据处理器的类型和支持的功能，进行一些特定的配置，如禁用某些中断，清除错误状态寄存器，确认未处理的中断，以及在 APIC 上启用中断等。</p>
+<h3 id="local-apic-如何设置虚拟内存"><a class="header" href="#local-apic-如何设置虚拟内存">Local APIC 如何设置虚拟内存？</a></h3>
+<p>首先将 LAPIC（本地高级可编程中断控制器）的物理内存映射到虚拟内存中，以便我们可以在代码中访问它。</p>
+<pre><code class="language-cpp">lapic = mmio_map_region(lapicaddr, 4096);
+</code></pre>
+<p><code>lapicaddr</code> 是 LAPIC 的物理地址，它是在系统启动时由 BIOS 设置的。LAPIC 是一个硬件设备，它的寄存器是映射在物理内存中的。为了在代码中访问这些寄存器，我们需要将它们映射到虚拟内存中。</p>
+<p><code>mmio_map_region</code> 是一个函数，它的作用是将物理内存映射到虚拟内存中。这个函数接受两个参数：要映射的物理地址和映射的大小。在这个例子中，我们要映射的是 LAPIC 的物理地址，大小是 4096 字节（4KB）。这是因为 LAPIC 的寄存器是在一个 4KB 的内存区域中。</p>
+<p>这段代码的结果是，<code>lapic</code> 变量现在指向一个虚拟地址，这个虚拟地址映射到了 LAPIC 的物理地址。这样，我们就可以通过 <code>lapic</code> 变量来访问 LAPIC 的寄存器了。</p>
+<p>这是做因为在现代操作系统中，我们通常使用虚拟内存来访问内存。虚拟内存为我们提供了一种抽象，使我们可以像操作连续的内存一样操作物理内存，即使物理内存可能是分散的。此外，虚拟内存还提供了一种保护机制，使我们可以控制哪些内存区域可以被访问，以及如何访问。因此，我们需要将 LAPIC 的物理内存映射到虚拟内存中，以便我们可以在代码中访问它。</p>
+<h3 id="内存映射-iommio"><a class="header" href="#内存映射-iommio">内存映射 I/O（MMIO）</a></h3>
+<p>内存映射 I/O（MMIO）是一种允许 CPU 和设备进行通信的机制。在这种机制中，设备的寄存器被映射到系统的地址空间，CPU 可以通过读写这些地址来控制设备。MMIO 区域的起始地址是<code>MMIOBASE</code>，结束地址是<code>MMIOLIM</code>。这个区域的大小是<code>PTSIZE</code>。</p>
+<p>这个区域的权限是读写（RW）对于内核，对于用户空间是不可访问的（--）。这是因为设备通常只允许内核进行直接操作，用户程序通常需要通过系统调用来间接操作设备。</p>
+<p>在这个区域中，设备的寄存器被映射到虚拟地址，CPU 可以通过读写这些虚拟地址来读取设备的状态或者发送命令给设备。这种方式比传统的 I/O 端口访问方式更灵活，因为它可以直接利用 CPU 的地址空间，不需要额外的 I/O 指令和 I/O 地址空间。</p>
+<pre><code>                     :              .               :                   |
+                     :              .               :                   |
+    MMIOLIM ------&gt;  +------------------------------+ 0xefc00000      --+
+                     |       Memory-mapped I/O      | RW/--  PTSIZE
+ ULIM, MMIOBASE --&gt;  +------------------------------+ 0xef800000
+                     |  Cur. Page Table (User R-)   | R-/R-  PTSIZE
+    UVPT      ----&gt;  +------------------------------+ 0xef400000
+</code></pre>
+<p>下面的代码实现了如何映射，即<code>mmio_map_region</code>函数将物理地址<code>pa</code>到<code>pa+size</code>的区域映射到这个预留的空间。这个函数返回预留区域的基址。</p>
+<pre><code class="language-c">void *
+mmio_map_region(physaddr_t pa, size_t size)
+{
+	static uintptr_t base = MMIOBASE;
+	size = ROUNDUP(pa+size, PGSIZE);
+	pa = ROUNDDOWN(pa, PGSIZE);
+	size -= pa;
+	if (base+size &gt;= MMIOLIM) panic("not enough memory");
+	boot_map_region(kern_pgdir, base, size, pa, PTE_PCD|PTE_PWT|PTE_W);
+	base += size;
+ 	return (void*) (base - size);
+}
+</code></pre>
+<h3 id="ap-引导过程"><a class="header" href="#ap-引导过程">AP 引导过程</a></h3>
+<p>在系统启动时，BSP 负责初始化系统，然后启动其他的应用程序处理器（Application Processor，简称 AP）。第一个启动的 CPU 是 BSP，后续启动的 CPU 是 AP 。之前已经提及了，此处再强调一下。</p>
+<p>在 AP 的引导过程中，BSP 会将 AP 的引导代码复制到一个特定的物理地址，这个地址是 <code>MPENTRY_PADDR</code>。下面是代码复制的具体细节。</p>
+<pre><code class="language-c">extern unsigned char mpentry_start[], mpentry_end[];
+void *code;
+
+// Write entry code to unused memory at MPENTRY_PADDR
+code = KADDR(MPENTRY_PADDR);
+memmove(code, mpentry_start, mpentry_end - mpentry_start);
+</code></pre>
+<p>这段代码的目的是将 AP（Application Processor）的引导代码复制到一个特定的物理地址 <code>MPENTRY_PADDR</code>。</p>
+<ol>
+<li>
+<p><code>extern unsigned char mpentry_start[], mpentry_end[];</code> 这行代码声明了两个外部变量 <code>mpentry_start</code> 和 <code>mpentry_end</code>，它们分别表示 AP 引导代码的开始和结束位置。</p>
+</li>
+<li>
+<p><code>void *code;</code> 这行代码声明了一个指针变量 <code>code</code>，它将用于指向 <code>MPENTRY_PADDR</code> 所指向的物理地址。</p>
+</li>
+<li>
+<p><code>code = KADDR(MPENTRY_PADDR);</code> 这行代码将 <code>MPENTRY_PADDR</code> 所指向的物理地址转换为内核虚拟地址，并将结果赋值给 <code>code</code>。<code>KADDR()</code> 是一个宏，用于将物理地址转换为内核虚拟地址。</p>
+</li>
+<li>
+<p><code>memmove(code, mpentry_start, mpentry_end - mpentry_start);</code> 这行代码将 <code>mpentry_start</code> 和 <code>mpentry_end</code> 之间的内容（即 AP 引导代码）复制到 <code>code</code> 所指向的地址（即 <code>MPENTRY_PADDR</code> 所指向的物理地址）。<code>memmove()</code> 是一个标准的 C 函数，用于复制内存区域。</p>
+</li>
+</ol>
+<p>然后，BSP 通过发送启动 IPI（Inter-Processor Interrupt，处理器间中断）来启动 AP。AP 会在 <code>MPENTRY_PADDR</code> 指定的地址开始执行其引导代码。</p>
+<pre><code class="language-c">// Boot each AP one at a time
+for (c = cpus; c &lt; cpus + ncpu; c++) {
+	if (c == cpus + cpunum())  // We've started already.
+		continue;
+
+	// Tell mpentry.S what stack to use
+	mpentry_kstack = percpu_kstacks[c - cpus] + KSTKSIZE;
+	// Start the CPU at mpentry_start
+	lapic_startap(c-&gt;cpu_id, PADDR(code));
+	// Wait for the CPU to finish some basic setup in mp_main()
+	while(c-&gt;cpu_status != CPU_STARTED)
+		;
+}
+</code></pre>
+<p>遍历所有的处理器。对于每一个处理器，首先检查它是否已经启动。如果已经启动，则跳过这个处理器。否则，设置这个处理器的栈，然后通过 <code>lapic_startap</code> 函数启动这个处理器。<code>lapic_startap</code> 函数会发送一个 IPI 来启动目标处理器。</p>
+<p>在处理器启动后，会执行 <code>mpentry_start</code> 到 <code>mpentry_end</code> 之间的代码。在这段代码执行完毕后，处理器的状态会被设置为 <code>CPU_STARTED</code>。<code>boot_aps</code> 函数会等待处理器的状态变为 <code>CPU_STARTED</code>，然后继续启动下一个处理器。</p>
+<p>总的来说，这段代码通过发送 IPI 来启动非引导处理器，然后等待处理器完成初始化。这是一个典型的使用 IPI 进行处理器间同步的例子。</p>
+<h3 id="ipi-处理器间中断"><a class="header" href="#ipi-处理器间中断">IPI 处理器间中断</a></h3>
+<p>IPI，全称为 Inter-Processor Interrupt，即处理器间中断，是一种用于多处理器系统中的通信机制。在多处理器系统中，一个处理器可以通过发送 IPI 来中断另一个处理器，以便通知它执行某些任务。</p>
+<p>例如，当一个处理器改变了内存的某个部分，可能需要通知其他处理器刷新其缓存。这时，它就可以发送一个 IPI 来通知其他处理器。</p>
+<p>IPI 也可以用于实现任务调度。例如，当一个处理器过载时，操作系统可以通过发送 IPI 来通知另一个处理器接管一些任务。</p>
+<p>总的来说，IPI 是多处理器系统中处理器间同步和通信的重要机制。下面是使用 IPI 中断的具体代码。</p>
+<pre><code class="language-c">// 启动额外的处理器并运行指定地址的入口代码
+// 参见多处理器规范的附录B
+void
+lapic_startap(uint8_t apicid, uint32_t addr)
+{
+	int i;
+	uint16_t *wrv;
+
+	// "BSP必须将CMOS关机代码初始化为0AH
+	// 并将热重启向量（位于40:67的DWORD）指向
+	// AP启动代码，然后才能执行[通用启动算法]。"
+	outb(IO_RTC, 0xF);  // 偏移0xF是关机代码
+	outb(IO_RTC+1, 0x0A);
+	wrv = (uint16_t *)KADDR((0x40 &lt;&lt; 4 | 0x67));  // 热重启向量
+	wrv[0] = 0;
+	wrv[1] = addr &gt;&gt; 4;
+
+	// "通用启动算法。"
+	// 发送INIT（电平触发）中断以重置其他CPU。
+	lapicw(ICRHI, apicid &lt;&lt; 24);
+	lapicw(ICRLO, INIT | LEVEL | ASSERT);
+	microdelay(200);
+	lapicw(ICRLO, INIT | LEVEL);
+	microdelay(100);    // 应该是10ms，但在Bochs中太慢了！
+
+	// 发送启动IPI（两次！）以进入代码。
+	// 正常的硬件应该只在由于INIT而处于停止状态时接受STARTUP。
+	// 所以第二次应该会被忽略，但这是官方Intel算法的一部分。
+	// Bochs对第二次发送的STARTUP有所抱怨。对Bochs来说，这是不幸的。
+	for (i = 0; i &lt; 2; i++) {
+		lapicw(ICRHI, apicid &lt;&lt; 24);
+		lapicw(ICRLO, STARTUP | (addr &gt;&gt; 12));
+		microdelay(200);
+	}
+}
+</code></pre>
+<p>在 <code>lapic_startap</code> 函数中，用于启动其他处理器（AP）并运行指定地址的入口代码。这个过程涉及到了 IPI（Inter-Processor Interrupt，处理器间中断）。</p>
+<p>首先，函数设置了 CMOS 的关机代码和热重启向量，以指向 AP 启动代码。这是在执行通用启动算法之前必须完成的步骤。</p>
+<p>然后，函数通过发送 INIT 中断来重置其他处理器。这个中断是电平触发的，发送后会等待一段时间，然后再次发送 INIT 中断，但这次不再触发。这个过程是为了确保其他处理器已经被正确地重置。</p>
+<p>接下来，函数发送两次启动 IPI，以使处理器进入指定地址的代码。根据 Intel 的官方算法，正常的硬件只会在由于 INIT 而处于停止状态时接受 STARTUP。因此，第二次发送的 STARTUP 应该会被忽略。但是，为了遵循官方算法，这里还是发送了两次。</p>
+<p>总的来说，这段代码通过发送 IPI 来重置和启动其他处理器，然后等待处理器进入指定地址的代码。这是一个典型的使用 IPI 进行处理器间同步的例子。</p>
+<h3 id="ap-和-bsp-启动代码的差异"><a class="header" href="#ap-和-bsp-启动代码的差异">AP 和 BSP 启动代码的差异</a></h3>
+<p><code>kern/mpentry.S</code> 和 <code>boot/boot.S</code> 都是启动代码，但它们的运行环境和目标不同。<code>boot/boot.S</code> 是 BIOS 加载的第一段代码，它的目标是切换到保护模式，设置好分页，然后加载并跳转到内核。</p>
+<p>而 <code>kern/mpentry.S</code> 是在内核中用于启动其他处理器的代码。当启动其他处理器（AP）时，BIOS 会将 AP 设置为实模式，并从预设的物理地址开始执行代码。因此，我们需要将 <code>kern/mpentry.S</code> 编译为可以在物理地址运行的代码，这就是 <code>MPBOOTPHYS</code> 宏的目的。</p>
+<p><code>MPBOOTPHYS</code> 宏将 <code>kern/mpentry.S</code> 中的所有地址都转换为物理地址。这是因为在 AP 启动的早期阶段，分页还没有被设置，处理器还在实模式下运行，此时处理器只能访问物理地址。</p>
+<p><code>MPBOOTPHYS</code> 宏的定义如下：</p>
+<pre><code>#define MPBOOTPHYS(s) ((s) - mpentry_start + MPENTRY_PADDR)
+</code></pre>
+<p>这个宏接受一个参数 <code>s</code>，然后将 <code>s</code> 减去 <code>mpentry_start</code> 的地址，再加上 <code>MPENTRY_PADDR</code>。这样做的目的是将链接时的虚拟地址转换为运行时的物理地址。</p>
+<p>在 <code>kern/mpentry.S</code> 文件中，<code>mpentry_start</code> 是该文件中代码的起始地址，而 <code>MPENTRY_PADDR</code> 是在 <code>inc/memlayout.h</code> 文件中定义的物理地址，其值为 <code>0x7000</code>。</p>
+<p>如果在 <code>kern/mpentry.S</code> 中省略 <code>MPBOOTPHYS</code> 宏，那么生成的代码将无法在 AP 启动的早期阶段正确执行，因为那时的地址空间还是物理地址空间，而不是内核的虚拟地址空间。</p>
+<p>而在 <code>boot/boot.S</code> 中，由于它是在没有开启分页的实模式下运行的，所以它直接使用物理地址，不需要进行地址转换，因此不需要 <code>MPBOOTPHYS</code> 宏。</p>
+<h3 id="cpu-内核"><a class="header" href="#cpu-内核">CPU 内核</a></h3>
+<p>因为多个 CPU 可以同时陷入内核，所以我们需要为每个处理器提供一个单独的内核栈，以防止它们干扰彼此的执行。数组<code>percpu_kstacks[NCPU][KSTKSIZE]</code>为 NCPU 的内核栈预留了空间。</p>
+<p>此前将<code>bootstack</code>引用的物理内存映射为 BSP 的内核栈，就在<code>KSTACKTOP</code>下面。同样，此时需要把每个 CPU 的内核栈映射到这个区域，用保护页作为它们之间的缓冲。CPU 0 的栈仍然会从<code>KSTACKTOP</code>向下增长；CPU 1 的栈将从 CPU 0 栈的底部向下<code>KSTKGAP</code>字节开始，以此类推。</p>
+<p>每个 CPU 都需要一个任务状态段（TSS）来指定每个 CPU 的内核栈在哪里。CPU i 的 TSS 存储在<code>cpus[i].cpu_ts</code>中，相应的 TSS 描述符定义在 GDT 条目<code>gdt[(GD_TSS0 &gt;&gt; 3) + i]</code>中。在<code>kern/trap.c</code>中定义的全局变量<code>ts</code>将不再有用。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../os/mult/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../os/mult/ap-init.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../os/mult/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../os/mult/ap-init.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/mult/apic-intro.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

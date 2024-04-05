@@ -1,0 +1,529 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>OS 物理页面管理 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item expanded "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item expanded "><a href="../../os/kern/phy-manage.html" class="active"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/kern/phy-manage.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>这篇文章主要讲解内存初始化，即 mem_init 部分。进入内核之后需要初始化物理内存，随后建立物理内存和虚拟内存之间的映射。初始化物理内存的过程分为物理内存的检测，页表的初始化。这篇文章如何初始化物理内存，下篇文章讲解如何建立虚拟内存和物理内存之间的映射。</p>
+<h3 id="检测物理内存"><a class="header" href="#检测物理内存">检测物理内存</a></h3>
+<p>使用<code>i386_detect_memory()</code>函数检测机器上的物理内存数量。在操作系统中，物理内存的检测是非常重要的一步。这是因为操作系统需要知道有多少可用的物理内存，以便于后续的内存管理和分配。例如，操作系统需要知道有多少内存可以用于创建页表，分配给进程，或者用于文件系统的缓存等。如果没有正确地检测物理内存，操作系统可能会尝试使用不存在的内存，这将导致错误。因此，物理内存的检测通常是操作系统启动和初始化过程的一部分。</p>
+<p>通过 <code>i386_detect_memory()</code> 来获取一些基本的内存信息，即<code>npages</code>和<code>npages_basemem</code>，这两个变量都是用来存储物理内存页面数量的，但是它们的用途有所不同。</p>
+<p><code>npages</code>：这个变量用来存储系统中所有的物理内存页面的数量。这包括了<strong>所有可用</strong>的物理内存，无论它们是否正在被使用。</p>
+<p><code>npages_basemem</code>：这个变量用来存储<strong>基本内存的页面数量</strong>。基本内存通常指的是系统启动时可用的，例如有些内存会被 BIOS，设备驱动程序和操作系统内核使用。</p>
+<p><code>npages</code>和<code>npages_basemem</code>都是全局变量，下面是获取这两个变量的具体代码：</p>
+<pre><code class="language-c">static void
+i386_detect_memory(void)
+{
+	size_t basemem, extmem, ext16mem, totalmem;
+
+	// 使用 CMOS 调用来测量可用的基本内存和扩展内存。
+	// （CMOS 调用返回以千字节为单位的结果。）
+	basemem = nvram_read(NVRAM_BASELO);
+	extmem = nvram_read(NVRAM_EXTLO);
+	ext16mem = nvram_read(NVRAM_EXT16LO) * 64;
+
+	// 计算基本内存和扩展内存中可用的物理页面数量。
+	if (ext16mem)
+		totalmem = 16 * 1024 + ext16mem;
+	else if (extmem)
+		totalmem = 1 * 1024 + extmem;
+	else
+		totalmem = basemem;
+
+	npages = totalmem / (PGSIZE / 1024);
+	npages_basemem = basemem / (PGSIZE / 1024);
+
+	cprintf("Physical memory: %uK available, base = %uK, extended = %uK\n",
+		totalmem, basemem, totalmem - basemem);
+}
+</code></pre>
+<p>这段代码的主要目的是检测和计算系统中可用的物理内存数量。</p>
+<p>首先，它使用 CMOS 调用来读取基本内存（<code>basemem</code>）和扩展内存（<code>extmem</code>和<code>ext16mem</code>）。</p>
+<p><code>extmem</code>表示的是在 1MB 以上，16MB 以下的扩展内存大小，单位是 KB。这部分内存通常被称为"传统"的扩展内存。这部分内存通常被操作系统和一些大型的应用程序使用，例如数据库管理系统或者图形处理软件。</p>
+<p><code>ext16mem</code>表示的是在 16MB 以上的扩展内存大小，单位是 64KB。这部分内存通常被称为"高端"的扩展内存。这部分内存通常被操作系统用来存储内核数据结构，例如页表、文件系统缓存等。</p>
+<p>在操作系统启动的时候，会读取这两个变量的值，然后根据这些值来初始化内存管理子系统，包括设置物理内存的布局，初始化页表，以及设置内存分配器等。</p>
+<p>CMOS 是计算机上的一种小型存储设备，用于存储系统的基本设置，包括系统时间和系统内存大小等信息。在这里，<code>nvram_read</code>函数被用来读取 CMOS 中的内存信息。这些信息通常以 KB（千字节）为单位。</p>
+<p>然后，它根据读取到的内存信息来计算总的物理内存数量（<code>totalmem</code>）。如果<code>ext16mem</code>存在，那么总内存就是 16MB 加上<code>ext16mem</code>。如果<code>ext16mem</code>不存在但<code>extmem</code>存在，那么总内存就是 1MB 加上<code>extmem</code>。如果两者都不存在，那么总内存就是<code>basemem</code>。</p>
+<p>这段代码的结果是计算出系统中可用的物理内存总量，以便于后续的内存管理和分配。</p>
+<h3 id="初始页目录"><a class="header" href="#初始页目录">初始页目录</a></h3>
+<p>接下来创建一个初始的页目录来管理虚拟内存到物理内存的映射。</p>
+<pre><code class="language-c">kern_pgdir = (pde_t *) boot_alloc(PGSIZE);
+memset(kern_pgdir, 0, PGSIZE);
+</code></pre>
+<p>其中 <code>boot_alloc</code> 函数是一个简单的物理内存分配器，仅在系统启动时用于分配物理内存。后续会讲解这个函数的实现细节。</p>
+<p>函数接受一个参数<code>n</code>，表示需要分配的字节数。此处表示要分配一个 PGSIZE ，作为内核的页目录(kern_pgdir)，PGSIZE 即 4096 字节。页目录是一个包含页表条目（PTE）的数组，每个条目都指向一个页表。页表又是一个数组，包含了实际的物理页帧地址以及一些权限和状态位。</p>
+<p>可以将页目录想象成一个数组，其中每个元素都是一个页表条目（PTE）。每个 PTE 都指向一个页表。下面是一个简化描述。</p>
+<pre><code>+---------------+
+|   Page Table  |
+|   Directory   |
++---------------+
+| PTE[0] (Page   |
+| Table Entry)  |
++---------------+
+| PTE[1]        |
++---------------+
+| PTE[2]        |
++---------------+
+| ...           |
++---------------+
+| PTE[N]        |
++---------------+
+</code></pre>
+<p>在这个数组中，每个 PTE 都是一个指向页表的指针。接下来，让我们深入了解页表，将其表示为另一个数组，其中包含了实际的物理页帧地址以及一些权限和状态位。这可以通过以下方式进行图形化表示：</p>
+<pre><code>+------------------------+
+|       Page Table       |
++------------------------+
+| Entry 0 | Frame: 0xABC |  &lt;-- Physical Page Frame Address
+|         | Permissions  |  &lt;-- Read/Write/Execute permissions
+|         | Status Bits  |  &lt;-- Page status bits
++------------------------+
+| Entry 1 | Frame: 0xDEF |
+|         | Permissions  |
+|         | Status Bits  |
++------------------------+
+| Entry 2 | Frame: ...   |
+|         | Permissions  |
+|         | Status Bits  |
++------------------------+
+| ...                    |
++------------------------+
+| Entry N | Frame: ...   |
+|         | Permissions  |
+|         | Status Bits  |
++------------------------+
+</code></pre>
+<p>在这个数组中，每个条目表示一个物理页帧，其中包含了该页的实际地址、权限（读/写/执行）和状态位。整个结构形成了一个层次化的页面管理系统，其中页目录引导到页表，而页表则映射到实际的物理页帧。</p>
+<h3 id="boot_alloc"><a class="header" href="#boot_alloc">boot_alloc</a></h3>
+<p>接下来详细讲解 boot_alloc 是如何申请空间的。通过 boot_alloc 申请足够的空间用作内核的页目录(kern_pgdir)。如果系统没有足够的内存来满足分配请求，<code>boot_alloc</code>函数会触发 panic，表示系统出现了无法恢复的错误。</p>
+<pre><code class="language-c">static void *
+boot_alloc(uint32_t n)
+{
+	static char *nextfree;
+	char *result;
+
+	if (!nextfree) {
+		extern char end[];
+		nextfree = ROUNDUP((char *) end, PGSIZE);
+	}
+
+    // 将 'n' 对齐到 PGSIZE 的倍数
+    if (n &gt; 0) {
+        n = ROUNDUP(n, PGSIZE);
+    }
+
+    // 检查是否有足够的剩余内存进行分配。
+    if (PADDR(nextfree) + n &gt; npages * PGSIZE) {
+        panic("boot_alloc: Out of memory!");
+        return NULL;
+    }
+
+    // 通过调整 'nextfree' 来分配内存。
+    result = nextfree;
+    if (n &gt; 0) {
+        nextfree += n;
+    }
+
+    return result;
+}
+</code></pre>
+<p>需要注意的是，这个函数只能在系统初始化期间使用，也就是在设置<code>page_free_list</code>列表之前。<code>page_free_list</code>是一个链表，用于跟踪系统中所有的空闲内存页。一旦这个列表被设置，系统就会开始使用<code>page_alloc</code>函数来分配内存，而不再使用<code>boot_alloc</code>函数。</p>
+<h4 id="nextfree-为什么指向-end-"><a class="header" href="#nextfree-为什么指向-end-">nextfree 为什么指向 end ？</a></h4>
+<p>nextfree 是一个指向下一个可用内存的指针。在 boot_alloc 函数中，如果 nextfree 为 NULL（也就是第一次调用 boot_alloc 函数），nextfree 会被初始化为内核 bss 段结束后的第一个地址。bss 段接下来是堆，即堆的起始地址。</p>
+<pre><code class="language-c">	if (!nextfree) {
+		extern char end[];
+		nextfree = ROUNDUP((char *) end, PGSIZE);
+	}
+</code></pre>
+<p>关于程序的内存布局在上一篇文章中已经提及，下面是一个局部图。这样做的目的是让 nextfree 指向内核使用的内存之后的第一个可用页。</p>
+<pre><code>                          ..........
+                  .                      .
+                  :                      :
+                  |           ^          |
+                  |           |          |
+ brk point -&gt;     | - - - - - - - - - - -|   堆上声明动态内存
+                  |          HEAP        |
+                  |                      |
+                  |----------------------|
+                  |          BSS         |   未初始化数据 (BSS)
+                  |----------------------|
+                  |          Data        |   初始化数据 (DS)
+                  |----------------------|
+                  |          Text        |   二进制代码
+低地址       ----&gt; '----------------------'
+</code></pre>
+<h4 id="检查内存是否足够"><a class="header" href="#检查内存是否足够">检查内存是否足够</a></h4>
+<p>在分配内存之前要检查是否有足够的可用内存，下面是具体的判断代码，后续会详细讲解。</p>
+<pre><code class="language-c">	if (PADDR(nextfree) + n &gt; npages * PGSIZE) {
+		panic("Out of memory!");
+	}
+</code></pre>
+<p><code>PADDR(nextfree)</code>是将<code>nextfree</code>（下一个空闲内存字节的虚拟地址）转换为物理地址。<code>n</code>是请求的内存大小，<code>npages * PGSIZE</code>是系统中总的物理内存大小。</p>
+<p>如果<code>PADDR(nextfree) + n</code>大于<code>npages * PGSIZE</code>，那么说明请求的内存大小加上已经分配的内存大小超过了系统的总物理内存大小，这意味着系统没有足够的物理内存来满足这次的内存分配请求，因此会触发 panic，表示系统出现了无法恢复的错误。</p>
+<h3 id="设置-uvpt"><a class="header" href="#设置-uvpt">设置 UVPT</a></h3>
+<p>接下来要在页目录中递归地插入自身，以在虚拟地址 UVPT 处形成一个虚拟页表。</p>
+<pre><code class="language-c">kern_pgdir[PDX(UVPT)] = PADDR(kern_pgdir) | PTE_U | PTE_P;
+</code></pre>
+<p>在这里，<code>kern_pgdir[PDX(UVPT)]</code> 是获取 UVPT 的页目录条目。<code>PADDR(kern_pgdir)</code> 是获取页目录的物理地址。<code>PTE_U</code> 和 <code>PTE_P</code> 是页表条目的权限位，分别表示用户级别可以访问和页存在。</p>
+<p>所以，这行代码的含义是将页目录的物理地址与权限位进行或运算后，设置到 UVPT 的页目录条目中。这样做的结果是在虚拟地址 UVPT 处形成了一个虚拟页表，这个页表实际上就是页目录自身。这样做的好处是，操作系统可以通过 UVPT 这个虚拟地址来访问和修改页表。</p>
+<p><code>UVPT</code> 是用户级别的页表的虚拟地址。在 x86 架构中，每个进程都有自己的页表，用于将虚拟地址映射到物理地址。<code>UVPT</code> 是这个页表在用户空间的虚拟地址。这个地址是在用户空间的高地址部分，这样设计的目的是为了避免与用户程序的地址空间冲突。在这个地址处，用户程序可以读取但不能写入，因此它可以查看但不能修改页表。</p>
+<p>在 <code>kern/pmap.c</code> 文件的 <code>mem_init</code> 函数中，<code>UVPT</code> 被设置为页目录自身的地址，这样在用户空间就可以访问到页表了：这行代码的含义是将页目录的物理地址与权限位进行或运算后，设置到 <code>UVPT</code> 的页目录条目中。这样做的结果是在虚拟地址 <code>UVPT</code> 处形成了一个虚拟页表，这个页表实际上就是页目录自身。</p>
+<h3 id="分配并初始化页表数组"><a class="header" href="#分配并初始化页表数组">分配并初始化页表数组</a></h3>
+<p>接下来需要为每个物理页面分配一个 <code>struct PageInfo</code> 结构体，并将其存储在 <code>pages</code> 数组中。可以使用 <code>boot_alloc</code> 函数来分配所需的内存，然后使用 <code>memset</code> 函数将所有字段初始化为 0。以下是实现这个功能的具体代码：</p>
+<pre><code class="language-c">// 计算需要的内存大小
+size_t pages_size = sizeof(struct PageInfo) * npages;
+
+// 使用 boot_alloc 分配内存
+pages = (struct PageInfo *) boot_alloc(pages_size);
+
+// 使用 memset 将所有字段初始化为 0
+memset(pages, 0, pages_size);
+</code></pre>
+<p>这段代码首先计算了需要分配的内存大小，然后使用 <code>boot_alloc</code> 函数分配了相应的内存，并将返回的地址赋值给 <code>pages</code>。最后，使用 <code>memset</code> 函数将所有字段初始化为 0。</p>
+<p>接下来讲解和 page 相关的三个函数，其中 page_init 用于初始化物理页面的空闲列表，page_alloc 用于申请一个 page ，而 page_free 则用与释放 page 。</p>
+<h3 id="初始化空闲页面列表"><a class="header" href="#初始化空闲页面列表">初始化空闲页面列表</a></h3>
+<p>在分配了初始的内核数据结构之后，设置空闲物理页面的列表。这样，所有后续的内存管理都将通过<code>page_*</code>函数进行。</p>
+<p><code>page_init</code> 函数的主要目的是初始化物理页面的空闲列表。这个函数的主要任务是遍历所有的物理页面，并将未使用的页面添加到空闲列表中。在这个过程中，我们需要考虑到一些特殊的内存区域，比如物理页面 0（通常被 BIOS 使用），IO hole（被 IO 设备使用的内存区域），以及已经被内核使用的内存区域。</p>
+<pre><code class="language-c">void
+page_init(void)
+{
+	pages[0].pp_ref = 1;
+	pages[0].pp_link = NULL;
+
+
+	// 从物理页面 1 到 npages_basemem - 1 是基本内存，可以被分配。
+	for (size_t i = 1; i &lt; npages_basemem; i++) {
+		pages[i].pp_ref = 0;
+		pages[i].pp_link = page_free_list;
+		page_free_list = &amp;pages[i];
+	}
+
+	// 处理 I/O 空隙。这些页面从 IOPHYSMEM 到 EXTPHYSMEM 不能被分配。
+	size_t io_hole_start = IOPHYSMEM / PGSIZE;
+	size_t io_hole_end = EXTPHYSMEM / PGSIZE;
+	for (size_t i = io_hole_start; i &lt; io_hole_end; i++) {
+		pages[i].pp_ref = 1;
+	}
+
+	// 处理内核已使用的扩展内存。从 EXTPHYSMEM 到 boot_alloc(0) 返回的地址是内核使用的。
+	size_t kernel_end = PADDR((char *)boot_alloc(0)) / PGSIZE;
+	for (size_t i = io_hole_end; i &lt; kernel_end; i++) {
+		pages[i].pp_ref = 1;
+	}
+
+	// 处理剩余的扩展内存。这些页面可以被分配。
+	for (size_t i = kernel_end; i &lt; npages; i++) {
+		pages[i].pp_ref = 0;
+		pages[i].pp_link = page_free_list;
+		page_free_list = &amp;pages[i];
+	}
+}
+</code></pre>
+<p>函数首先将物理页面 0 标记为已使用，然后将基础内存的页面添加到空闲列表中。接着，函数将 IO hole 的页面标记为已使用。然后，函数检查扩展内存中的页面，其中一部分已经被内核使用，一部分是空闲的。对于已经被内核使用的页面，函数将它们标记为已使用。对于空闲的页面，函数将它们添加到空闲列表中。</p>
+<p>这个函数的主要作用是在系统启动时，对物理内存进行初始化和管理，以便后续的内存分配和回收操作。</p>
+<h3 id="page"><a class="header" href="#page">Page</a></h3>
+<p>接下来详细讲解如何管理物理页面，以及如何实现获取 Page <code>page_alloc</code> 和释放 Page <code>page_free</code> 对应的功能。对于物理页面需要设计一个对应的结构体<code>PageInfo</code>，用于存储关于物理页面的元数据。这个结构体并不是物理页面本身，但是每个物理页面和一个<code>PageInfo</code>结构体一一对应。</p>
+<pre><code class="language-c">struct PageInfo {
+	struct PageInfo *pp_link;
+	uint16_t pp_ref;
+};
+</code></pre>
+<p><code>PageInfo</code>结构体包含两个成员：</p>
+<ol>
+<li>
+<p><code>pp_link</code>：这是一个指向下一个<code>PageInfo</code>的指针，用于链接空闲页面列表。</p>
+</li>
+<li>
+<p><code>pp_ref</code>：这是一个指向此页面的指针计数（通常在页面表条目中）。对于使用<code>page_alloc</code>分配的页面，这个字段是有效的。但是对于在引导时使用<code>pmap.c</code>的<code>boot_alloc</code>分配的页面，这个字段是无效的。</p>
+</li>
+</ol>
+<p>这个结构体通常映射在<code>UPAGES</code>地址，对内核是可读写的，对用户程序是只读的。</p>
+<h4 id="page_alloc"><a class="header" href="#page_alloc">page_alloc</a></h4>
+<p>page_alloc 函数用来获取一个 page ，以下是实现这个函数的代码：</p>
+<pre><code class="language-c">struct PageInfo *
+page_alloc(int alloc_flags)
+{
+    // 检查是否有空闲的物理页面
+    if (!page_free_list)
+        return NULL;
+
+    // 从空闲列表中取出一个页面
+    struct PageInfo *page = page_free_list;
+
+    // 更新空闲列表
+    page_free_list = page_free_list-&gt;pp_link;
+
+    // 防止双重释放
+    page-&gt;pp_link = NULL;
+
+    // 如果需要，将页面内容清零
+    if (alloc_flags &amp; ALLOC_ZERO)
+        memset(page2kva(page), 0, PGSIZE);
+
+    return page;
+}
+</code></pre>
+<p>这段代码首先检查 <code>page_free_list</code> 是否为空。如果为空，说明没有空闲的物理页面，函数返回 NULL。否则，函数从 <code>page_free_list</code> 中取出一个页面，并更新 <code>page_free_list</code>。然后，函数将取出的页面的 <code>pp_link</code> 字段设置为 NULL，以防止在释放页面时出现双重释放的错误。最后，如果 <code>alloc_flags</code> 参数中包含 <code>ALLOC_ZERO</code> 标志，函数将整个页面填充为 0。</p>
+<h4 id="page_free"><a class="header" href="#page_free">page_free</a></h4>
+<p><code>page_free</code> 函数用于释放一个 Page ，以下是实现这个函数的代码：</p>
+<pre><code class="language-cpp">void
+page_free(struct PageInfo *pp)
+{
+    // 如果 pp-&gt;pp_ref 不为0，调用 panic 函数报错
+    if (pp-&gt;pp_ref != 0)
+        panic("pp-&gt;pp_ref is nonzero!");
+
+    // 如果 pp-&gt;pp_link 不为 NULL，调用 panic 函数报错
+    if (pp-&gt;pp_link != NULL)
+        panic("pp-&gt;pp_link is not NULL!");
+
+    // 将页面添加到空闲列表中
+    pp-&gt;pp_link = page_free_list;
+    page_free_list = pp;
+}
+</code></pre>
+<p>这段代码首先检查 <code>pp-&gt;pp_ref</code> 是否为 0，如果不为 0，说明这个页面还在被引用，不能被释放，函数调用 panic 函数报错。然后，函数检查 <code>pp-&gt;pp_link</code> 是否为 NULL，如果不为 NULL，说明这个页面已经在空闲列表中，函数调用 panic 函数报错。如果以上两个条件都满足，函数将这个页面添加到 <code>page_free_list</code> 中。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>至此，详细讲解了物理页面管理，接下来讲解虚拟内存。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../os/kern/back-trace.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../os/kern/vir-mem.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../os/kern/back-trace.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../os/kern/vir-mem.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/kern/phy-manage.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

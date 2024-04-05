@@ -1,0 +1,419 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>HTTP 篇 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item "><a href="../../os/user/trap-impl.html"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item expanded "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item expanded "><a href="../../net/http/index.html" class="active"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/net/http/README.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>HTTP（超文本传输协议）是一种用于分布式、协作式和超媒体信息系统的应用层协议。它是互联网上数据通信的基础，设计用于从网页服务器传输超文本到本地浏览器的传输协议。</p>
+<h3 id="1-什么是-http-协议"><a class="header" href="#1-什么是-http-协议">1. 什么是 HTTP 协议</a></h3>
+<p>HTTP协议，全称为超文本传输协议（HyperText Transfer Protocol），是一种用于分布式、协作式和超媒体信息系统的应用层协议。它是互联网上应用最为广泛的一种网络协议。</p>
+<p>文本通常指的是一串有意义的字符序列，这些字符可以是字母、数字、标点符号等。文本通常用于表示人类语言，例如，一篇文章、一本书、一封电子邮件等都可以被视为文本。</p>
+<p>超文本（HyperText）是一种组织和共享信息的方式，它通过超链接（Hyperlink）将各种不同的信息（如文本、图片、音频、视频等）连接在一起，形成一个非线性、动态的信息系统。用户可以通过点击超链接在各种信息之间自由跳转，这种信息的组织方式大大提高了信息的可获取性和易用性。</p>
+<p>HTTP协议是基于TCP/IP通信协议来传递数据（HTML 文件, 图片文件, 查询结果等）。HTTP协议工作于客户端-服务端架构上。浏览器作为HTTP客户端通过URL向HTTP服务端即网站服务器发送所有请求。</p>
+<p>HTTP协议在网络传输过程中是明文的，这意味着如果网络中间人截取了HTTP传输的数据，就能直接看到内容，因此HTTP协议不适合传输一些敏感信息，如密码或者银行信息等。为了解决HTTP协议的这一缺点，HTTPS协议应运而生。</p>
+<h3 id="2-http-协议的使用场景有哪些"><a class="header" href="#2-http-协议的使用场景有哪些">2. HTTP 协议的使用场景有哪些？</a></h3>
+<p>HTTP协议主要用于以下几种场景：</p>
+<ol>
+<li>
+<p>网页浏览：当我们在浏览器中输入一个URL并按下回车键时，浏览器会通过HTTP协议向服务器发送请求，服务器响应请求并返回HTML文件，浏览器解析HTML文件并显示网页内容。</p>
+</li>
+<li>
+<p>API交互：许多Web应用程序使用HTTP协议作为其API的基础，客户端（可能是另一个Web应用程序、移动应用程序或其他类型的客户端）通过发送HTTP请求来获取数据或执行操作。</p>
+</li>
+<li>
+<p>文件传输：虽然FTP协议更常用于文件传输，但HTTP协议也可以用于文件传输，特别是在Web环境中。</p>
+</li>
+<li>
+<p>数据推送：通过WebSockets或Server-Sent Events（SSE），HTTP协议也可以用于服务器向客户端推送数据。</p>
+</li>
+<li>
+<p>网络爬虫：网络爬虫通过HTTP协议获取网页内容，然后解析这些内容以提取信息。</p>
+</li>
+<li>
+<p>内容分发网络（CDN）：CDN通过HTTP协议将内容（如网页、图片、视频等）分发到全球各地的服务器，以便用户可以从最近的服务器获取内容，从而提高加载速度。</p>
+</li>
+<li>
+<p>Web服务：许多Web服务，如云存储服务、在线办公服务等，都通过HTTP协议提供服务。</p>
+</li>
+</ol>
+<p>总的来说，HTTP协议是Web通信的基础，几乎所有的Web应用都会使用到HTTP协议。</p>
+<h3 id="3-为什么-tcp-不行"><a class="header" href="#3-为什么-tcp-不行">3。 为什么 TCP 不行？</a></h3>
+<p>TCP（传输控制协议）是一种面向连接的、可靠的、基于字节流的传输层通信协议。它确保了数据包的正确传输，但并不关心数据的内容和格式。TCP只负责在两个网络节点之间建立稳定的连接，并确保数据包的顺序和完整性。</p>
+<p>而HTTP（超文本传输协议）是一种应用层协议，它基于TCP，但在其之上添加了对请求和响应的处理，以及对数据格式的规定。HTTP定义了客户端和服务器之间交换数据的格式和方式，使得数据的传输更加高效和可控。</p>
+<p>如果直接使用TCP进行网页浏览，会遇到以下问题：</p>
+<ol>
+<li>
+<p>缺乏统一的数据格式：TCP并不关心数据的内容和格式，如果直接使用TCP，那么每个应用可能都需要定义自己的数据格式和解析方式，这将大大增加开发的复杂性。</p>
+</li>
+<li>
+<p>缺乏状态管理：HTTP协议定义了状态码和方法（如GET、POST等），使得服务器可以更好地理解和处理客户端的请求。而TCP并不具备这样的能力。</p>
+</li>
+<li>
+<p>缺乏缓存和其他优化机制：HTTP协议定义了许多用于提高性能的机制，如缓存、内容压缩、分块传输等。如果直接使用TCP，那么这些优化机制都需要由应用自己来实现。</p>
+</li>
+<li>
+<p>缺乏安全机制：HTTP协议还定义了一种安全的版本HTTPS，它使用SSL/TLS协议对数据进行加密，保护数据的安全性。而TCP并不具备这样的安全机制。</p>
+</li>
+</ol>
+<p>因此，虽然理论上可以直接使用TCP进行网页浏览，但实际上，由于上述的种种原因，我们通常使用HTTP协议进行网页浏览。</p>
+<h3 id="4-http的发展历史"><a class="header" href="#4-http的发展历史">4. HTTP的发展历史</a></h3>
+<p>HTTP协议的发展历史可以分为以下几个阶段：</p>
+<ol>
+<li>
+<p>HTTP/0.9：这是HTTP协议的最初版本，于1991年发布。这个版本的HTTP非常简单，只支持GET方法，且没有头部信息，服务器只能返回纯文本格式的HTML页面。</p>
+</li>
+<li>
+<p>HTTP/1.0：这个版本的HTTP于1996年发布，相比于HTTP/0.9，它增加了POST和HEAD方法，引入了HTTP头部信息，支持多种数据格式的返回，如HTML、图片、音频、视频等。</p>
+</li>
+<li>
+<p>HTTP/1.1：这个版本的HTTP于1997年发布，是目前使用最广泛的HTTP版本。它增加了PUT、DELETE、OPTIONS等方法，引入了持久连接、分块传输编码、内容协商、Host头部等特性，大大提高了HTTP协议的性能和可用性。</p>
+</li>
+<li>
+<p>HTTP/2：这个版本的HTTP于2015年发布，是对HTTP/1.1的重大改进。它引入了多路复用、服务器推送、头部压缩等特性，进一步提高了HTTP协议的性能。</p>
+</li>
+<li>
+<p>HTTP/3：这个版本的HTTP正在开发中，它将使用QUIC协议替代TCP协议，以解决TCP协议在高延迟和丢包环境下的性能问题。</p>
+</li>
+</ol>
+<p>以上就是HTTP协议的发展历史，每个版本的HTTP都在前一个版本的基础上，引入了新的特性和改进，以满足网络应用的发展需求。</p>
+<h3 id="5-描述-http-的工作过程"><a class="header" href="#5-描述-http-的工作过程">5. 描述 HTTP 的工作过程</a></h3>
+<p>HTTP协议的工作过程可以通过一个简单的例子来解释，例如，当你在浏览器中输入一个URL（例如，http://www.example.com）并按下回车键时，背后发生了什么？</p>
+<ol>
+<li>
+<p>浏览器首先会解析你输入的URL，确定你要访问的是哪个网站，以及具体的页面路径。在这个例子中，你要访问的网站是www.example.com。</p>
+</li>
+<li>
+<p>浏览器会向DNS服务器发送一个请求，要求解析www.example.com的IP地址。DNS服务器会返回对应的IP地址。</p>
+</li>
+<li>
+<p>浏览器会向这个IP地址发送一个HTTP GET请求。这个请求包含了一些信息，例如你的浏览器类型，你接受的语言等。</p>
+</li>
+<li>
+<p>服务器收到这个HTTP请求后，会解析这个请求，确定你要获取的是哪个页面。然后，服务器会从硬盘中找到这个页面，然后返回一个HTTP响应。这个响应包含了页面的内容，以及一些元信息，例如页面的类型，编码方式等。</p>
+</li>
+<li>
+<p>浏览器收到HTTP响应后，会解析这个响应，然后将页面的内容显示在浏览器中。</p>
+</li>
+</ol>
+<p>这就是一个简单的HTTP请求和响应的过程。在实际的应用中，HTTP协议还包含了更多的功能，例如POST请求，状态码，Cookie等。</p>
+<h3 id="6-http-状态码有什么用"><a class="header" href="#6-http-状态码有什么用">6. HTTP 状态码有什么用？</a></h3>
+<p>为什么 HTTP 需要状态码？如果没有状态码会出现什么问题？</p>
+<p>简单来说就是有了一个反馈，HTTP状态码是服务器对客户端请求的响应结果的一种标识，它告诉客户端请求的处理结果是成功、失败还是需要进一步操作。状态码的存在使得客户端能够根据不同的状态码采取不同的操作，提高了通信的效率。</p>
+<p>如果没有状态码，客户端将无法知道请求的处理结果，也就无法根据处理结果采取相应的操作。例如，如果客户端发送了一个获取资源的请求，但是服务器返回的响应中没有状态码，那么客户端无法判断资源是否获取成功，如果获取失败，又是由于什么原因失败的，这将大大降低通信的效率。</p>
+<p>此外，没有状态码，错误处理也会变得困难。例如，如果请求的资源不存在，正常情况下服务器会返回404状态码，客户端收到404状态码后就知道资源不存在，可以给用户显示一个错误页面。但是如果没有状态码，客户端就无法知道请求失败的原因，也就无法进行正确的错误处理。</p>
+<p>因此，HTTP状态码对于HTTP协议的正常运行是非常重要的。</p>
+<p>HTTP状态码是由3位数字组成的，用于表示请求的处理状态。它们分为五大类：</p>
+<ol>
+<li>
+<p>1xx（信息响应）：表示接收到请求，需要继续处理。这类状态码比较少见，一般用于异步操作。</p>
+<ul>
+<li>100 Continue：客户端应当继续发送请求。这个临时响应是用来通知客户端它的部分请求已经被服务器接收，且仍未被拒绝。</li>
+</ul>
+</li>
+<li>
+<p>2xx（成功）：表示请求已被成功接收、理解、并接受。</p>
+<ul>
+<li>200 OK：请求成功。请求所希望的响应头或数据体将随此响应返回。</li>
+</ul>
+</li>
+<li>
+<p>3xx（重定向）：需要后续操作才能完成这一请求。</p>
+<ul>
+<li>301 Moved Permanently：被请求的资源已永久移动到新位置，并且将来任何对此资源的引用都应该使用本响应返回的若干个 URI 之一。</li>
+</ul>
+</li>
+<li>
+<p>4xx（请求错误）：请求含有词法错误或者无法被执行。</p>
+<ul>
+<li>404 Not Found：请求失败，请求所希望得到的资源未被在服务器上发现。</li>
+</ul>
+</li>
+<li>
+<p>5xx（服务器错误）：服务器在处理某个正确请求时发生错误。</p>
+</li>
+</ol>
+<h3 id="7-http-get-和-post-作用"><a class="header" href="#7-http-get-和-post-作用">7. HTTP GET 和 POST 作用？</a></h3>
+<p>GET和POST是HTTP协议中两种常见的请求方法，它们的工作细节如下：</p>
+<p>GET请求是最常见的请求方法，通常用于获取资源。GET请求的参数会附加在URL之后，通过问号（?）分隔，参数之间用&amp;符号连接。例如，<code>http://www.example.com/index.html?name=John&amp;age=22</code>。这种方式的缺点是传输数据的大小有限制（因为浏览器对URL的长度有限制），并且不适合传输敏感信息（如密码），因为参数会直接暴露在URL中。</p>
+<p>POST请求通常用于提交数据。POST请求将参数放在HTTP请求的主体中，而不是URL中。POST请求没有对传输数据的大小进行限制，而且可以传输任何类型的数据，包括二进制数据。因此，POST请求通常用于提交表单数据。</p>
+<p>下面是一个GET请求和POST请求的例子：</p>
+<p>GET请求示例：</p>
+<pre><code class="language-http">GET /index.html?name=John&amp;age=22 HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+</code></pre>
+<p>POST请求示例：</p>
+<pre><code class="language-http">POST /submit_form.php HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 13
+
+name=John&amp;age=22
+</code></pre>
+<p>在GET请求示例中，参数<code>name=John&amp;age=22</code>附加在URL之后。在POST请求示例中，参数<code>name=John&amp;age=22</code>放在HTTP请求的主体中。</p>
+<p>需要注意的是，虽然POST请求在传输大量或敏感数据时更安全，但无论是GET还是POST，都不能提供真正的安全性。为了保护数据的安全，应该使用HTTPS协议，它可以对传输的数据进行加密。</p>
+<h3 id="8-http-和-https-的区别"><a class="header" href="#8-http-和-https-的区别">8. HTTP 和 HTTPS 的区别？</a></h3>
+<p>HTTPS和HTTP的主要区别在于安全性和数据传输方式。</p>
+<ol>
+<li>
+<p>安全性：HTTP是明文传输，数据在传输过程中可能被窃取或篡改。而HTTPS则是在HTTP和TCP之间添加了一个安全层（SSL或TLS），用于对数据进行加密，防止数据在传输过程中被窃取或篡改。因此，HTTPS比HTTP更安全。</p>
+</li>
+<li>
+<p>数据传输方式：HTTP使用TCP作为传输层协议，而HTTPS则使用SSL/TLS协议进行加密传输。SSL/TLS不仅提供了数据加密，还提供了数据完整性检查和身份验证，这可以防止中间人攻击。</p>
+</li>
+<li>
+<p>端口：HTTP和HTTPS使用的端口也不同，HTTP默认使用80端口，而HTTPS默认使用443端口。</p>
+</li>
+<li>
+<p>性能：由于HTTPS需要进行数据加密，因此在处理速度和数据传输速度上，HTTPS会比HTTP慢一些。但是，随着技术的发展，这种差距已经越来越小。</p>
+</li>
+<li>
+<p>URL显示：在浏览器的地址栏中，HTTPS的URL会显示一个锁的图标，表示连接是安全的。而HTTP的URL则没有这个图标。</p>
+</li>
+</ol>
+<p>总的来说，HTTPS提供了比HTTP更高的安全性，但是需要消耗更多的资源。在处理敏感信息（如密码、信用卡号等）时，应该优先使用HTTPS。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../net/ip/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../net/http/histroy.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../net/ip/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../net/http/histroy.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "net/http/index.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>OS 中断和异常实现细节 - everystep</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/style.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../about-book.html">关于项目</a></li><li class="chapter-item affix "><li class="part-title">🌟 计算机基础</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../../os/0-summary.html"><strong aria-hidden="true">1.</strong> 操作系统</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/index.html"><strong aria-hidden="true">1.1.</strong> OS 启动过程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/start/bios.html"><strong aria-hidden="true">1.1.1.</strong> OS 启动之 BIOS</a></li><li class="chapter-item "><a href="../../os/start/boot-loader.html"><strong aria-hidden="true">1.1.2.</strong> OS 启动 Boot Loader 汇编实现细节</a></li><li class="chapter-item "><a href="../../os/start/boot-main.html"><strong aria-hidden="true">1.1.3.</strong> OS 启动 Boot Loader C语言实现细节</a></li><li class="chapter-item "><a href="../../os/start/pc-address.html"><strong aria-hidden="true">1.1.4.</strong> OS 内存地址空间的演化历程</a></li><li class="chapter-item "><a href="../../os/start/real-mold.html"><strong aria-hidden="true">1.1.5.</strong> OS 实模式、保护模式</a></li><li class="chapter-item "><a href="../../os/start/seg-page.html"><strong aria-hidden="true">1.1.6.</strong> OS 分段、分页</a></li></ol></li><li class="chapter-item "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.2.</strong> OS 内核</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/kern/os-asm.html"><strong aria-hidden="true">1.2.1.</strong> OS 内核入口实现细节</a></li><li class="chapter-item "><a href="../../os/kern/os-stack.html"><strong aria-hidden="true">1.2.2.</strong> OS 内核内存、堆栈布局</a></li><li class="chapter-item "><a href="../../os/kern/back-trace.html"><strong aria-hidden="true">1.2.3.</strong> OS backtrace 实现细节</a></li><li class="chapter-item "><a href="../../os/kern/phy-manage.html"><strong aria-hidden="true">1.2.4.</strong> OS 物理页面管理</a></li><li class="chapter-item "><a href="../../os/kern/vir-mem.html"><strong aria-hidden="true">1.2.5.</strong> OS 如何建立虚拟内存映射？</a></li><li class="chapter-item "><a href="../../os/kern/map.html"><strong aria-hidden="true">1.2.6.</strong> OS 内核空间映射细节</a></li></ol></li><li class="chapter-item expanded "><a href="../../os/kern/index.html"><strong aria-hidden="true">1.3.</strong> OS 进程</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/user/process-mem.html"><strong aria-hidden="true">1.3.1.</strong> OS 进程内部的实现细节</a></li><li class="chapter-item "><a href="../../os/user/process-load.html"><strong aria-hidden="true">1.3.2.</strong> OS 如何将程序加载到虚拟内存中并执行</a></li><li class="chapter-item "><a href="../../os/user/trap-theory.html"><strong aria-hidden="true">1.3.3.</strong> OS 什么是中断和异常？</a></li><li class="chapter-item "><a href="../../os/user/uk-trans.html"><strong aria-hidden="true">1.3.4.</strong> OS 用户态和内核态之间的切换细节</a></li><li class="chapter-item expanded "><a href="../../os/user/trap-impl.html" class="active"><strong aria-hidden="true">1.3.5.</strong> OS 中断和异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/page-fault.html"><strong aria-hidden="true">1.3.6.</strong> OS 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/user/break-point.html"><strong aria-hidden="true">1.3.7.</strong> OS 断点异常实现细节</a></li><li class="chapter-item "><a href="../../os/user/system-call.html"><strong aria-hidden="true">1.3.8.</strong> OS 系统调用实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.4.</strong> 多核 OS</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../os/mult/apic-intro.html"><strong aria-hidden="true">1.4.1.</strong> 多核 OS 初始化细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-init.html"><strong aria-hidden="true">1.4.2.</strong> 多处理器内核栈和环境初始化实现细节</a></li><li class="chapter-item "><a href="../../os/mult/ap-start.html"><strong aria-hidden="true">1.4.3.</strong> 多核 OS AP 启动细节</a></li><li class="chapter-item "><a href="../../os/mult/spin-lock.html"><strong aria-hidden="true">1.4.4.</strong> OS 自旋锁实现细节</a></li><li class="chapter-item "><a href="../../os/mult/round-robin.html"><strong aria-hidden="true">1.4.5.</strong> OS 循环调度实现细节</a></li><li class="chapter-item "><a href="../../os/mult/fork-intro.html"><strong aria-hidden="true">1.4.6.</strong> OS COW Fork 原理图解</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-pagefalt.html"><strong aria-hidden="true">1.4.7.</strong> COW Fork 页面错误实现细节</a></li><li class="chapter-item "><a href="../../os/mult/cow-fork-init.html"><strong aria-hidden="true">1.4.8.</strong> COW Fork 创建进程实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-irq.html"><strong aria-hidden="true">1.4.9.</strong> OS 时钟中断实现细节</a></li><li class="chapter-item "><a href="../../os/mult/os-ipc.html"><strong aria-hidden="true">1.4.10.</strong> OS IPC 进程通信实现细节</a></li></ol></li><li class="chapter-item "><a href="../../os/mult/index.html"><strong aria-hidden="true">1.5.</strong> </a></li><li class="chapter-item "><a href="../../os/sleep-lock.html"><strong aria-hidden="true">1.6.</strong> 自旋锁和睡眠锁的区别</a></li><li class="chapter-item "><a href="../../os/shell-know.html"><strong aria-hidden="true">1.7.</strong> Linux 常用命令使用场景</a></li><li class="chapter-item "><a href="../../os/appendix/index.html"><strong aria-hidden="true">1.8.</strong> MIT 6.828 JOS 2018 环境配置</a></li></ol></li><li class="chapter-item "><a href="../../net/index.html"><strong aria-hidden="true">2.</strong> 计算机网络</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/index.html"><strong aria-hidden="true">2.1.</strong> TCP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/tcp-field.html"><strong aria-hidden="true">2.1.1.</strong> TCP 报文格式</a></li><li class="chapter-item "><a href="../../net/tcp/pack.html"><strong aria-hidden="true">2.1.2.</strong> TCP 粘包、拆包问题</a></li><li class="chapter-item "><a href="../../net/tcp/tcp-udp.html"><strong aria-hidden="true">2.1.3.</strong> TCP 和 UDP的区别？</a></li><li class="chapter-item "><a href="../../net/tcp/three-hand.html"><strong aria-hidden="true">2.1.4.</strong> TCP 三次握手</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/tcp/three-hand-socket.html"><strong aria-hidden="true">2.1.4.1.</strong> Socket 编程中的 TCP 三次握手</a></li></ol></li><li class="chapter-item "><a href="../../net/tcp/timeout-try.html"><strong aria-hidden="true">2.1.5.</strong> TCP 超时重传</a></li><li class="chapter-item "><a href="../../net/tcp/four-hand.html"><strong aria-hidden="true">2.1.6.</strong> TCP 四次挥手</a></li></ol></li><li class="chapter-item "><a href="../../net/ip/index.html"><strong aria-hidden="true">2.2.</strong> IP 篇</a></li><li class="chapter-item "><a href="../../net/http/index.html"><strong aria-hidden="true">2.3.</strong> HTTP 篇</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../net/http/histroy.html"><strong aria-hidden="true">2.3.1.</strong> HTTP 发展历史</a></li><li class="chapter-item "><a href="../../net/http/state.html"><strong aria-hidden="true">2.3.2.</strong> HTTP 状态</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">😈 C++</li><li class="spacer"></li><li class="chapter-item "><a href="../../cpp/basic/index.html"><strong aria-hidden="true">3.</strong> 基础 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/cpp-iso.html"><strong aria-hidden="true">3.1.</strong> C/C++ 发展历史</a></li><li class="chapter-item "><a href="../../cpp/basic/paradigm.html"><strong aria-hidden="true">3.2.</strong> C++ 编程范式有哪些？</a></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.3.</strong> 语言基础</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/pragma-once.html"><strong aria-hidden="true">3.3.1.</strong> pragma-once</a></li><li class="chapter-item "><a href="../../cpp/basic/const-define.html"><strong aria-hidden="true">3.3.2.</strong> const 和 define 的区别？</a></li><li class="chapter-item "><a href="../../cpp/basic/reference.html"><strong aria-hidden="true">3.3.3.</strong> 如何使用引用？</a></li><li class="chapter-item "><a href="../../cpp/basic/ptr-reference.html"><strong aria-hidden="true">3.3.4.</strong> C/C++ 站在汇编的视角看待引用和指针</a></li><li class="chapter-item "><a href="../../cpp/basic/c-asm.html"><strong aria-hidden="true">3.3.5.</strong> C 语言指针编译前后</a></li><li class="chapter-item "><a href="../../cpp/basic/byte-ordering.html"><strong aria-hidden="true">3.3.6.</strong> 大小端</a></li><li class="chapter-item "><a href="../../cpp/basic/constructor.html"><strong aria-hidden="true">3.3.7.</strong> 构造函数</a></li><li class="chapter-item "><a href="../../cpp/basic/null-class.html"><strong aria-hidden="true">3.3.8.</strong> 一个空类默认生成哪些函数？</a></li><li class="chapter-item "><a href="../../cpp/basic/placement-new.html"><strong aria-hidden="true">3.3.9.</strong> new 和 Placement new 的区别</a></li><li class="chapter-item "><a href="../../cpp/basic/delete-new.html"><strong aria-hidden="true">3.3.10.</strong> new 和 malloc 的区别</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/cast.html"><strong aria-hidden="true">3.4.</strong> 四种转换</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/updown-cast.html"><strong aria-hidden="true">3.4.1.</strong> 向上转型、向下转型</a></li><li class="chapter-item "><a href="../../cpp/basic/static-cast.html"><strong aria-hidden="true">3.4.2.</strong> static_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/dynamic-cast.html"><strong aria-hidden="true">3.4.3.</strong> dynamic_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/const-cast.html"><strong aria-hidden="true">3.4.4.</strong> const_cast</a></li><li class="chapter-item "><a href="../../cpp/basic/reinterpret-cast.html"><strong aria-hidden="true">3.4.5.</strong> reinterpret_cast</a></li></ol></li><li class="chapter-item "><a href="../../cpp/basic/base.html"><strong aria-hidden="true">3.5.</strong> 注意事项</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/basic/p1.html"><strong aria-hidden="true">3.5.1.</strong> 如何在代码中提供更明确的语义？</a></li><li class="chapter-item "><a href="../../cpp/basic/p2.html"><strong aria-hidden="true">3.5.2.</strong> C++中的静态类型安全</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/modern/index.html"><strong aria-hidden="true">4.</strong> 现代 C++</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/index.html"><strong aria-hidden="true">4.1.</strong> C++11</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/modern/c11/enum-class.html"><strong aria-hidden="true">4.1.1.</strong> enum class</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/index.html"><strong aria-hidden="true">5.</strong> STL</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/allocator.html"><strong aria-hidden="true">5.1.</strong> 空间配置器</a></li><li class="chapter-item "><a href="../../cpp/stl/iterator.html"><strong aria-hidden="true">5.2.</strong> 迭代器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/iter-null.html"><strong aria-hidden="true">5.2.1.</strong> 如何避免迭代器失效</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/container.html"><strong aria-hidden="true">5.3.</strong> 容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/seq-container.html"><strong aria-hidden="true">5.3.1.</strong> 序列容器</a></li><li class="chapter-item "><a href="../../cpp/stl/ass-container.html"><strong aria-hidden="true">5.3.2.</strong> 关联容器</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.2.1.</strong> map 和 unordered_map 的区别？</a></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.3.3.</strong> 注意</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/container-effective.html"><strong aria-hidden="true">5.3.3.1.</strong> 如何高效的使用 STL 容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-how-select.html"><strong aria-hidden="true">5.3.3.2.</strong> STL 如何选择容器？</a></li><li class="chapter-item "><a href="../../cpp/stl/container-null.html"><strong aria-hidden="true">5.3.3.3.</strong> STL 判断长度为空存在哪些坑？</a></li><li class="chapter-item "><a href="../../cpp/stl/resize.html"><strong aria-hidden="true">5.3.3.4.</strong> resize 和 reserve 的区别</a></li><li class="chapter-item "><a href="../../cpp/stl/vector-push-back.html"><strong aria-hidden="true">5.3.3.5.</strong> vector 中 emplace_back 和 push_back 的区别？</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.4.</strong> 算法</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.5.</strong> 仿函数</a></li><li class="chapter-item "><a href="../../cpp/stl/map.html"><strong aria-hidden="true">5.6.</strong> 其他</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../cpp/stl/dll.html"><strong aria-hidden="true">5.6.1.</strong> 容器动态链接可能产生的问题？</a></li><li class="chapter-item "><a href="../../cpp/stl/sec.html"><strong aria-hidden="true">5.6.2.</strong> 容器是否线程安全</a></li></ol></li></ol></li><li class="chapter-item "><li class="part-title">🤡 源码解析</li><li class="spacer"></li><li class="chapter-item "><a href="../../lsm/0-summary.html"><strong aria-hidden="true">6.</strong> Leveldb 源码阅读</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../lsm/read-write.html"><strong aria-hidden="true">6.1.</strong> Leveldb 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable.html"><strong aria-hidden="true">6.2.</strong> Leveldb Memtable 读写过程</a></li><li class="chapter-item "><a href="../../lsm/memtable-iter.html"><strong aria-hidden="true">6.3.</strong> Leveldb Memtable 迭代器</a></li><li class="chapter-item "><a href="../../lsm/block.html"><strong aria-hidden="true">6.4.</strong> Leveldb Block 实现细节</a></li><li class="chapter-item "><a href="../../lsm/sst.html"><strong aria-hidden="true">6.5.</strong> Leveldb SST 实现细节</a></li><li class="chapter-item "><a href="../../lsm/bloom-fliter.html"><strong aria-hidden="true">6.6.</strong> Leveldb 布隆过滤器</a></li><li class="chapter-item "><a href="../../lsm/compact-detail.html"><strong aria-hidden="true">6.7.</strong> Leveldb Compaction 总揽</a></li></ol></li><li class="chapter-item "><li class="part-title">🎃 算法</li><li class="spacer"></li><li class="chapter-item "><a href="../../alg/array/index.html"><strong aria-hidden="true">7.</strong> 数组</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/array/lc-283.html"><strong aria-hidden="true">7.1.</strong> 283. 移动零</a></li><li class="chapter-item "><a href="../../alg/array/lc-27.html"><strong aria-hidden="true">7.2.</strong> 27. 移除元素</a></li><li class="chapter-item "><a href="../../alg/array/lc-977.html"><strong aria-hidden="true">7.3.</strong> 977. 有序数组的平方</a></li><li class="chapter-item "><a href="../../alg/array/lc-704.html"><strong aria-hidden="true">7.4.</strong> 二分查找</a></li><li class="chapter-item "><a href="../../alg/array/lc-59.html"><strong aria-hidden="true">7.5.</strong> 螺旋矩阵</a></li><li class="chapter-item "><a href="../../alg/array/lc-54.html"><strong aria-hidden="true">7.6.</strong> 螺旋矩阵进阶</a></li></ol></li><li class="chapter-item "><a href="../../alg/linklist/index.html"><strong aria-hidden="true">8.</strong> 链表</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/linklist/lc-203.html"><strong aria-hidden="true">8.1.</strong> 203. 移除链表元素</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-206.html"><strong aria-hidden="true">8.2.</strong> 206. 反转链表</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-24.html"><strong aria-hidden="true">8.3.</strong> 24. 两两交换链表中的节点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-19.html"><strong aria-hidden="true">8.4.</strong> 19. 删除链表的倒数第 N 个结点</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-02-07.html"><strong aria-hidden="true">8.5.</strong> 面试题 02.07. 链表相交</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-142.html"><strong aria-hidden="true">8.6.</strong> 142. 环形链表 II</a></li><li class="chapter-item "><a href="../../alg/linklist/lc-1206.html"><strong aria-hidden="true">8.7.</strong> 一步一步图解跳表</a></li></ol></li><li class="chapter-item "><a href="../../alg/hash/index.html"><strong aria-hidden="true">9.</strong> 哈希</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/hash/lc-242.html"><strong aria-hidden="true">9.1.</strong> 242. 有效的字母异位词</a></li><li class="chapter-item "><a href="../../alg/hash/lc-1002.html"><strong aria-hidden="true">9.2.</strong> xxxx 1002. 查找共用字符</a></li><li class="chapter-item "><a href="../../alg/hash/lc-349.html"><strong aria-hidden="true">9.3.</strong> 349. 两个数组的交集</a></li></ol></li><li class="chapter-item "><a href="../../alg/tree/index.html"><strong aria-hidden="true">10.</strong> 树</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../alg/tree/trie.html"><strong aria-hidden="true">10.1.</strong> Trie 树</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+        
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">everystep</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/weijiew/everystep/edit/master/src/os/user/trap-impl.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+                    <main>
+                        <p>这篇文章主要讲解 OS 是如何实现中断和异常的，首先讲解如何设置 IDT 。</p>
+<h3 id="设置中断描述符-idt"><a class="header" href="#设置中断描述符-idt">设置中断描述符 IDT</a></h3>
+<p>接下来结合具体的代码讲解如何设置 IDT 来处理中断向量 0-31（处理器异常）。随后讲解如何处理系统调用中断，并添加中断 32-47（设备 IRQ）。</p>
+<p>在 <code>trapentry.S</code> 中定义了 <code>TRAPHANDLER</code> 和 <code>TRAPHANDLER_NOEC</code> 两个宏，这两个宏都是用来定义处理中断和异常的处理程序的。它们的工作流程非常相似，都是先定义一个全局的函数符号，然后设置这个符号的类型为函数，接着对齐函数定义，然后在函数开始的地方推入中断或异常的编号，最后跳转到 <code>_alltraps</code> 函数。</p>
+<p>这两个宏的主要差异在于处理错误代码的方式不同。<code>TRAPHANDLER</code> 宏用于处理那些 CPU 会自动推送错误代码的中断或异常，它直接将中断或异常的编号推入堆栈。而 <code>TRAPHANDLER_NOEC</code> 宏用于处理那些 CPU 不会自动推送错误代码的中断或异常，它在推入中断或异常的编号之前，先推入一个 0 作为错误代码。这样做的目的是为了保证在任何情况下，中断或异常的处理程序的堆栈帧都有相同的格式。</p>
+<pre><code class="language-c">#define TRAPHANDLER(name, num)						\
+	.globl name;		/* 定义 'name' 的全局符号 */	\
+	.type name, @function;	/* 符号类型是函数 */		\
+	.align 2;		/* 对齐函数定义 */		\
+	name:			/* 函数从这里开始 */		\
+	pushl $(num);							\
+	jmp _alltraps
+
+#define TRAPHANDLER_NOEC(name, num)					\
+	.globl name;							\
+	.type name, @function;						\
+	.align 2;							\
+	name:								\
+	pushl $0;							\
+	pushl $(num);							\
+	jmp _alltraps
+</code></pre>
+<p>在处理中断或异常时，CPU 会将一些信息（如错误代码）推入堆栈。这些信息会被保存在一个叫做 <code>trap frame</code> 的数据结构中。<code>trap frame</code> 的格式对于不同的中断或异常可能会有所不同。例如，对于某些中断或异常，CPU 会自动将错误代码推入堆栈，而对于其他的中断或异常，CPU 则不会这样做。</p>
+<p><code>TRAPHANDLER</code> 和 <code>TRAPHANDLER_NOEC</code> 这两个宏的主要区别就在于它们如何处理这种情况。<code>TRAPHANDLER</code> 宏用于处理那些 CPU 会自动推送错误代码的中断或异常，它直接将中断或异常的编号推入堆栈。而 <code>TRAPHANDLER_NOEC</code> 宏用于处理那些 CPU 不会自动推送错误代码的中断或异常，它在推入中断或异常的编号之前，先推入一个 0 作为错误代码。</p>
+<p>这样做的目的是为了保证在任何情况下，中断或异常的处理程序的堆栈帧都有相同的格式。也就是说，无论 CPU 是否会自动推送错误代码，处理程序都可以从相同的位置找到中断或异常的编号。这样可以简化处理程序的代码，因为它们不需要考虑不同的 <code>trap frame</code> 格式。</p>
+<h3 id="陷阱trap和中断请求irq对应的编号"><a class="header" href="#陷阱trap和中断请求irq对应的编号">陷阱（trap）和中断请求（IRQ）对应的编号</a></h3>
+<p>接下来讲解陷阱（trap）和中断请求（IRQ）对应的编号，下一节为每种编号设置对应的处理函数。</p>
+<pre><code class="language-c">// Trap numbers
+// 这些是处理器定义的：
+#define T_DIVIDE     0		// 除法错误
+#define T_DEBUG      1		// 调试异常
+#define T_NMI        2		// 不可屏蔽中断
+#define T_BRKPT      3		// 断点
+#define T_OFLOW      4		// 溢出
+#define T_BOUND      5		// 边界检查
+#define T_ILLOP      6		// 非法操作码
+#define T_DEVICE     7		// 设备不可用
+#define T_DBLFLT     8		// 双重错误
+
+/* #define T_COPROC  9 */	// 保留（最近的处理器不会生成）
+#define T_TSS       10		// 无效的任务切换段
+#define T_SEGNP     11		// 段不存在
+#define T_STACK     12		// 栈异常
+#define T_GPFLT     13		// 一般保护错误
+#define T_PGFLT     14		// 页错误
+
+/* #define T_RES    15 */	// 保留
+#define T_FPERR     16		// 浮点错误
+#define T_ALIGN     17		// 对齐检查
+#define T_MCHK      18		// 机器检查
+#define T_SIMDERR   19		// SIMD浮点错误
+
+// 这些是任意选择的，但是要注意不要与处理器定义的异常或中断向量重叠。
+#define T_SYSCALL   48		// 系统调用
+#define T_DEFAULT   500		// 万能捕获
+
+#define IRQ_OFFSET	32	// IRQ 0 对应于 int IRQ_OFFSET
+
+// 硬件IRQ编号。我们接收到的是 (IRQ_OFFSET+IRQ_WHATEVER)
+#define IRQ_TIMER        0
+#define IRQ_KBD          1
+#define IRQ_SERIAL       4
+#define IRQ_SPURIOUS     7
+#define IRQ_IDE         14
+#define IRQ_ERROR       19
+</code></pre>
+<p>这段代码中的宏定义主要分为三部分：</p>
+<ol>
+<li>
+<p>处理器定义的陷阱编号：这些陷阱是由 CPU 硬件定义的，例如除以零错误（T_DIVIDE）、调试异常（T_DEBUG）等。</p>
+</li>
+<li>
+<p>自定义的陷阱编号：这些陷阱是操作系统自定义的，例如系统调用（T_SYSCALL）和默认陷阱（T_DEFAULT）。</p>
+</li>
+<li>
+<p>硬件中断请求（IRQ）编号：这些是由硬件设备发出的中断请求，例如定时器（IRQ_TIMER）、键盘（IRQ_KBD）等。</p>
+</li>
+</ol>
+<p>这些宏定义在操作系统的其他部分会被用到，例如在处理陷阱和中断的代码中，会根据陷阱或中断的编号，调用相应的处理函数。</p>
+<h3 id="设置-trap-入口"><a class="header" href="#设置-trap-入口">设置 trap 入口</a></h3>
+<p>接下来为 trap 中定义的每个陷阱（trap）设置相应的入口，下面这段代码是在为不同的陷阱（trap）生成入口点。</p>
+<pre><code class="language-c">TRAPHANDLER_NOEC(handler0, T_DIVIDE)
+TRAPHANDLER_NOEC(handler1, T_DEBUG)
+TRAPHANDLER_NOEC(handler2, T_NMI)
+TRAPHANDLER_NOEC(handler3, T_BRKPT)
+TRAPHANDLER_NOEC(handler4, T_OFLOW)
+TRAPHANDLER_NOEC(handler5, T_BOUND)
+TRAPHANDLER_NOEC(handler6, T_ILLOP)
+TRAPHANDLER_NOEC(handler7, T_DEVICE)
+
+TRAPHANDLER(handler8, T_DBLFLT)
+TRAPHANDLER(handler10, T_TSS)
+TRAPHANDLER(handler11, T_SEGNP)
+TRAPHANDLER(handler12, T_STACK)
+TRAPHANDLER(handler13, T_GPFLT)
+TRAPHANDLER(handler14, T_PGFLT)
+TRAPHANDLER(handler16, T_FPERR)
+TRAPHANDLER(handler17, T_ALIGN)
+</code></pre>
+<p>这段代码的目的是为了在发生陷阱时，能够根据陷阱号调用对应的处理函数，处理完陷阱后，再恢复程序的执行。</p>
+<p>在这段代码中，<code>TRAPHANDLER_NOEC(handler0, T_DIVIDE)</code>定义了一个名为<code>handler0</code>的函数，用于处理陷阱号为<code>T_DIVIDE</code>的陷阱，这是一个由除以零引起的陷阱。</p>
+<p>当程序运行过程中发生这些特定的陷阱时，对应的<code>handler</code>函数就会被调用，以处理这些陷阱。处理完陷阱后，程序会恢复执行。</p>
+<h3 id="alltraps"><a class="header" href="#alltraps">alltraps</a></h3>
+<p>前文已经提到了 <code>_alltraps</code> 函数，这个函数是所有陷阱处理函数（由<code>TRAPHANDLER</code>和<code>TRAPHANDLER_NOEC</code>宏定义）的公共入口点。</p>
+<p>当发生陷阱时，CPU 会跳转到相应的陷阱处理函数，然后这些处理函数会将陷阱号（和错误代码，如果有的话）压入堆栈，然后跳转到<code>_alltraps</code>。</p>
+<pre><code>.globl		_start
+_alltraps:
+	pushl	%ds
+	pushl	%es
+	pushal
+	movw 	$(GD_KD), %ax
+  	movw 	%ax, %ds
+  	movw 	%ax, %es
+	pushl 	%esp
+	call	trap
+</code></pre>
+<p><code>_alltraps</code>函数的主要任务是保存 CPU 的状态，然后调用<code>trap</code>函数处理陷阱。具体来说，它做了以下操作：</p>
+<ol>
+<li>
+<p><code>pushl %ds</code>和<code>pushl %es</code>：将数据段寄存器（DS）和附加段寄存器（ES）的值压入堆栈，以便稍后恢复。这两个寄存器是 x86 架构中的段寄存器，用于存储内存段的基地址。在处理陷阱或中断时，可能需要改变这些寄存器的值，所以需要先保存原来的值。</p>
+</li>
+<li>
+<p><code>pushal</code>：将所有通用寄存器的值压入堆栈。<code>pushal</code>是一个汇编指令，它会依次将 EAX、ECX、EDX、EBX、ESP、EBP、ESI 和 EDI 寄存器的值压入堆栈。</p>
+</li>
+<li>
+<p><code>movw $(GD_KD), %ax</code>，<code>movw %ax, %ds</code>和<code>movw %ax, %es</code>：将内核数据段的选择子（<code>GD_KD</code>）加载到 AX 寄存器，然后将 AX 寄存器的值复制到 DS 和 ES 寄存器。这是为了确保在处理陷阱时，数据段和附加段寄存器指向内核数据段。</p>
+</li>
+<li>
+<p><code>pushl %esp</code>：将堆栈指针（ESP）的值压入堆栈。这是因为<code>trap</code>函数需要知道陷阱帧的位置，陷阱帧是保存在堆栈上的，包含了发生陷阱时 CPU 的状态信息。</p>
+</li>
+<li>
+<p><code>call trap</code>：调用<code>trap</code>函数处理陷阱。<code>trap</code>函数会根据陷阱号调用相应的处理函数。</p>
+</li>
+</ol>
+<p>这段代码的目的是为了在发生陷阱时，保存 CPU 的状态，然后调用<code>trap</code>函数处理陷阱，处理完陷阱后，再恢复 CPU 的状态，继续执行被中断的程序。</p>
+<p>这样做的原因是为了统一处理所有的陷阱和中断。当发生陷阱或中断时，CPU 会跳转到相应的处理函数，这些处理函数会将陷阱号（和错误代码，如果有的话）压入堆栈，然后跳转到<code>_alltraps</code>。这样，无论发生何种陷阱或中断，处理流程都是一样的，都会跳转到<code>_alltraps</code>进行处理。</p>
+<p>在<code>_alltraps</code>中，首先会保存当前的环境（包括寄存器的值等），然后调用<code>trap</code>函数进行具体的处理。这样做的好处是，无论<code>trap</code>函数如何修改寄存器的值，都不会影响到原来的环境，因为在返回到原来的代码之前，会恢复这些寄存器的值。</p>
+<p>这种设计使得处理陷阱和中断更加灵活和方便，因为可以在<code>trap</code>函数中根据陷阱号和错误代码进行不同的处理，而不需要为每种陷阱或中断都编写一个完整的处理函数。同时，这种设计也使得代码更加简洁和易于理解。</p>
+<h3 id="trapframe"><a class="header" href="#trapframe">Trapframe</a></h3>
+<p><code>Trapframe</code> 用于在发生中断或异常时保存处理器的状态。下面是对每个字段的详细解释：</p>
+<pre><code class="language-cpp">struct Trapframe {
+ struct PushRegs tf_regs;  // 保存通用寄存器的状态
+ uint16_t tf_es;          // 保存ES寄存器的状态
+ uint16_t tf_padding1;    // 填充，用于保持结构体的对齐
+ uint16_t tf_ds;          // 保存DS寄存器的状态
+ uint16_t tf_padding2;    // 填充，用于保持结构体的对齐
+ uint32_t tf_trapno;      // 中断或异常的编号
+ /* below here defined by x86 hardware */
+ uint32_t tf_err;         // 错误代码
+ uintptr_t tf_eip;        // 保存EIP寄存器的状态，即下一条要执行的指令的地址
+ uint16_t tf_cs;          // 保存CS寄存器的状态
+ uint16_t tf_padding3;    // 填充，用于保持结构体的对齐
+ uint32_t tf_eflags;      // 保存EFLAGS寄存器的状态，包含了处理器的一些状态标志
+ /* below here only when crossing rings, such as from user to kernel */
+ uintptr_t tf_esp;        // 保存ESP寄存器的状态，即当前的栈顶指针
+ uint16_t tf_ss;          // 保存SS寄存器的状态
+ uint16_t tf_padding4;    // 填充，用于保持结构体的对齐
+} __attribute__((packed)); // 表示该结构体按照紧凑模式进行对齐
+</code></pre>
+<p>这个结构体的设计是为了在发生中断或异常时，能够保存处理器的状态，然后在处理完中断或异常后，能够恢复到原来的状态，继续执行被打断的代码。</p>
+<p>每个处理程序都应该在堆栈上构建一个<code>struct Trapframe</code> 并用指向 <code>Trapframe</code> 的指针调用 <code>trap()</code>。然后<code>trap()</code> 处理异常/中断或分派到特定的处理函数。</p>
+<h3 id="初始化-idt"><a class="header" href="#初始化-idt">初始化 IDT</a></h3>
+<p>下面这段代码是在初始化中断描述符表（Interrupt Descriptor Table，IDT）。当 CPU 接收到一个中断或者陷阱（trap）信号时，会根据信号的类型（也就是中断向量）在 IDT 中查找对应的中断处理程序，然后跳转到该程序去处理中断。</p>
+<pre><code class="language-c">void
+trap_init(void)
+{
+	extern struct Segdesc gdt[];
+
+	SETGATE(idt[0], 1, GD_KT, handler0, 0);
+	SETGATE(idt[1], 1, GD_KT, handler1, 3);
+	SETGATE(idt[2], 1, GD_KT, handler2, 0);
+
+	// ...
+	// Per-CPU setup
+	trap_init_percpu();
+}
+</code></pre>
+<p>在这段代码中，<code>SETGATE</code>宏用于设置 IDT 中的条目。它接受五个参数：</p>
+<ol>
+<li>IDT 的条目（例如<code>idt[0]</code>，<code>idt[1]</code>等）。</li>
+<li>中断门的类型，这里都是 1，表示这是一个中断门。</li>
+<li>段描述符，这里都是<code>GD_KT</code>，表示内核文本段。</li>
+<li>中断处理程序的名称（例如<code>handler0</code>，<code>handler1</code>等）。</li>
+<li>特权级，0 表示内核级，3 表示用户级。</li>
+</ol>
+<p>例如，<code>SETGATE(idt[0], 1, GD_KT, handler0, 0);</code>这行代码设置了中断向量 0 的中断门。当 CPU 接收到中断向量为 0 的中断时，它会跳转到<code>handler0</code>去处理这个中断。</p>
+<p>最后，<code>trap_init_percpu()</code>函数用于进行每个 CPU 的中断初始化。在多处理器系统中，每个处理器都有自己的中断控制器，因此需要单独进行初始化。</p>
+<h3 id="全局-idt"><a class="header" href="#全局-idt">全局 IDT</a></h3>
+<p>trap_init 代码中使用了一个名为<code>idt</code>的数组，这个数据是一个全局数据，定义在了函数外。数组的类型是<code>Gatedesc</code>，长度为 256。<code>Gatedesc</code>是一个结构体类型，用于表示中断描述符表（Interrupt Descriptor Table，IDT）中的条目。IDT 是一个数据结构，用于存储中断处理程序的地址和一些相关属性。当 CPU 接收到一个中断或者陷阱（trap）信号时，会根据信号的类型（也就是中断向量）在 IDT 中查找对应的中断处理程序，然后跳转到该程序去处理中断。</p>
+<pre><code class="language-c">/* 中断描述符表。 （必须在运行时构建，因为
+ * 位移后的函数地址无法在重定位记录中表示。）
+ */
+struct Gatedesc idt[256] = { { 0 } };
+</code></pre>
+<p>在这段代码中，<code>idt</code>数组被初始化为全 0，表示所有的中断向量初始时都没有对应的中断处理程序。在系统运行过程中，会通过<code>SETGATE</code>宏来设置<code>idt</code>中的条目，即为特定的中断向量指定处理程序。</p>
+<p>IDT 必须在运行时构建，因为位移后的函数地址无法在重定位记录中表示。这是因为中断处理程序的地址是在程序运行过程中动态确定的，不能在编译时就固定下来。</p>
+<h3 id="setgate"><a class="header" href="#setgate">SETGATE</a></h3>
+<p>接下来讲解 SETGATE ，即设置 IDT 的细节。下面是具体的代码：</p>
+<pre><code class="language-c">#define SETGATE(gate, istrap, sel, off, dpl)			\
+{								\
+	(gate).gd_off_15_0 = (uint32_t) (off) &amp; 0xffff;		\
+	(gate).gd_sel = (sel);					\
+	(gate).gd_args = 0;					\
+	(gate).gd_rsv1 = 0;					\
+	(gate).gd_type = (istrap) ? STS_TG32 : STS_IG32;	\
+	(gate).gd_s = 0;					\
+	(gate).gd_dpl = (dpl);					\
+	(gate).gd_p = 1;					\
+	(gate).gd_off_31_16 = (uint32_t) (off) &gt;&gt; 16;		\
+}
+</code></pre>
+<p>这段代码定义了一个名为<code>SETGATE</code>的宏，用于设置中断门或陷阱门描述符。这个宏接受五个参数：</p>
+<ul>
+<li><code>gate</code>：要设置的门描述符。</li>
+<li><code>istrap</code>：如果为 1，表示设置的是陷阱门；如果为 0，表示设置的是中断门。</li>
+<li><code>sel</code>：中断或陷阱处理程序的代码段选择器。</li>
+<li><code>off</code>：中断或陷阱处理程序在代码段中的偏移量。</li>
+<li><code>dpl</code>：描述符特权级别，表示软件使用<code>int</code>指令显式调用此中断/陷阱门所需的特权级别。</li>
+</ul>
+<p>这个宏的主要作用是填充<code>gate</code>描述符的各个字段。例如，<code>(gate).gd_off_15_0 = (uint32_t) (off) &amp; 0xffff;</code>这行代码将<code>off</code>的低 16 位赋值给<code>gate</code>的<code>gd_off_15_0</code>字段，表示中断或陷阱处理程序在代码段中的偏移量的低 16 位。其他字段的设置也类似。</p>
+<p>其中，<code>gd_type</code>字段的设置比较特殊，它根据<code>istrap</code>的值来确定是设置为陷阱门类型（<code>STS_TG32</code>）还是中断门类型（<code>STS_IG32</code>）。</p>
+<p>下面是对应 <code>Gatedesc</code> 的结构体，用于描述中断和陷阱门的描述符，即 gate 部分。</p>
+<pre><code class="language-c">// 中断和陷阱门的门描述符
+struct Gatedesc {
+ unsigned gd_off_15_0 : 16;   // 段内偏移的低16位
+ unsigned gd_sel : 16;        // 段选择器
+ unsigned gd_args : 5;        // 参数数量，对于中断/陷阱门，此值为0
+ unsigned gd_rsv1 : 3;        // 保留字段，我猜应该为零
+ unsigned gd_type : 4;        // 类型(STS_{TG,IG32,TG32})
+ unsigned gd_s : 1;           // 必须为0（系统）
+ unsigned gd_dpl : 2;         // 描述符（新的含义）特权级别
+ unsigned gd_p : 1;           // 存在位
+ unsigned gd_off_31_16 : 16;  // 段内偏移的高16位
+};
+</code></pre>
+<p>这段代码定义了一个名为<code>Gatedesc</code>的结构体，它是中断和陷阱门的描述符。这个描述符用于在中断描述符表（IDT）中表示中断或陷阱的处理程序的信息。每个字段都包含了中断或陷阱处理程序的重要信息，如段内偏移、段选择器、参数数量、类型、特权级别等。这些信息在处理中断或陷阱时非常关键，因为它们决定了如何定位和执行相应的处理程序。</p>
+<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<p>文章主要介绍了操作系统如何实现中断和异常的处理，以及如何设置中断描述符表（IDT）。通过详细讲解设置 IDT 的过程，包括使用宏定义处理中断和异常、陷阱和中断请求的编号、以及为每个陷阱设置相应的入口点。此外，文章还解释了全局 IDT 的初始化、<code>SETGATE</code>宏的具体实现，以及<code>Trapframe</code>结构体的设计用于保存处理器状态。文章最后总结了整个过程，包括初始化 IDT、设置中断和陷阱处理程序、处理陷阱的公共入口点<code>_alltraps</code>，以及<code>Trapframe</code>的作用。</p>
+
+                        <div id="giscus-container"></div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../os/user/uk-trans.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../os/user/page-fault.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../os/user/uk-trans.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../os/user/page-fault.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        var pagePath = "os/user/trap-impl.md"
+        </script>
+
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/custom.js"></script>
+        <script src="../../assets/bigPicture.js"></script>
+
+
+    </div>
+    </body>
+</html>
